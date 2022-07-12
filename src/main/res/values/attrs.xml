@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PlaylistToolbar">
+        <attr name="title" format="string" />
+        <attr name="showOptions" format="boolean" />
+        <attr name="showActionButton" format="boolean" />
+        <attr name="actionButtonText" format="string" />
+        <attr name="requireDarkMode" format="boolean" />
+        <attr name="backButtonIcon" format="reference" />
+        <attr name="optionButtonIcon" format="reference" />
+    </declare-styleable>
+</resources>
