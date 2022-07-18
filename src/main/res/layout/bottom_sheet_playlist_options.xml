@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/layoutBottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:theme="@style/Theme.MaterialComponents.DayNight"
         app:cardBackgroundColor="@color/playlist_background"
-        app:cardCornerRadius="16dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <FrameLayout
@@ -26,5 +26,5 @@
                 tools:itemCount="5"
                 tools:listitem="@layout/item_playlist_options_bottom_sheet" />
         </FrameLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
