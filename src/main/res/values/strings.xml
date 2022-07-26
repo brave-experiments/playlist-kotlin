@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="string_playlist">Playlist</string>
+    <string name="create_toolbar_playlist">Create</string>
+    <string name="create_your_first_playlist">Create your first playlist</string>
+    <string name="first_playlist_message">Make a playlist of your favorite audio and videos and play anytime, anywhere. Even offline.</string>
+    <string name="create_a_playlist">Create a Playlist</string>
+    <string name="string_skip">Skip</string>
+    <string name="string_saved">Saved</string>
+    <string name="browse_and_add">Browse and add</string>
+    <string name="browse_and_add_message">Add any media from any website. Look for the + button in your address bar and tap it to add.</string>
+    <string name="browse_for_media">Browse for media</string>
+    <string name="new_playlist">New Playlist</string>
+    <string name="playlist_name">Playlist name</string>
+    <string name="untitled_playlist">Untitled Playlist</string>
+    <string name="playlist_cancel">Cancel</string>
+    <string name="remove_data">Remove Data</string>
+    <string name="number_selected">%d Selected</string>
+    <string name="number_items">%d items</string>
+    <string name="play">Play</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="recently_played">Recently played</string>
+    <string name="playlist_next">Next</string>
+    <string name="tap_long_press_or_drag">Tap, long press or drag</string>
+    <string name="add_to_playlist">Add to Playlist</string>
+    <string name="string_playlists">Playlists</string>
+</resources>

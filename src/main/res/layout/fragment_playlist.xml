@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/playlist_background">
+
+    <com.brave.braveandroidplaylist.view.PlaylistToolbar
+        android:id="@+id/playlistToolbar"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/playlist_toolbar_height"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:optionButtonIcon="@drawable/ic_arrow_down_playlist"
+        app:showOptions="true" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivPlaylistCover"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/layoutPlaylistControls"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="0.3" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutPlaylistControls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@id/rvPlaylists"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivPlaylistCover">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvPlaylistName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/string_saved"
+            android:textColor="@color/playlist_text_color"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toStartOf="@id/ivPlaylistOptions"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivPlaylistOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_options_toolbar_playlist"
+            app:tint="@color/icon_tint" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTotalMediaCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/string_saved"
+            android:textColor="@color/media_stats_color"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPlaylistName" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvPlaylistTotalSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/string_saved"
+            android:textColor="@color/media_stats_color"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/tvTotalMediaCount"
+            app:layout_constraintTop_toBottomOf="@id/tvPlaylistName" />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/layoutPlayMedia"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/ic_button_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            app:layout_constraintEnd_toStartOf="@id/layoutShuffleMedia"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPlaylistTotalSize">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_play_filled"
+                android:drawablePadding="8dp"
+                android:drawableTint="@color/icon_tint"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/play"
+                android:textColor="@color/playlist_text_color"
+                android:textSize="16sp" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/layoutShuffleMedia"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="22dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/ic_button_unfilled_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/layoutPlayMedia"
+            app:layout_constraintTop_toBottomOf="@id/tvPlaylistTotalSize">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_shuffle"
+                android:drawablePadding="8dp"
+                android:drawableTint="@color/icon_tint"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/shuffle"
+                android:textColor="@color/playlist_text_color"
+                android:textSize="16sp" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPlaylists"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutPlaylistControls"
+        app:layout_constraintVertical_weight="0.6"
+        tools:itemCount="5"
+        tools:listitem="@layout/item_media" />
+
+    <!--    <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/layoutBrowseForMedia"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:background="@drawable/ic_button_unfilled_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_playlist_search" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@android:color/transparent"
+                android:text="@string/browse_for_media"
+                android:textAllCaps="false"
+                android:textColor="@color/playlist_button_color"
+                android:textSize="16sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>-->
+</androidx.constraintlayout.widget.ConstraintLayout>

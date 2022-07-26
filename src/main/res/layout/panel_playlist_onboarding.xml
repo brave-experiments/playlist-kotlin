@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_onboarding_floating_window_bg"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/playlistOnboardingViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btNextOnboarding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/ic_button_bg"
+            android:text="@string/playlist_next"
+            android:textAllCaps="false"
+            android:textColor="@color/playlist_text_color"
+            android:textSize="16sp" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/playlistOnboardingTabLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            app:tabIndicatorHeight="0dp"
+            app:tabPaddingEnd="-2dp"
+            app:tabPaddingStart="-2dp"
+            app:tabRippleColor="@android:color/transparent" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="-1dp"
+        android:layout_marginEnd="24dp"
+        android:src="@drawable/ic_onboarding_arrow" />
+</androidx.appcompat.widget.LinearLayoutCompat>

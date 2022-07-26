@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="playlist_background">#1E2029</color>
+    <color name="red_playlist">#FB542B</color>
+    <color name="playlist_text_color">#FFFFFF</color>
+    <color name="icon_tint">#FFFFFF</color>
+    <color name="playlist_popup_window">#17171F</color>
+    <color name="media_stats_color">#84889C</color>
+    <color name="dialog_message">#C6C8D0</color>
+    <color name="recently_played_playlist_name">#F0F2FF</color>
+</resources>
