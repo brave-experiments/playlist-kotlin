@@ -18,4 +18,7 @@
     <color name="upload_option_bg">#339AF0</color>
     <color name="tooltip">#4C54D2</color>
     <color name="selected_media">#05F0F2FF</color>
+    <color name="playlist_progress_bar_tint">#F0F2FF</color>
+    <color name="playlist_progress_bar_tint_bg">#20F0F2FF</color>
+    <color name="playlist_behavior">#C2C4CF</color>
 </resources>

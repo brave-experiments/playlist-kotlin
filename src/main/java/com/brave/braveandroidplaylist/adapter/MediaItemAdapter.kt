@@ -1,6 +1,7 @@
 package com.brave.braveandroidplaylist.adapter
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.braveandroidplaylist.R
+import com.brave.braveandroidplaylist.activity.PlaylistPlayerActivity
 import com.brave.braveandroidplaylist.listener.OnStartDragListener
 import com.brave.braveandroidplaylist.model.MediaModel
 
@@ -22,6 +24,7 @@ class MediaItemAdapter(
 
     fun setEditMode(enable: Boolean) {
         editMode = enable
+        itemList.forEach { it.isSelected = false }
         notifyItemRangeChanged(0, size)
     }
 
@@ -52,6 +55,8 @@ class MediaItemAdapter(
                 if (editMode) {
                     model.isSelected = !model.isSelected
                     setViewOnSelected(model.isSelected)
+                } else {
+                    itemView.context.startActivity(Intent(itemView.context, PlaylistPlayerActivity::class.java))
                 }
             }
             ivDragMedia.setOnTouchListener { _, event ->
