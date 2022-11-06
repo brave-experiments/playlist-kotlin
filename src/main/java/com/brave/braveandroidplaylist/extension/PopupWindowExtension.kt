@@ -3,6 +3,7 @@ package com.brave.braveandroidplaylist.extension
 import android.content.Context
 import android.view.WindowManager
 import android.widget.PopupWindow
+import com.brave.braveandroidplaylist.view.MovableImageButton
 
 fun PopupWindow.addScrimBackground() {
     val rootView = contentView.rootView
@@ -12,4 +13,10 @@ fun PopupWindow.addScrimBackground() {
     params.flags = params.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
     params.dimAmount = 0.3f
     windowManager.updateViewLayout(rootView, params)
+}
+
+fun MovableImageButton.allowMoving(shouldMove: Boolean) {
+    if (shouldMove) {
+        setOnTouchListener(this)
+    }
 }

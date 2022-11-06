@@ -28,10 +28,6 @@ class MovableImageButton :
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    init {
-        setOnTouchListener(this)
-    }
-
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         val layoutParams = view.layoutParams as MarginLayoutParams
         return when (motionEvent.action) {

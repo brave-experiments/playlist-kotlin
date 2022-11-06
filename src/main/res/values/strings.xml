@@ -24,4 +24,16 @@
     <string name="tap_long_press_or_drag">Tap, long press or drag</string>
     <string name="add_to_playlist">Add to Playlist</string>
     <string name="string_playlists">Playlists</string>
+    <string name="add_media">Add media</string>
+    <string name="playlist_onboarding_title_1">Save videos with Brave Playlist and watch later, even offline</string>
+    <string name="playlist_onboarding_text_1">Make playlists of your favorite audio and videos, and play anytime, anywhere.</string>
+    <string name="playlist_onboarding_title_2">Long press any video or audio to add to Playlist</string>
+    <string name="playlist_onboarding_text_2">Lorem ipsum dolor sit amet et vitae lorem un provisio et laurete</string>
+    <string name="playlist_onboarding_title_3">Or tap the Playlist button when it appears</string>
+    <string name="playlist_onboarding_text_3">Playlist button appears when there’s media to add. Long press it for options. You can even hide it.</string>
+    <string name="open_playlist">Open Playlist</string>
+    <string name="opne_playlist_settings">Open Playlist Settings</string>
+    <string name="hide_playlist_button">Hide Playlist button</string>
+    <string name="try_it">Try it!</string>
+
 </resources>

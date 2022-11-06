@@ -30,6 +30,8 @@ class PlaylistOnboardingActivity : AppCompatActivity(R.layout.activity_playlist_
 
         btCreateAPlaylist.setOnClickListener { navigateToAddNewPlaylistActivity() }
         tvSkipPlaylist.setOnClickListener { navigateToAllPlaylistActivity() }
+
+//        showOnboardingButton();
     }
 
     private fun navigateToAddNewPlaylistActivity() {
@@ -40,17 +42,17 @@ class PlaylistOnboardingActivity : AppCompatActivity(R.layout.activity_playlist_
         startActivity(Intent(this, AllPlaylistActivity::class.java))
     }
 
-    private fun showOnboardingButton() {
-        val movableImageButton: View = findViewById(R.id.movableImageButton)
-        val parent = findViewById<ViewGroup>(R.id.parent)
-
-        val transition = Slide(Gravity.BOTTOM)
-            .addTarget(R.id.movableImageButton)
-            .setDuration(500)
-            .setInterpolator(BraveBounceInterpolator())
-
-        TransitionManager.beginDelayedTransition(parent, transition)
-
-        movableImageButton.visibility = View.VISIBLE
-    }
+//    private fun showOnboardingButton() {
+//        val movableImageButton: View = findViewById(R.id.movableImageButton)
+//        val parent = findViewById<ViewGroup>(R.id.parent)
+//
+//        val transition = Slide(Gravity.BOTTOM)
+//            .addTarget(R.id.movableImageButton)
+//            .setDuration(500)
+//            .setInterpolator(BraveBounceInterpolator())
+//
+//        TransitionManager.beginDelayedTransition(parent, transition)
+//
+//        movableImageButton.visibility = View.VISIBLE
+//    }
 }

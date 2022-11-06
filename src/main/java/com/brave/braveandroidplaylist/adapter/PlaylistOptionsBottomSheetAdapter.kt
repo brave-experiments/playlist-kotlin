@@ -14,7 +14,7 @@ class PlaylistOptionsBottomSheetAdapter(itemList: MutableList<PlaylistOptionsMod
     ) {
 
     class PlaylistOptionsViewHolder(view: View) :
-        AbstractRecyclerViewAdapter.AbstractViewHolder<PlaylistOptionsModel>(view) {
+        AbstractViewHolder<PlaylistOptionsModel>(view) {
         private val ivOptionIcon: AppCompatImageView
         private val tvOptionTitle: AppCompatTextView
 

@@ -92,16 +92,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btCreateAPlaylist" />
 
-    <com.brave.braveandroidplaylist.view.MovableImageButton
-        android:id="@+id/movableImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="64dp"
-        android:background="@drawable/ic_playlist_floating_button_bg"
-        android:elevation="8dp"
-        android:src="@drawable/ic_add_media_to_playlist"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+<!--    <com.brave.braveandroidplaylist.view.MovableImageButton-->
+<!--        android:id="@+id/movableImageButton"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginEnd="12dp"-->
+<!--        android:layout_marginBottom="64dp"-->
+<!--        android:background="@drawable/ic_playlist_floating_button_bg"-->
+<!--        android:elevation="8dp"-->
+<!--        android:src="@drawable/ic_add_media_to_playlist"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

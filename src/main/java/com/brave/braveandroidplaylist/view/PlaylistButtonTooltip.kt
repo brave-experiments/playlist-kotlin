@@ -4,6 +4,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import androidx.appcompat.widget.AppCompatImageView
 import com.brave.braveandroidplaylist.R
 
 class PlaylistButtonTooltip(anchorView: View, parent: View) {
@@ -18,6 +19,10 @@ class PlaylistButtonTooltip(anchorView: View, parent: View) {
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
+
+        view.findViewById<AppCompatImageView>(R.id.ivCloseTooltip).setOnClickListener {
+            popupWindow.dismiss()
+        }
 
         popupWindow.animationStyle = R.style.OnboardingWindowAnimation
 
