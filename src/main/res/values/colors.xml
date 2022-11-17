@@ -8,7 +8,7 @@
     <color name="bottom_sheet_dim_color">#50000000</color>
     <color name="hint_color">#50FFFFFF</color>
     <color name="text_input_layout_activated">#FB542B</color>
-    <color name="playlist_popup_window">#FFFFFF</color>
+    <color name="playlist_popup_window">#E9E9F4</color>
     <color name="media_stats_color">#84889C</color>
     <color name="dialog_message">#C6C8D0</color>
     <color name="edit_toolbar">#353DAB</color>

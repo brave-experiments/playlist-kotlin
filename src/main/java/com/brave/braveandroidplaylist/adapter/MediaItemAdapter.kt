@@ -3,6 +3,7 @@ package com.brave.braveandroidplaylist.adapter
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -11,8 +12,12 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.braveandroidplaylist.R
 import com.brave.braveandroidplaylist.activity.PlaylistPlayerActivity
+import com.brave.braveandroidplaylist.extension.sizeStrInMb
 import com.brave.braveandroidplaylist.listener.OnStartDragListener
 import com.brave.braveandroidplaylist.model.MediaModel
+import com.brave.braveandroidplaylist.util.MediaUtils
+import com.brave.braveandroidplaylist.util.PlaylistUtils
+import java.io.File
 
 class MediaItemAdapter(
     mediaItemList: MutableList<MediaModel>,
@@ -29,7 +34,7 @@ class MediaItemAdapter(
     }
 
     inner class MediaItemViewHolder(view: View) :
-        AbstractRecyclerViewAdapter.AbstractViewHolder<MediaModel>(view) {
+        AbstractViewHolder<MediaModel>(view) {
         private val ivMediaThumbnail: AppCompatImageView
         private val tvMediaTitle: AppCompatTextView
         private val tvMediaDuration: AppCompatTextView
@@ -49,14 +54,17 @@ class MediaItemAdapter(
         @SuppressLint("ClickableViewAccessibility")
         override fun onBind(position: Int, model: MediaModel) {
             setViewOnSelected(model.isSelected)
-            tvMediaTitle.text = model.mediaTitle
+            tvMediaTitle.text = model.name
+//            tvMediaFileSize.text = File(model.mediaPath).sizeStrInMb()
+//            tvMediaDuration.text = MediaUtils.getMediaDuration(itemView.context ,model.mediaPath).toString()
+            Log.e("BravePlaylist", model.name);
             ivDragMedia.visibility = if (editMode) View.VISIBLE else View.GONE
             itemView.setOnClickListener {
                 if (editMode) {
                     model.isSelected = !model.isSelected
                     setViewOnSelected(model.isSelected)
                 } else {
-                    itemView.context.startActivity(Intent(itemView.context, PlaylistPlayerActivity::class.java))
+                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
                 }
             }
             ivDragMedia.setOnTouchListener { _, event ->

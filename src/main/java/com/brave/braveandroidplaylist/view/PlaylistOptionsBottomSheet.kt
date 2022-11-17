@@ -9,13 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brave.braveandroidplaylist.R
 import com.brave.braveandroidplaylist.adapter.PlaylistOptionsBottomSheetAdapter
 import com.brave.braveandroidplaylist.extension.setTopCornersRounded
+import com.brave.braveandroidplaylist.listener.PlaylistOptionsListener
 import com.brave.braveandroidplaylist.model.PlaylistOptionsModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.card.MaterialCardView
 
-class PlaylistOptionsBottomSheet(private val optionsList: MutableList<PlaylistOptionsModel>) :
-    BottomSheetDialogFragment() {
+class PlaylistOptionsBottomSheet(private val optionsList: MutableList<PlaylistOptionsModel>, private val playlistOptionsListener: PlaylistOptionsListener) :
+    BottomSheetDialogFragment(),PlaylistOptionsListener {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,7 +33,7 @@ class PlaylistOptionsBottomSheet(private val optionsList: MutableList<PlaylistOp
 
         val rvBottomSheet: RecyclerView = view.findViewById(R.id.rvBottomSheet)
         rvBottomSheet.layoutManager = LinearLayoutManager(view.context)
-        rvBottomSheet.adapter = PlaylistOptionsBottomSheetAdapter(optionsList)
+        rvBottomSheet.adapter = PlaylistOptionsBottomSheetAdapter(optionsList, this)
 
         val behavior = BottomSheetBehavior.from(layoutBottomSheet)
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -40,5 +41,10 @@ class PlaylistOptionsBottomSheet(private val optionsList: MutableList<PlaylistOp
 
         dialog?.window?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
             ?.setBackgroundResource(android.R.color.transparent)
+    }
+
+    override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
+        playlistOptionsListener.onOptionClicked(playlistOptionsModel)
+        dismiss()
     }
 }

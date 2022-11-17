@@ -32,8 +32,12 @@
     <string name="playlist_onboarding_title_3">Or tap the Playlist button when it appears</string>
     <string name="playlist_onboarding_text_3">Playlist button appears when there’s media to add. Long press it for options. You can even hide it.</string>
     <string name="open_playlist">Open Playlist</string>
-    <string name="opne_playlist_settings">Open Playlist Settings</string>
+    <string name="open_playlist_settings">Open Playlist Settings</string>
     <string name="hide_playlist_button">Hide Playlist button</string>
     <string name="try_it">Try it!</string>
-
+    <string name="edit_text">Edit</string>
+    <string name="rename_text">Rename</string>
+    <string name="remove_playlist_offline_data">Remove playlist offline data</string>
+    <string name="download_playlist_for_offline_use">Download playlist for offline use</string>
+    <string name="delete_playlist">Delete playlist</string>
 </resources>

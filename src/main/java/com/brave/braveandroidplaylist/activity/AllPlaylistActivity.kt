@@ -25,7 +25,7 @@ class AllPlaylistActivity : AppCompatActivity(R.layout.activity_all_playlist) {
 
         btAddNewPlaylist.setOnClickListener { navigateToAddNewPlaylistActivity() }
         ivPlaylistsOptions.setOnClickListener {
-            PlaylistOptionsBottomSheet(mutableListOf()).show(supportFragmentManager, null)
+//            PlaylistOptionsBottomSheet(mutableListOf()).show(supportFragmentManager, null)
         }
 
         val rvRecentlyPlayed: RecyclerView = findViewById(R.id.rvRecentlyPlayed)

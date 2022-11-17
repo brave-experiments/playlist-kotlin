@@ -55,7 +55,7 @@
             android:id="@+id/tvMediaDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/string_playlist"
+            android:text="7:12"
             android:textColor="@color/media_stats_color" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="@string/playlist_name"
+            android:text="15 MB"
             android:textColor="@color/media_stats_color" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 

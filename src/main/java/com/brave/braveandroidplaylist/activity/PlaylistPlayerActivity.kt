@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.braveandroidplaylist.R
+import com.brave.braveandroidplaylist.model.MediaModel
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -150,13 +151,14 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
         val trackSelector = DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
+        val mediaModel = intent.getSerializableExtra("data") as MediaModel
         exoPlayer = ExoPlayer.Builder(this)
             .setTrackSelector(trackSelector)
             .build()
             .also {
                 styledPlayerView.player = it
                 val mediaItem: MediaItem =
-                    MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+                    MediaItem.fromUri(mediaModel.mediaPath)
                 it.addListener(this)
                 it.playWhenReady = playWhenReady
                 it.shuffleModeEnabled = isShuffleOn
