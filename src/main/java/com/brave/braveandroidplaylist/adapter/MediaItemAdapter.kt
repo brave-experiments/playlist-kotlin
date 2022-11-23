@@ -13,6 +13,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.brave.braveandroidplaylist.R
 import com.brave.braveandroidplaylist.activity.PlaylistPlayerActivity
 import com.brave.braveandroidplaylist.extension.sizeStrInMb
+import com.brave.braveandroidplaylist.listener.OnItemInteractionListener
 import com.brave.braveandroidplaylist.listener.OnStartDragListener
 import com.brave.braveandroidplaylist.model.MediaModel
 import com.brave.braveandroidplaylist.util.MediaUtils
@@ -21,7 +22,8 @@ import java.io.File
 
 class MediaItemAdapter(
     mediaItemList: MutableList<MediaModel>,
-    private val onStartDragListener: OnStartDragListener
+    private val onStartDragListener: OnStartDragListener,
+    private val onItemInteractionListener: OnItemInteractionListener
 ) :
     AbstractRecyclerViewAdapter<MediaItemAdapter.MediaItemViewHolder, MediaModel>(mediaItemList) {
 
@@ -64,7 +66,8 @@ class MediaItemAdapter(
                     model.isSelected = !model.isSelected
                     setViewOnSelected(model.isSelected)
                 } else {
-                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
+                    onItemInteractionListener.onPlaylistItemClick(mediaModel = model)
+//                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
                 }
             }
             ivDragMedia.setOnTouchListener { _, event ->

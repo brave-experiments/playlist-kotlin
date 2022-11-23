@@ -113,4 +113,8 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     fun setActionButtonOnClickListener(clickListener: OnClickListener) {
         tvActionToolbarPlaylist.setOnClickListener(clickListener)
     }
+
+    fun setOptionsButtonOnClickListener(clickListener: OnClickListener) {
+        ivOptionsToolbarPlayList.setOnClickListener(clickListener)
+    }
 }

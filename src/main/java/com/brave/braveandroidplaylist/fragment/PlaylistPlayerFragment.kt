@@ -1,11 +1,15 @@
-package com.brave.braveandroidplaylist.activity
+package com.brave.braveandroidplaylist.fragment
 
+import android.content.Context
+import android.os.Bundle
+import android.view.View
 import android.widget.SeekBar
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.brave.braveandroidplaylist.PlaylistViewModel
 import com.brave.braveandroidplaylist.R
-import com.brave.braveandroidplaylist.model.MediaModel
 import com.brave.braveandroidplaylist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -13,10 +17,9 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 
-
-class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_player),
-    Player.Listener {
-
+class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener {
+//    private val viewModel: PlaylistViewModel by activityViewModels()
+    private lateinit var viewModel: PlaylistViewModel
     private var exoPlayer: Player? = null
     private var duration: Long = 0
     private var isUserTrackingTouch = false
@@ -28,33 +31,46 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     private var repeatMode = Player.REPEAT_MODE_OFF
     private var updatePositionDelayMs = 1000L
 
-    private val playlistToolbar: PlaylistToolbar by lazy {
-        findViewById(R.id.playlistToolbar)
-    }
+    private lateinit var playlistToolbar: PlaylistToolbar
+    private lateinit var styledPlayerView: StyledPlayerView
+    private lateinit var videoSeekBar: SeekBar
+    private lateinit var tvVideoTimeElapsed: AppCompatTextView
+    private lateinit var tvVideoTimeRemaining: AppCompatTextView
+    private lateinit var ivPlaylistMediaSpeed: AppCompatImageView
+    private lateinit var ivPlaylistRepeat: AppCompatImageView
+    private lateinit var ivPlaylistShuffle: AppCompatImageView
+    private lateinit var ivNextVideo: AppCompatImageView
+    private lateinit var ivPrevVideo: AppCompatImageView
+    private lateinit var ivPlayPauseVideo: AppCompatImageView
+    private lateinit var ivSeekForward15Seconds: AppCompatImageView
+    private lateinit var ivSeekBack15Seconds: AppCompatImageView
 
-    private val styledPlayerView: StyledPlayerView by lazy {
-        findViewById(R.id.styledPlayerView)
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = activity?.let {
+            ViewModelProvider(
+                it, ViewModelProvider.NewInstanceFactory()
+            )
+        }!![PlaylistViewModel::class.java]
+        playlistToolbar = view.findViewById(R.id.playlistToolbar)
+        styledPlayerView = view.findViewById(R.id.styledPlayerView)
+        videoSeekBar = view.findViewById(R.id.videoSeekBar)
+        tvVideoTimeElapsed = view.findViewById(R.id.tvVideoTimeElapsed)
+        tvVideoTimeRemaining = view.findViewById(R.id.tvVideoTimeRemaining)
+        ivPlaylistMediaSpeed = view.findViewById(R.id.ivPlaylistMediaSpeed)
+        ivPlaylistRepeat = view.findViewById(R.id.ivPlaylistRepeat)
+        ivPlaylistShuffle = view.findViewById(R.id.ivPlaylistShuffle)
+        ivNextVideo = view.findViewById(R.id.ivNextVideo)
+        ivPrevVideo = view.findViewById(R.id.ivPrevVideo)
+        ivPlayPauseVideo = view.findViewById(R.id.ivPlayPauseVideo)
+        ivSeekForward15Seconds = view.findViewById(R.id.ivSeekForward15Seconds)
+        ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
 
-    private val videoSeekBar: SeekBar by lazy {
-        findViewById(R.id.videoSeekBar)
-    }
-
-    private val tvVideoTimeElapsed: AppCompatTextView by lazy {
-        findViewById(R.id.tvVideoTimeElapsed)
-    }
-
-    private val tvVideoTimeRemaining: AppCompatTextView by lazy {
-        findViewById(R.id.tvVideoTimeRemaining)
-    }
-
-    override fun onResume() {
-        super.onResume()
         initializePlayer()
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroyView() {
+        super.onDestroyView()
         releasePlayer()
     }
 
@@ -96,12 +112,11 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
 
     private fun setToolbar() {
         playlistToolbar.setOptionsButtonOnClickListener {
-            finish()
+            activity?.finish()
         }
     }
 
     private fun setPlaybackSpeed() {
-        val ivPlaylistMediaSpeed: AppCompatImageView = findViewById(R.id.ivPlaylistMediaSpeed)
         ivPlaylistMediaSpeed.setOnClickListener {
             playbackSpeed += 0.5f
             if (playbackSpeed > 2)
@@ -117,7 +132,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setPlaylistRepeatMode() {
-        val ivPlaylistRepeat: AppCompatImageView = findViewById(R.id.ivPlaylistRepeat)
         ivPlaylistRepeat.setOnClickListener {
             when (repeatMode) {
                 Player.REPEAT_MODE_OFF -> {
@@ -138,7 +152,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setPlaylistShuffle() {
-        val ivPlaylistShuffle: AppCompatImageView = findViewById(R.id.ivPlaylistShuffle)
         ivPlaylistShuffle.setOnClickListener {
             isShuffleOn = !isShuffleOn
             exoPlayer?.shuffleModeEnabled = isShuffleOn
@@ -160,27 +173,52 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun initializePlayer() {
-        val trackSelector = DefaultTrackSelector(this).apply {
-            setParameters(buildUponParameters().setMaxVideoSizeSd())
-        }
-        val mediaModel = intent.getSerializableExtra("data") as MediaModel
-        exoPlayer = ExoPlayer.Builder(this)
-            .setTrackSelector(trackSelector)
-            .build()
-            .also {
-                styledPlayerView.player = it
-                val mediaItem: MediaItem =
-//                    MediaItem.fromUri(mediaModel.mediaPath)
-                    MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-                it.addListener(this)
-                it.playWhenReady = playWhenReady
-                it.shuffleModeEnabled = isShuffleOn
-                it.setMediaItem(mediaItem)
-                it.seekTo(currentMediaIndex, playbackPosition)
-                it.repeatMode = repeatMode
-                it.setPlaybackSpeed(playbackSpeed)
-                it.prepare()
+        val trackSelector = view?.let {
+            DefaultTrackSelector(it.context).apply {
+                setParameters(buildUponParameters().setMaxVideoSizeSd())
             }
+        }
+        viewModel.selectedPlaylistItem.observe(viewLifecycleOwner) { mediaModel ->
+            exoPlayer = trackSelector?.let { trackSelector ->
+                view?.let {
+                    ExoPlayer.Builder(it.context)
+                        .setTrackSelector(trackSelector)
+                        .build()
+                        .also { exoplayer ->
+                            styledPlayerView.player = exoplayer
+                            val mediaItem: MediaItem =
+                                                    MediaItem.fromUri(mediaModel.mediaPath)
+//                                MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+                            exoplayer.addListener(this)
+                            exoplayer.playWhenReady = playWhenReady
+                            exoplayer.shuffleModeEnabled = isShuffleOn
+                            exoplayer.setMediaItem(mediaItem)
+                            exoplayer.seekTo(currentMediaIndex, playbackPosition)
+                            exoplayer.repeatMode = repeatMode
+                            exoplayer.setPlaybackSpeed(playbackSpeed)
+                            exoplayer.prepare()
+                        }
+                }
+            }
+        }
+//        val mediaModel = intent.getSerializableExtra("data") as MediaModel
+//        exoPlayer = ExoPlayer.Builder(activity)
+//            .setTrackSelector(trackSelector)
+//            .build()
+//            .also {
+//                styledPlayerView.player = it
+//                val mediaItem: MediaItem =
+////                    MediaItem.fromUri(mediaModel.mediaPath)
+//                    MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+//                it.addListener(this)
+//                it.playWhenReady = playWhenReady
+//                it.shuffleModeEnabled = isShuffleOn
+//                it.setMediaItem(mediaItem)
+//                it.seekTo(currentMediaIndex, playbackPosition)
+//                it.repeatMode = repeatMode
+//                it.setPlaybackSpeed(playbackSpeed)
+//                it.prepare()
+//            }
     }
 
     private fun releasePlayer() {
@@ -196,7 +234,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setNextMedia() {
-        val ivNextVideo: AppCompatImageView = findViewById(R.id.ivNextVideo)
         ivNextVideo.setOnClickListener {
             exoPlayer?.let {
                 if (it.hasNextMediaItem()) {
@@ -207,7 +244,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setPrevMedia() {
-        val ivPrevVideo: AppCompatImageView = findViewById(R.id.ivPrevVideo)
         ivPrevVideo.setOnClickListener {
             exoPlayer?.let {
                 if (it.hasPreviousMediaItem()) {
@@ -218,7 +254,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setPlayAndPause() {
-        val ivPlayPauseVideo: AppCompatImageView = findViewById(R.id.ivPlayPauseVideo)
         setPlayOrPauseIcon(ivPlayPauseVideo)
         ivPlayPauseVideo.setOnClickListener {
             exoPlayer?.let {
@@ -243,7 +278,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setSeekForward() {
-        val ivSeekForward15Seconds: AppCompatImageView = findViewById(R.id.ivSeekForward15Seconds)
         ivSeekForward15Seconds.setOnClickListener {
             exoPlayer?.let {
                 it.seekTo(it.currentPosition + SEEK_VALUE_MS)
@@ -254,7 +288,6 @@ class PlaylistPlayerActivity : AppCompatActivity(R.layout.activity_playlist_play
     }
 
     private fun setSeekBack() {
-        val ivSeekBack15Seconds: AppCompatImageView = findViewById(R.id.ivSeekBack15Seconds)
         ivSeekBack15Seconds.setOnClickListener {
             exoPlayer?.let {
                 it.seekTo(it.currentPosition - SEEK_VALUE_MS)
