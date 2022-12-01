@@ -5,10 +5,9 @@
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ic_playlist_onboarding_bg"
-    tools:context=".activity.PlaylistOnboardingActivity">
+    android:background="@drawable/ic_playlist_onboarding_bg">
 
-    <com.brave.braveandroidplaylist.view.PlaylistToolbar
+    <com.brave.playlist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/playlist_toolbar_height"
@@ -92,7 +91,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btCreateAPlaylist" />
 
-<!--    <com.brave.braveandroidplaylist.view.MovableImageButton-->
+<!--    <com.brave.playlist.view.MovableImageButton-->
 <!--        android:id="@+id/movableImageButton"-->
 <!--        android:layout_width="wrap_content"-->
 <!--        android:layout_height="wrap_content"-->

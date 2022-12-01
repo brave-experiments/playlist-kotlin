@@ -7,7 +7,7 @@
     android:background="@drawable/ic_media_player_bg"
     android:orientation="vertical">
 
-    <com.brave.braveandroidplaylist.view.PlaylistToolbar
+    <com.brave.playlist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
