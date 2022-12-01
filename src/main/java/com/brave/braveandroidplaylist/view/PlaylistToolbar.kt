@@ -1,23 +1,32 @@
 package com.brave.braveandroidplaylist.view
 
-import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.view.WindowManager
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.brave.braveandroidplaylist.R
 
-
 class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
     ConstraintLayout(context, attrs, defStyleAttr, defStyleRes) {
 
+    // Main toolbar
+    private val layoutMainToolbar: ConstraintLayout
+    private val tvTitleToolbarPlaylist:AppCompatTextView
     private val ivOptionsToolbarPlayList: AppCompatImageView
     private val tvActionToolbarPlaylist: AppCompatTextView
-    private val layoutMainToolbar: ConstraintLayout
+
+    // Edit toolbar
     private val layoutEditToolbar: LinearLayoutCompat
+    private val tvItemSelected: TextView
+    private val ivExitEditMode: AppCompatImageView
+    private val ivMoveItem: AppCompatImageView
+    private val ivDeleteItem: AppCompatImageView
+
     private val defaultStatusBarColor: Int
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : this(
@@ -49,42 +58,40 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             R.drawable.ic_options_toolbar_playlist
         )
 
-        val tvTitleToolbarPlaylist: AppCompatTextView = findViewById(R.id.tvTitleToolbarPlaylist)
-        val ivBackToolbarPlaylist: AppCompatImageView = findViewById(R.id.ivBackToolbarPlaylist)
-        val ivExitEditMode: AppCompatImageView = findViewById(R.id.ivExitEditMode)
-
         layoutMainToolbar = findViewById(R.id.layoutMainToolbar)
-        layoutEditToolbar = findViewById(R.id.layoutEditToolbar)
+        tvTitleToolbarPlaylist = findViewById(R.id.tvTitleToolbarPlaylist)
+        val ivBackToolbarPlaylist: AppCompatImageView = findViewById(R.id.ivBackToolbarPlaylist)
         ivOptionsToolbarPlayList = findViewById(R.id.ivOptionsToolbarPlaylist)
         tvActionToolbarPlaylist = findViewById(R.id.tvActionToolbarPlaylist)
-
         ivOptionsToolbarPlayList.setImageResource(optionButtonIcon)
         ivBackToolbarPlaylist.setImageResource(backButtonIcon)
-
-        defaultStatusBarColor = if (context is Activity)
-            context.window.statusBarColor
-        else
-            0
-
         ivOptionsToolbarPlayList.visibility = if (showOptions) VISIBLE else GONE
         tvActionToolbarPlaylist.visibility = if (showCreateButton) VISIBLE else GONE
-
+        ivBackToolbarPlaylist.setOnClickListener {
+            if (context is AppCompatActivity)
+                context.onBackPressedDispatcher.onBackPressed()
+        }
+        ivOptionsToolbarPlayList.setOnClickListener { showEditPlaylistPopupWindow() }
         tvTitleToolbarPlaylist.text = typedArray.getString(R.styleable.PlaylistToolbar_title)
         tvActionToolbarPlaylist.text =
             typedArray.getString(R.styleable.PlaylistToolbar_actionButtonText)
+
+        layoutEditToolbar = findViewById(R.id.layoutEditToolbar)
+        ivExitEditMode = findViewById(R.id.ivExitEditMode)
+        tvItemSelected = layoutEditToolbar.findViewById(R.id.tvItemSelected)
+        ivMoveItem = layoutEditToolbar.findViewById(R.id.ivMoveItem)
+        ivDeleteItem = layoutEditToolbar.findViewById(R.id.ivDeleteItem)
+        tvItemSelected.text = context.getString(R.string.number_selected, 0)
+
+        defaultStatusBarColor = if (context is AppCompatActivity)
+            context.window.statusBarColor
+        else
+            0
 
         if (requireDarkMode) {
             tvTitleToolbarPlaylist.setTextColor(getColor(R.color.playlist_white))
             ivBackToolbarPlaylist.setColorFilter(getColor(R.color.playlist_white))
         }
-
-        ivBackToolbarPlaylist.setOnClickListener {
-            if (context is Activity)
-                context.finish()
-        }
-
-        ivExitEditMode.setOnClickListener { enableEditMode(false) }
-        ivOptionsToolbarPlayList.setOnClickListener { showEditPlaylistPopupWindow() }
 
         typedArray.recycle()
     }
@@ -95,6 +102,10 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
 
     }
 
+    fun updateSelectedItems(count:Int) {
+        tvItemSelected.text = context.getString(R.string.number_selected, count)
+    }
+
     fun enableEditMode(enable: Boolean) {
         layoutMainToolbar.visibility = if (enable) GONE else VISIBLE
         layoutEditToolbar.visibility = if (enable) VISIBLE else GONE
@@ -102,19 +113,39 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     }
 
     private fun setStatusBarInEditMode(editMode: Boolean) {
-        if (context is Activity) {
-            val activity = context as Activity
+        if (context is AppCompatActivity) {
+            val activity = context as AppCompatActivity
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             activity.window.statusBarColor =
                 if (editMode) getColor(R.color.edit_toolbar) else defaultStatusBarColor
         }
     }
 
-    fun setActionButtonOnClickListener(clickListener: OnClickListener) {
+    fun setActionButtonClickListener(clickListener: OnClickListener) {
         tvActionToolbarPlaylist.setOnClickListener(clickListener)
     }
 
-    fun setOptionsButtonOnClickListener(clickListener: OnClickListener) {
+    fun setOptionsButtonClickListener(clickListener: OnClickListener) {
         ivOptionsToolbarPlayList.setOnClickListener(clickListener)
+    }
+
+    fun setExitEditModeClickListener(clickListener: OnClickListener) {
+        ivExitEditMode.setOnClickListener(clickListener)
+    }
+
+    fun setMoveClickListener(clickListener: OnClickListener) {
+        ivMoveItem.setOnClickListener(clickListener)
+    }
+
+    fun setDeleteClickListener(clickListener: OnClickListener) {
+        ivDeleteItem.setOnClickListener(clickListener)
+    }
+
+    fun setToolbarTitle(title: String) {
+        tvTitleToolbarPlaylist.text = title
+    }
+
+    fun setActionText(actionText : String) {
+        tvActionToolbarPlaylist.text = actionText
     }
 }

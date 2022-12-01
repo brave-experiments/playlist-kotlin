@@ -15,7 +15,7 @@ class PlaylistOnboardingSingleFragment : Fragment(R.layout.fragment_single_playl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            playlistOnboardingModel = it.getSerializable(MODEL) as PlaylistOnboardingModel
+            playlistOnboardingModel = it.getParcelable(MODEL)
         }
     }
 
@@ -43,7 +43,7 @@ class PlaylistOnboardingSingleFragment : Fragment(R.layout.fragment_single_playl
         fun newInstance(model: PlaylistOnboardingModel) =
             PlaylistOnboardingSingleFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(MODEL, model)
+                    putParcelable(MODEL, model)
                 }
             }
     }

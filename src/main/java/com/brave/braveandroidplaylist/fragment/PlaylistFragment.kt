@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -19,19 +20,18 @@ import com.brave.braveandroidplaylist.listener.OnItemInteractionListener
 import com.brave.braveandroidplaylist.listener.OnStartDragListener
 import com.brave.braveandroidplaylist.listener.PlaylistOptionsListener
 import com.brave.braveandroidplaylist.model.MediaModel
-import com.brave.braveandroidplaylist.model.PlaylistOptions
+import com.brave.braveandroidplaylist.enums.PlaylistOptions
+import com.brave.braveandroidplaylist.model.PlaylistModel
 import com.brave.braveandroidplaylist.model.PlaylistOptionsModel
-import com.brave.braveandroidplaylist.util.PlaylistUtils
 import com.brave.braveandroidplaylist.view.PlaylistOptionsBottomSheet
 import com.brave.braveandroidplaylist.view.PlaylistToolbar
 import org.json.JSONArray
 import org.json.JSONObject
 
-
 class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteractionListener,
     View.OnClickListener, OnStartDragListener, PlaylistOptionsListener {
 
-//    private val viewModel: PlaylistViewModel by activityViewModels()
+    private var playlistModel: PlaylistModel? = null
 
     private lateinit var viewModel: PlaylistViewModel
     private lateinit var mediaItemAdapter: MediaItemAdapter
@@ -60,8 +60,22 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
         }!![PlaylistViewModel::class.java]
 
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
-        playlistToolbar.setOptionsButtonOnClickListener {
-            activity?.finish()
+        playlistToolbar.setOptionsButtonClickListener {
+            activity?.onBackPressedDispatcher?.onBackPressed()
+        }
+        playlistToolbar.setExitEditModeClickListener {
+            mediaItemAdapter.setEditMode(false)
+            playlistToolbar.enableEditMode(false)
+        }
+        playlistToolbar.setMoveClickListener {
+            Toast.makeText(activity, "Move : "+mediaItemAdapter.getSelectedItems().size, Toast.LENGTH_LONG).show()
+            mediaItemAdapter.setEditMode(false)
+            playlistToolbar.enableEditMode(false)
+        }
+        playlistToolbar.setDeleteClickListener {
+            Toast.makeText(activity, "Delete : "+mediaItemAdapter.getSelectedItems().size, Toast.LENGTH_LONG).show()
+            mediaItemAdapter.setEditMode(false)
+            playlistToolbar.enableEditMode(false)
         }
         rvPlaylist = view.findViewById(R.id.rvPlaylists)
         tvTotalMediaCount = view.findViewById(R.id.tvTotalMediaCount)
@@ -72,7 +86,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
         viewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             Log.e("BravePlaylist", playlistData.toString())
-
             val playlistList = mutableListOf<MediaModel>()
             val playlistJsonObject = JSONObject(playlistData)
             val jsonArray: JSONArray = playlistJsonObject.getJSONArray("items")
@@ -88,13 +101,17 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 playlistList.add(mediaModel)
             }
 
+            playlistModel = PlaylistModel(playlistJsonObject.getString("id"), playlistJsonObject.getString("name"), playlistList)
+
             if (playlistList.size > 0) {
                 layoutPlayMedia.setOnClickListener {
-                    PlaylistUtils.openPlaylistPlayer(view.context, playlistList[0])
+                    viewModel.setSelectedPlaylistItem(playlistList[0])
+                    openPlaylistPlayer()
                 }
 
                 layoutShuffleMedia.setOnClickListener {
-                    PlaylistUtils.openPlaylistPlayer(view.context, playlistList[0])
+                    viewModel.setSelectedPlaylistItem(playlistList[0])
+                    openPlaylistPlayer()
                 }
             }
 
@@ -158,9 +175,19 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
     override fun onPlaylistItemClick(mediaModel: MediaModel) {
         viewModel.setSelectedPlaylistItem(mediaModel)
+        openPlaylistPlayer()
+    }
+
+    override fun onPlaylistItemClick(count: Int) {
+        playlistToolbar.updateSelectedItems(count)
+    }
+
+    private fun openPlaylistPlayer() {
         val playlistPlayerFragment = PlaylistPlayerFragment()
         parentFragmentManager.beginTransaction()
-            .replace(android.R.id.content, playlistPlayerFragment).commit()
+            .replace(android.R.id.content, playlistPlayerFragment)
+            .addToBackStack(PlaylistFragment::class.simpleName)
+            .commit()
     }
 
 //    companion object {
@@ -178,8 +205,19 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
     override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
         if (playlistOptionsModel.optionType == PlaylistOptions.EDIT_PLAYLIST) {
             mediaItemAdapter.setEditMode(true)
+            playlistToolbar.enableEditMode(true)
+        } else if (playlistOptionsModel.optionType == PlaylistOptions.RENAME_PLAYLIST) {
+            val newPlaylistFragment = playlistModel?.let { NewPlaylistFragment.newInstance(it, PlaylistOptions.RENAME_PLAYLIST) }
+            if (newPlaylistFragment != null) {
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(android.R.id.content, newPlaylistFragment)
+                    .addToBackStack(NewPlaylistFragment::class.simpleName)
+                    .commit()
+            }
         }
-        playlistOptionsListener.onOptionClicked(playlistOptionsModel)
+//        playlistOptionsListener.onOptionClicked(playlistOptionsModel)
+        viewModel.setSelectedOption(playlistOptionsModel.optionType)
     }
 
     fun setPlaylistOptionsListener(playlistOptionsListener: PlaylistOptionsListener) {

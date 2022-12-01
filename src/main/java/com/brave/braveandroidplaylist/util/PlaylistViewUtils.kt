@@ -12,7 +12,7 @@ import com.brave.braveandroidplaylist.R
 import com.brave.braveandroidplaylist.extension.allowMoving
 import com.brave.braveandroidplaylist.interpolator.BraveBounceInterpolator
 import com.brave.braveandroidplaylist.listener.PlaylistOptionsListener
-import com.brave.braveandroidplaylist.model.PlaylistOptions
+import com.brave.braveandroidplaylist.enums.PlaylistOptions
 import com.brave.braveandroidplaylist.model.PlaylistOptionsModel
 import com.brave.braveandroidplaylist.model.SnackBarActionModel
 import com.brave.braveandroidplaylist.view.MovableImageButton
@@ -78,11 +78,9 @@ object PlaylistViewUtils {
     }
 
     @JvmStatic
-    fun showSnackBarWithActions(view : View,message: String, actions : List<SnackBarActionModel>) {
+    fun showSnackBarWithActions(view : View,message: String, action : SnackBarActionModel) {
         val snack = Snackbar.make(view,message,Snackbar.LENGTH_LONG)
-        for (action : SnackBarActionModel in actions) {
-            snack.setAction(action.actionText, action.onActionClickListener)
-        }
+        snack.setAction(action.actionText, action.onActionClickListener)
         snack.show()
     }
 }

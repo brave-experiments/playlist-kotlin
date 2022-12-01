@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.brave.braveandroidplaylist.model.MediaModel
+import com.brave.braveandroidplaylist.enums.PlaylistOptions
 
 class PlaylistViewModel : ViewModel() {
     private val mutablePlaylistData = MutableLiveData<String>()
@@ -18,5 +19,12 @@ class PlaylistViewModel : ViewModel() {
 
     fun setSelectedPlaylistItem(mediaModel: MediaModel) {
         mutableSelectedPlaylistItem.value = mediaModel
+    }
+
+    private val mutableSelectedOption = MutableLiveData<PlaylistOptions>()
+    val selectedOption: LiveData<PlaylistOptions> get() = mutableSelectedOption
+
+    fun setSelectedOption(playlistOptions: PlaylistOptions) {
+        mutableSelectedOption.value = playlistOptions
     }
 }

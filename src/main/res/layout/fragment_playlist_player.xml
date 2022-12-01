@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/ic_media_player_bg"
-    android:orientation="vertical"
-    tools:context=".activity.PlaylistPlayerActivity">
+    android:orientation="vertical">
 
     <com.brave.braveandroidplaylist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
@@ -20,6 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="0.4"
+        app:resize_mode="fit"
         app:use_controller="false" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_play_filled"
             android:drawablePadding="5dp"
-            android:text="@string/string_saved"
+            android:text="@string/watch_later"
             android:textColor="@color/media_stats_color"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"

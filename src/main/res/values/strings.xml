@@ -6,7 +6,7 @@
     <string name="first_playlist_message">Make a playlist of your favorite audio and videos and play anytime, anywhere. Even offline.</string>
     <string name="create_a_playlist">Create a Playlist</string>
     <string name="string_skip">Skip</string>
-    <string name="string_saved">Saved</string>
+    <string name="watch_later">Watch Later</string>
     <string name="browse_and_add">Browse and add</string>
     <string name="browse_and_add_message">Add any media from any website. Look for the + button in your address bar and tap it to add.</string>
     <string name="browse_for_media">Browse for media</string>

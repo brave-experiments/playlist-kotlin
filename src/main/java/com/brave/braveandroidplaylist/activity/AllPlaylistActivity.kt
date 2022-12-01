@@ -13,7 +13,6 @@ import com.brave.braveandroidplaylist.adapter.RecentlyPlayedPlaylistAdapter
 import com.brave.braveandroidplaylist.view.PlaylistOptionsBottomSheet
 
 class AllPlaylistActivity : AppCompatActivity(R.layout.activity_all_playlist) {
-
     private lateinit var btAddNewPlaylist: AppCompatButton
     private lateinit var ivPlaylistsOptions: AppCompatImageView
 
@@ -43,6 +42,6 @@ class AllPlaylistActivity : AppCompatActivity(R.layout.activity_all_playlist) {
     }
 
     private fun navigateToAddNewPlaylistActivity() {
-        startActivity(Intent(this, AddNewPlaylistActivity::class.java))
+//        startActivity(Intent(this, AddNewPlaylistActivity::class.java))
     }
 }

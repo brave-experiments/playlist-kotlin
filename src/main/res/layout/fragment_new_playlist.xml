@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/playlist_background"
-    tools:context=".activity.AddNewPlaylistActivity">
+    android:background="@color/playlist_background">
 
     <com.brave.braveandroidplaylist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
@@ -15,8 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:showActionButton="true"
-        app:title="@string/new_playlist" />
+        app:showActionButton="true" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guidelineStart"

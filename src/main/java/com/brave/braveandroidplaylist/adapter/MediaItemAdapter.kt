@@ -1,8 +1,8 @@
 package com.brave.braveandroidplaylist.adapter
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -11,13 +11,9 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.braveandroidplaylist.R
-import com.brave.braveandroidplaylist.activity.PlaylistPlayerActivity
-import com.brave.braveandroidplaylist.extension.sizeStrInMb
 import com.brave.braveandroidplaylist.listener.OnItemInteractionListener
 import com.brave.braveandroidplaylist.listener.OnStartDragListener
 import com.brave.braveandroidplaylist.model.MediaModel
-import com.brave.braveandroidplaylist.util.MediaUtils
-import com.brave.braveandroidplaylist.util.PlaylistUtils
 import java.io.File
 
 class MediaItemAdapter(
@@ -57,6 +53,7 @@ class MediaItemAdapter(
         override fun onBind(position: Int, model: MediaModel) {
             setViewOnSelected(model.isSelected)
             tvMediaTitle.text = model.name
+            ivMediaThumbnail.setImageURI(Uri.fromFile(File(model.thumbnailPath+".jpg")))
 //            tvMediaFileSize.text = File(model.mediaPath).sizeStrInMb()
 //            tvMediaDuration.text = MediaUtils.getMediaDuration(itemView.context ,model.mediaPath).toString()
             Log.e("BravePlaylist", model.name);
@@ -65,6 +62,13 @@ class MediaItemAdapter(
                 if (editMode) {
                     model.isSelected = !model.isSelected
                     setViewOnSelected(model.isSelected)
+                    var count = 0
+                    itemList.forEach {
+                        if (it.isSelected) {
+                            count ++
+                        }
+                    }
+                    onItemInteractionListener.onPlaylistItemClick(count)
                 } else {
                     onItemInteractionListener.onPlaylistItemClick(mediaModel = model)
 //                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
@@ -90,5 +94,15 @@ class MediaItemAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_media, parent, false)
         return MediaItemViewHolder(view)
+    }
+
+    fun getSelectedItems(): ArrayList<MediaModel> {
+        val selectedItems = arrayListOf<MediaModel>()
+        itemList.forEach {
+            if (it.isSelected) {
+                selectedItems.add(it)
+            }
+        }
+        return selectedItems
     }
 }

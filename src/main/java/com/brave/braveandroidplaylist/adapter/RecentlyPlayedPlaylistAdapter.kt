@@ -25,9 +25,9 @@ class RecentlyPlayedPlaylistAdapter(private val playlists: MutableList<PlaylistM
             tvPlaylistItemCount = view.findViewById(R.id.tvPlaylistItemCount)
         }
         override fun onBind(position: Int, model: PlaylistModel) {
-            ivPlaylistCover.setImageResource(model.cover)
-            tvPlaylistName.text = model.title
-            tvPlaylistItemCount.text = itemView.context.getString(R.string.number_items, model.totalItems)
+//            ivPlaylistCover.setImageResource(model.id)
+            tvPlaylistName.text = model.name
+            tvPlaylistItemCount.text = itemView.context.getString(R.string.number_items, model.items.size)
         }
     }
 

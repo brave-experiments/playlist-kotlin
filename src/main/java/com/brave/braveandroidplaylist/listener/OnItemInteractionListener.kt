@@ -11,4 +11,6 @@ interface OnItemInteractionListener {
     fun onUpload(position: Int)
 
     fun onPlaylistItemClick(mediaModel: MediaModel)
+
+    fun onPlaylistItemClick(count:Int)
 }

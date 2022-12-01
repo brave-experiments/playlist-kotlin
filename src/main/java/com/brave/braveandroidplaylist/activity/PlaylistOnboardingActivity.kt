@@ -35,7 +35,7 @@ class PlaylistOnboardingActivity : AppCompatActivity(R.layout.activity_playlist_
     }
 
     private fun navigateToAddNewPlaylistActivity() {
-        startActivity(Intent(this, AddNewPlaylistActivity::class.java))
+//        startActivity(Intent(this, AddNewPlaylistActivity::class.java))
     }
 
     private fun navigateToAllPlaylistActivity() {

@@ -15,10 +15,10 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener {
-//    private val viewModel: PlaylistViewModel by activityViewModels()
     private lateinit var viewModel: PlaylistViewModel
     private var exoPlayer: Player? = null
     private var duration: Long = 0
@@ -34,6 +34,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var styledPlayerView: StyledPlayerView
     private lateinit var videoSeekBar: SeekBar
+    private lateinit var tvVideoTitle: AppCompatTextView
+    private lateinit var tvVideoSource: AppCompatTextView
     private lateinit var tvVideoTimeElapsed: AppCompatTextView
     private lateinit var tvVideoTimeRemaining: AppCompatTextView
     private lateinit var ivPlaylistMediaSpeed: AppCompatImageView
@@ -53,6 +55,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             )
         }!![PlaylistViewModel::class.java]
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
+        tvVideoTitle = view.findViewById(R.id.tvVideoTitle)
+        tvVideoSource = view.findViewById(R.id.tvVideoSource)
         styledPlayerView = view.findViewById(R.id.styledPlayerView)
         videoSeekBar = view.findViewById(R.id.videoSeekBar)
         tvVideoTimeElapsed = view.findViewById(R.id.tvVideoTimeElapsed)
@@ -111,8 +115,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     private fun setToolbar() {
-        playlistToolbar.setOptionsButtonOnClickListener {
-            activity?.finish()
+        playlistToolbar.setOptionsButtonClickListener {
+            activity?.onBackPressedDispatcher?.onBackPressed()
         }
     }
 
@@ -179,6 +183,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             }
         }
         viewModel.selectedPlaylistItem.observe(viewLifecycleOwner) { mediaModel ->
+            tvVideoTitle.text = mediaModel.name
             exoPlayer = trackSelector?.let { trackSelector ->
                 view?.let {
                     ExoPlayer.Builder(it.context)
