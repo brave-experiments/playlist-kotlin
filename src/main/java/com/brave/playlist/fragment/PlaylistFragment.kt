@@ -142,23 +142,28 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                     PlaylistOptionsModel(
                         it.resources.getString(R.string.edit_text),
                         R.drawable.ic_edit_playlist,
-                        PlaylistOptions.EDIT_PLAYLIST
+                        PlaylistOptions.EDIT_PLAYLIST,
+                        playlistModel
                     ), PlaylistOptionsModel(
                         it.resources.getString(R.string.rename_text),
                         R.drawable.ic_rename_playlist,
-                        PlaylistOptions.RENAME_PLAYLIST
+                        PlaylistOptions.RENAME_PLAYLIST,
+                        playlistModel
                     ), PlaylistOptionsModel(
                         it.resources.getString(R.string.remove_playlist_offline_data),
                         R.drawable.ic_remove_offline_data_playlist,
-                        PlaylistOptions.REMOVE_PLAYLIST_OFFLINE_DATA
+                        PlaylistOptions.REMOVE_PLAYLIST_OFFLINE_DATA,
+                        playlistModel
                     ), PlaylistOptionsModel(
                         it.resources.getString(R.string.download_playlist_for_offline_use),
                         R.drawable.ic_cloud_download,
-                        PlaylistOptions.DOWNLOAD_PLAYLIST_FOR_OFFLINE_USE
+                        PlaylistOptions.DOWNLOAD_PLAYLIST_FOR_OFFLINE_USE,
+                        playlistModel
                     ), PlaylistOptionsModel(
                         it.resources.getString(R.string.delete_playlist),
                         R.drawable.ic_playlist_delete,
-                        PlaylistOptions.DELETE_PLAYLIST
+                        PlaylistOptions.DELETE_PLAYLIST,
+                        playlistModel
                     )
                 ), this
             ).show(parentFragmentManager, null)

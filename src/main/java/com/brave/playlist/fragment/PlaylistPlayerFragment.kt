@@ -210,8 +210,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         }
         exoPlayer?.playWhenReady = playWhenReady
         playlistItems?.forEach {mediaModel ->
-            exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
-//            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
+//            exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
+            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
         }
         exoPlayer?.prepare()
     }

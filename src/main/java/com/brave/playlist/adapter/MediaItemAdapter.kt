@@ -16,6 +16,7 @@ import com.brave.playlist.extension.sizeStr
 import com.brave.playlist.listener.OnPlaylistItemClickListener
 import com.brave.playlist.listener.OnStartDragListener
 import com.brave.playlist.model.MediaModel
+import com.bumptech.glide.Glide
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -59,11 +60,14 @@ class MediaItemAdapter(
         override fun onBind(position: Int, model: MediaModel) {
             setViewOnSelected(model.isSelected)
             tvMediaTitle.text = model.name
-            val thumbnailFile = File("file:\\/\\/\\/data\\/user\\/0\\/com.brave.browser_nightly\\/app_chrome\\/Default\\/playlist\\/CAF7255EB5B18B6DFE68DF37A33A78A0\\/thumbnail.webp")
-            if (thumbnailFile.exists()) {
-                val myBitmap = BitmapFactory.decodeFile(thumbnailFile.absolutePath)
-                ivMediaThumbnail.setImageBitmap(myBitmap)
-            }
+//            val thumbnailFile = File(model.thumbnailPath)
+//            if (thumbnailFile.exists()) {
+//                val myBitmap = BitmapFactory.decodeFile(thumbnailFile.absolutePath)
+//                ivMediaThumbnail.setImageBitmap(myBitmap)
+//            }
+            Glide.with(itemView.context)
+                .load(File(model.mediaPath))
+            .into(ivMediaThumbnail)
             tvMediaFileSize.text = File(model.mediaPath).sizeStr()
             val df = SimpleDateFormat("mm:ss", Locale.getDefault())
             tvMediaDuration.text = model.duration.toLongOrNull()

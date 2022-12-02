@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:padding="12dp"
     android:orientation="horizontal">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivOptionIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         app:srcCompat="@drawable/ic_edit_playlist"
         app:tint="@color/icon_tint" />
 
@@ -18,6 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
+        android:layout_gravity="center_vertical"
         android:textColor="@color/playlist_text_color" />
 
 </androidx.appcompat.widget.LinearLayoutCompat>
