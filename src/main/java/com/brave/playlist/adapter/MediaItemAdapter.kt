@@ -1,6 +1,7 @@
 package com.brave.playlist.adapter
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.util.Log
@@ -11,15 +12,20 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
-import com.brave.playlist.listener.OnItemInteractionListener
+import com.brave.playlist.extension.sizeStr
+import com.brave.playlist.listener.OnPlaylistItemClickListener
 import com.brave.playlist.listener.OnStartDragListener
 import com.brave.playlist.model.MediaModel
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+
 
 class MediaItemAdapter(
     mediaItemList: MutableList<MediaModel>,
     private val onStartDragListener: OnStartDragListener,
-    private val onItemInteractionListener: OnItemInteractionListener
+    private val onPlaylistItemClickListener: OnPlaylistItemClickListener
 ) :
     AbstractRecyclerViewAdapter<MediaItemAdapter.MediaItemViewHolder, MediaModel>(mediaItemList) {
 
@@ -53,9 +59,15 @@ class MediaItemAdapter(
         override fun onBind(position: Int, model: MediaModel) {
             setViewOnSelected(model.isSelected)
             tvMediaTitle.text = model.name
-            ivMediaThumbnail.setImageURI(Uri.fromFile(File(model.thumbnailPath+".jpg")))
-//            tvMediaFileSize.text = File(model.mediaPath).sizeStrInMb()
-//            tvMediaDuration.text = MediaUtils.getMediaDuration(itemView.context ,model.mediaPath).toString()
+            val thumbnailFile = File("file:\\/\\/\\/data\\/user\\/0\\/com.brave.browser_nightly\\/app_chrome\\/Default\\/playlist\\/CAF7255EB5B18B6DFE68DF37A33A78A0\\/thumbnail.webp")
+            if (thumbnailFile.exists()) {
+                val myBitmap = BitmapFactory.decodeFile(thumbnailFile.absolutePath)
+                ivMediaThumbnail.setImageBitmap(myBitmap)
+            }
+            tvMediaFileSize.text = File(model.mediaPath).sizeStr()
+            val df = SimpleDateFormat("mm:ss", Locale.getDefault())
+            tvMediaDuration.text = model.duration.toLongOrNull()
+                ?.let { df.format(Date(TimeUnit.MICROSECONDS.toSeconds(it) * 1000L)) }.toString()
             Log.e("BravePlaylist", model.name);
             ivDragMedia.visibility = if (editMode) View.VISIBLE else View.GONE
             itemView.setOnClickListener {
@@ -65,12 +77,12 @@ class MediaItemAdapter(
                     var count = 0
                     itemList.forEach {
                         if (it.isSelected) {
-                            count ++
+                            count++
                         }
                     }
-                    onItemInteractionListener.onPlaylistItemClick(count)
+                    onPlaylistItemClickListener.onPlaylistItemClick(count)
                 } else {
-                    onItemInteractionListener.onPlaylistItemClick(mediaModel = model)
+                    onPlaylistItemClickListener.onPlaylistItemClick(mediaModel = model)
 //                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
                 }
             }

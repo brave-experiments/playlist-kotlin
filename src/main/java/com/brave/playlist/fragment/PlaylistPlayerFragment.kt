@@ -6,9 +6,11 @@ import android.widget.SeekBar
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
+import com.brave.playlist.model.MediaModel
+import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.util.ConstantUtils.PLAYLIST
+import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM
 import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -17,7 +19,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener {
-    private lateinit var viewModel: PlaylistViewModel
+    //    private lateinit var viewModel: PlaylistViewModel
     private var exoPlayer: Player? = null
     private var duration: Long = 0
     private var isUserTrackingTouch = false
@@ -45,13 +47,32 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var ivSeekForward15Seconds: AppCompatImageView
     private lateinit var ivSeekBack15Seconds: AppCompatImageView
 
+    private var playlistModel: PlaylistModel? = null
+    private var selectedPlaylistItem: MediaModel? = null
+    private var playlistItems: ArrayList<MediaModel>? = arrayListOf()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            playlistModel = it.getParcelable(PLAYLIST)
+            selectedPlaylistItem = it.getParcelable(SELECTED_PLAYLIST_ITEM)
+        }
+
+        selectedPlaylistItem?.let { playlistItems?.add(it) }
+        playlistModel?.items?.forEach {
+            if (it.id != selectedPlaylistItem?.id) {
+                playlistItems?.add(it)
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = activity?.let {
-            ViewModelProvider(
-                it, ViewModelProvider.NewInstanceFactory()
-            )
-        }!![PlaylistViewModel::class.java]
+//        viewModel = activity?.let {
+//            ViewModelProvider(
+//                it, ViewModelProvider.NewInstanceFactory()
+//            )
+//        }!![PlaylistViewModel::class.java]
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
         tvVideoTitle = view.findViewById(R.id.tvVideoTitle)
         tvVideoSource = view.findViewById(R.id.tvVideoSource)
@@ -68,6 +89,16 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivSeekForward15Seconds = view.findViewById(R.id.ivSeekForward15Seconds)
         ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
 
+        setToolbar()
+        setNextMedia()
+        setPrevMedia()
+        setSeekForward()
+        setSeekBack()
+        setSeekBarListener()
+        setPlaylistShuffle()
+        setPlaylistRepeatMode()
+        setPlaybackSpeed()
+
         initializePlayer()
     }
 
@@ -78,7 +109,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
-        init()
+        exoPlayer?.let {
+            it.playWhenReady = true
+            tvVideoTitle.text = playlistItems?.get(it.currentPeriodIndex)?.name
+        }
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
@@ -87,6 +121,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             exoPlayer?.let {
                 duration = it.duration
                 updateTime(it.currentPosition)
+                tvVideoTitle.text = playlistItems?.get(it.currentPeriodIndex)?.name
             }
         }
     }
@@ -95,21 +130,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         super.onIsPlayingChanged(isPlaying)
         if (isPlaying && !isUserTrackingTouch)
             styledPlayerView.postDelayed(this::setCurrentPlayerPosition, updatePositionDelayMs)
-    }
-
-    private fun init() {
-        setToolbar()
-        setMediaStats()
-        setNextMedia()
-        setPrevMedia()
         setPlayAndPause()
-        setSeekForward()
-        setSeekBack()
-        setSeekBarListener()
-        setPlaylistShuffle()
-        playWhenReady()
-        setPlaylistRepeatMode()
-        setPlaybackSpeed()
     }
 
     private fun setToolbar() {
@@ -166,62 +187,33 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         }
     }
 
-    private fun setMediaStats() {
-
-    }
-
-    private fun playWhenReady() {
-        exoPlayer?.playWhenReady = true
-    }
-
     private fun initializePlayer() {
         val trackSelector = view?.let {
             DefaultTrackSelector(it.context).apply {
                 setParameters(buildUponParameters().setMaxVideoSizeSd())
             }
         }
-        viewModel.selectedPlaylistItem.observe(viewLifecycleOwner) { mediaModel ->
-            tvVideoTitle.text = mediaModel.name
-            exoPlayer = trackSelector?.let { trackSelector ->
-                view?.let {
-                    ExoPlayer.Builder(it.context)
-                        .setTrackSelector(trackSelector)
-                        .build()
-                        .also { exoplayer ->
-                            styledPlayerView.player = exoplayer
-                            val mediaItem: MediaItem =
-                                                    MediaItem.fromUri(mediaModel.mediaPath)
-//                                MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-                            exoplayer.addListener(this)
-                            exoplayer.playWhenReady = playWhenReady
-                            exoplayer.shuffleModeEnabled = isShuffleOn
-                            exoplayer.setMediaItem(mediaItem)
-                            exoplayer.seekTo(currentMediaIndex, playbackPosition)
-                            exoplayer.repeatMode = repeatMode
-                            exoplayer.setPlaybackSpeed(playbackSpeed)
-                            exoplayer.prepare()
-                        }
+
+        exoPlayer = trackSelector?.let { tempTrackSelector ->
+            ExoPlayer.Builder(requireContext())
+                .setTrackSelector(tempTrackSelector)
+                .build()
+                .also { tempExoPlayer ->
+                    styledPlayerView.player = tempExoPlayer
+                    tempExoPlayer.addListener(this)
+                    tempExoPlayer.shuffleModeEnabled = isShuffleOn
+    //                        mediaItem?.let { it1 -> it.addMediaItem(it1) }
+                    tempExoPlayer.seekTo(currentMediaIndex, playbackPosition)
+                    tempExoPlayer.repeatMode = repeatMode
+                    tempExoPlayer.setPlaybackSpeed(playbackSpeed)
                 }
-            }
         }
-//        val mediaModel = intent.getSerializableExtra("data") as MediaModel
-//        exoPlayer = ExoPlayer.Builder(activity)
-//            .setTrackSelector(trackSelector)
-//            .build()
-//            .also {
-//                styledPlayerView.player = it
-//                val mediaItem: MediaItem =
-////                    MediaItem.fromUri(mediaModel.mediaPath)
-//                    MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-//                it.addListener(this)
-//                it.playWhenReady = playWhenReady
-//                it.shuffleModeEnabled = isShuffleOn
-//                it.setMediaItem(mediaItem)
-//                it.seekTo(currentMediaIndex, playbackPosition)
-//                it.repeatMode = repeatMode
-//                it.setPlaybackSpeed(playbackSpeed)
-//                it.prepare()
-//            }
+        exoPlayer?.playWhenReady = playWhenReady
+        playlistItems?.forEach {mediaModel ->
+            exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
+//            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
+        }
+        exoPlayer?.prepare()
     }
 
     private fun releasePlayer() {
@@ -272,7 +264,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private fun setPlayOrPauseIcon(ivPlayPauseVideo: AppCompatImageView) {
         exoPlayer?.let {
             ivPlayPauseVideo.setImageResource(
-                if (it.isPlaying)
+                if (!it.isPlaying)
                     R.drawable.ic_playlist_pause_media
                 else
                     R.drawable.ic_playlist_play_media
@@ -302,7 +294,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     private fun setSeekBarListener() {
         videoSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+            override fun onProgressChanged(
+                seekBar: SeekBar?,
+                progress: Int,
+                fromUser: Boolean
+            ) {
                 exoPlayer?.let {
                     updateTime(it.currentPosition)
                 }
@@ -362,5 +358,14 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     companion object {
         private const val SEEK_VALUE_MS = 15000
+
+        @JvmStatic
+        fun newInstance(playlistModel: PlaylistModel, selectedPlaylistItem: MediaModel) =
+            PlaylistPlayerFragment().apply {
+                arguments = Bundle().apply {
+                    putParcelable(PLAYLIST, playlistModel)
+                    putParcelable(SELECTED_PLAYLIST_ITEM, selectedPlaylistItem)
+                }
+            }
     }
 }

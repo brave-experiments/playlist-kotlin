@@ -9,6 +9,9 @@ data class MediaModel(
     val pageSource: String,
     val mediaPath: String,
     val thumbnailPath: String,
+    val author: String,
+    val duration: String,
+    val isCached:Boolean = false,
     var isSelected: Boolean = false
 ) : Parcelable {
     companion object {
@@ -25,6 +28,9 @@ data class MediaModel(
         pageSource = parcel.readString().toString(),
         mediaPath = parcel.readString().toString(),
         thumbnailPath = parcel.readString().toString(),
+        author = parcel.readString().toString(),
+        duration = parcel.readString().toString(),
+        isCached = parcel.readInt() == 1,
         isSelected = parcel.readInt() == 1
     )
 
@@ -34,6 +40,9 @@ data class MediaModel(
         parcel.writeString(pageSource)
         parcel.writeString(mediaPath)
         parcel.writeString(thumbnailPath)
+        parcel.writeString(author)
+        parcel.writeString(duration)
+        parcel.writeInt(if(isCached) 1 else 0)
         parcel.writeInt(if(isSelected) 1 else 0)
     }
 

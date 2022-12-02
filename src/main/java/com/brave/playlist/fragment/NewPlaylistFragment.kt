@@ -9,6 +9,8 @@ import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.util.ConstantUtils.PLAYLIST
+import com.brave.playlist.util.ConstantUtils.PLAYLIST_OPTION
 import com.brave.playlist.view.PlaylistToolbar
 
 class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
@@ -50,9 +52,6 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
     }
 
     companion object {
-        const val PLAYLIST = "playlist"
-        const val PLAYLIST_OPTION = "playlist_option"
-
         @JvmStatic
         fun newInstance(playlistModel: PlaylistModel, playlistOptions: PlaylistOptions) =
             NewPlaylistFragment().apply {
