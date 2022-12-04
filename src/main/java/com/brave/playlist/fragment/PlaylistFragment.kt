@@ -31,7 +31,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
     private var playlistModel: PlaylistModel? = null
 
-    private lateinit var viewModel: PlaylistViewModel
+    private lateinit var playlistViewModel: PlaylistViewModel
     private lateinit var mediaItemAdapter: MediaItemAdapter
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var rvPlaylist: RecyclerView
@@ -51,7 +51,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = activity?.let {
+        playlistViewModel = activity?.let {
             ViewModelProvider(
                 it, ViewModelProvider.NewInstanceFactory()
             )
@@ -90,7 +90,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
         layoutShuffleMedia = view.findViewById(R.id.layoutShuffleMedia)
         ivPlaylistOptions = view.findViewById(R.id.ivPlaylistOptions)
 
-        viewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
+        playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             Log.e("BravePlaylist", playlistData.toString())
             val playlistList = mutableListOf<MediaModel>()
             val playlistJsonObject = JSONObject(playlistData)
@@ -127,7 +127,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 }
             }
 
-            tvTotalMediaCount.text = playlistList.size.toString() + " items"
+            tvTotalMediaCount.text = getString(R.string.number_of_items, playlistList.size.toString())
 
             mediaItemAdapter = MediaItemAdapter(playlistList, this, this)
             val callback = MediaItemGestureHelper(view.context, rvPlaylist, mediaItemAdapter, this)
@@ -242,7 +242,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
             }
         }
 //        playlistOptionsListener.onOptionClicked(playlistOptionsModel)
-        viewModel.setSelectedOption(playlistOptionsModel.optionType)
+        playlistViewModel.setSelectedOption(playlistOptionsModel.optionType)
     }
 
     fun setPlaylistOptionsListener(playlistOptionsListener: PlaylistOptionsListener) {

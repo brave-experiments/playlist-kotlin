@@ -14,6 +14,13 @@ class PlaylistViewModel : ViewModel() {
         mutablePlaylistData.value = playlistData
     }
 
+    private val mutableAllPlaylistData = MutableLiveData<String>()
+    val allPlaylistData: LiveData<String> get() = mutableAllPlaylistData
+
+    fun setAllPlaylistData(allPlaylistData: String) {
+        mutableAllPlaylistData.value = allPlaylistData
+    }
+
     private val mutableSelectedPlaylistItem = MutableLiveData<MediaModel>()
     val selectedPlaylistItem: LiveData<MediaModel> get() = mutableSelectedPlaylistItem
 

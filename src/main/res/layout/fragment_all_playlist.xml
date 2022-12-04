@@ -5,32 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/playlist_background"
-    android:clipToPadding="false"
-    tools:context=".activity.AllPlaylistActivity">
+    android:clipToPadding="false">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/ivCollapsePlaylists"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:padding="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_arrow_down_playlist"
-        app:tint="@color/icon_tint" />
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/ivPlaylistsOptions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:padding="16dp"
+    <com.brave.playlist.view.PlaylistToolbar
+        android:id="@+id/playlistToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/playlist_toolbar_height"
+        app:optionButtonIcon="@drawable/ic_options_toolbar_playlist"
+        app:showOptions="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_options_toolbar_playlist"
-        app:tint="@color/icon_tint" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvPlaylistHeader"
@@ -43,7 +28,7 @@
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivCollapsePlaylists" />
+        app:layout_constraintTop_toBottomOf="@id/playlistToolbar" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tvRecentlyPlayed"

@@ -33,7 +33,7 @@ class PlaylistOnboardingActivity : AppCompatActivity(R.layout.activity_playlist_
     }
 
     private fun navigateToAllPlaylistActivity() {
-        startActivity(Intent(this, AllPlaylistActivity::class.java))
+//        startActivity(Intent(this, AllPlaylistActivity::class.java))
     }
 
 //    private fun showOnboardingButton() {

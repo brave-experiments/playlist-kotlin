@@ -111,7 +111,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         super.onMediaItemTransition(mediaItem, reason)
         exoPlayer?.let {
             it.playWhenReady = true
-            tvVideoTitle.text = playlistItems?.get(it.currentPeriodIndex)?.name
         }
     }
 
@@ -122,6 +121,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 duration = it.duration
                 updateTime(it.currentPosition)
                 tvVideoTitle.text = playlistItems?.get(it.currentPeriodIndex)?.name
+                ivNextVideo.isEnabled = it.hasNextMediaItem()
+                ivNextVideo.alpha = if (it.hasNextMediaItem()) 1.0f else 0.4f
+                ivPrevVideo.isEnabled = it.hasPreviousMediaItem()
+                ivPrevVideo.alpha = if (it.hasPreviousMediaItem()) 1.0f else 0.4f
             }
         }
     }
@@ -210,8 +213,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         }
         exoPlayer?.playWhenReady = playWhenReady
         playlistItems?.forEach {mediaModel ->
-//            exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
-            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
+            exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
+//            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
         }
         exoPlayer?.prepare()
     }

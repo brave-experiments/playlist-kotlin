@@ -8,11 +8,6 @@
         android:usesCleartextTraffic="true">
         <activity
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
-            android:name=".activity.AllPlaylistActivity"
-            android:exported="false"
-            android:launchMode="singleTask" />
-        <activity
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
             android:name=".activity.PlaylistOnboardingActivity"
             android:exported="false"
             android:launchMode="singleTask" />
