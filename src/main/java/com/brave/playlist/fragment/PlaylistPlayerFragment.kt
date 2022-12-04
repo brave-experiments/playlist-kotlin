@@ -1,25 +1,31 @@
 package com.brave.playlist.fragment
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
 import com.brave.playlist.R
+import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.model.MediaModel
 import com.brave.playlist.model.PlaylistModel
-import com.brave.playlist.util.ConstantUtils.PLAYLIST
+import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
+import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
+import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM
 import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener {
-    //    private lateinit var viewModel: PlaylistViewModel
     private var exoPlayer: Player? = null
     private var duration: Long = 0
     private var isUserTrackingTouch = false
@@ -51,28 +57,40 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private var selectedPlaylistItem: MediaModel? = null
     private var playlistItems: ArrayList<MediaModel>? = arrayListOf()
 
+    private val connection = object : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {
+
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            if (service is PlaylistVideoService.PlaylistVideoServiceBinder) {
+                exoPlayer = service.getExoPlayerInstance()
+                service.getPlayerNotificationManagerInstance()?.setPlayer(exoPlayer)
+                setToolbar()
+                setNextMedia()
+                setPrevMedia()
+                setSeekForward()
+                setSeekBack()
+                setSeekBarListener()
+                setPlaylistShuffle()
+                setPlaylistRepeatMode()
+                setPlaybackSpeed()
+
+                initializePlayer()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            playlistModel = it.getParcelable(PLAYLIST)
+            playlistModel = it.getParcelable(PLAYLIST_MODEL)
             selectedPlaylistItem = it.getParcelable(SELECTED_PLAYLIST_ITEM)
-        }
-
-        selectedPlaylistItem?.let { playlistItems?.add(it) }
-        playlistModel?.items?.forEach {
-            if (it.id != selectedPlaylistItem?.id) {
-                playlistItems?.add(it)
-            }
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        viewModel = activity?.let {
-//            ViewModelProvider(
-//                it, ViewModelProvider.NewInstanceFactory()
-//            )
-//        }!![PlaylistViewModel::class.java]
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
         tvVideoTitle = view.findViewById(R.id.tvVideoTitle)
         tvVideoSource = view.findViewById(R.id.tvVideoSource)
@@ -89,22 +107,27 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivSeekForward15Seconds = view.findViewById(R.id.ivSeekForward15Seconds)
         ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
 
-        setToolbar()
-        setNextMedia()
-        setPrevMedia()
-        setSeekForward()
-        setSeekBack()
-        setSeekBarListener()
-        setPlaylistShuffle()
-        setPlaylistRepeatMode()
-        setPlaybackSpeed()
+        selectedPlaylistItem?.let { playlistItems?.add(it) }
+        playlistModel?.items?.forEach {
+            if (it.id != selectedPlaylistItem?.id) {
+                playlistItems?.add(it)
+            }
+        }
 
-        initializePlayer()
+        val intent = Intent(requireContext(), PlaylistVideoService::class.java).apply {
+            putExtra(
+                PLAYLIST_NAME,
+                if (playlistModel?.id == "default") getString(R.string.watch_later) else playlistModel?.name
+            )
+            putParcelableArrayListExtra(PLAYER_ITEMS, playlistItems)
+        }
+        activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        activity?.startService(intent)
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         releasePlayer()
+        super.onDestroyView()
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -191,28 +214,14 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     private fun initializePlayer() {
-        val trackSelector = view?.let {
-            DefaultTrackSelector(it.context).apply {
-                setParameters(buildUponParameters().setMaxVideoSizeSd())
-            }
-        }
-
-        exoPlayer = trackSelector?.let { tempTrackSelector ->
-            ExoPlayer.Builder(requireContext())
-                .setTrackSelector(tempTrackSelector)
-                .build()
-                .also { tempExoPlayer ->
-                    styledPlayerView.player = tempExoPlayer
-                    tempExoPlayer.addListener(this)
-                    tempExoPlayer.shuffleModeEnabled = isShuffleOn
-    //                        mediaItem?.let { it1 -> it.addMediaItem(it1) }
-                    tempExoPlayer.seekTo(currentMediaIndex, playbackPosition)
-                    tempExoPlayer.repeatMode = repeatMode
-                    tempExoPlayer.setPlaybackSpeed(playbackSpeed)
-                }
-        }
+        styledPlayerView.player = exoPlayer
+        exoPlayer?.addListener(this)
+        exoPlayer?.shuffleModeEnabled = isShuffleOn
+        exoPlayer?.seekTo(currentMediaIndex, playbackPosition)
+        exoPlayer?.repeatMode = repeatMode
+        exoPlayer?.setPlaybackSpeed(playbackSpeed)
         exoPlayer?.playWhenReady = playWhenReady
-        playlistItems?.forEach {mediaModel ->
+        playlistItems?.forEach { mediaModel ->
             exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
 //            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
         }
@@ -226,16 +235,24 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             currentMediaIndex = it.currentMediaItemIndex
             playWhenReady = it.playWhenReady
             isShuffleOn = it.shuffleModeEnabled
-            it.release()
         }
-        exoPlayer = null
+        activity?.unbindService(connection)
     }
+
+    private fun disableNextPreviousControls() {
+        ivNextVideo.isEnabled = false
+        ivNextVideo.alpha = 0.4f
+        ivPrevVideo.isEnabled = false
+        ivPrevVideo.alpha = 0.4f
+    }
+
 
     private fun setNextMedia() {
         ivNextVideo.setOnClickListener {
             exoPlayer?.let {
                 if (it.hasNextMediaItem()) {
                     it.seekToNextMediaItem()
+                    disableNextPreviousControls()
                 }
             }
         }
@@ -246,6 +263,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             exoPlayer?.let {
                 if (it.hasPreviousMediaItem()) {
                     it.seekToPreviousMediaItem()
+                    disableNextPreviousControls()
                 }
             }
         }
@@ -366,7 +384,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         fun newInstance(playlistModel: PlaylistModel, selectedPlaylistItem: MediaModel) =
             PlaylistPlayerFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(PLAYLIST, playlistModel)
+                    putParcelable(PLAYLIST_MODEL, playlistModel)
                     putParcelable(SELECTED_PLAYLIST_ITEM, selectedPlaylistItem)
                 }
             }

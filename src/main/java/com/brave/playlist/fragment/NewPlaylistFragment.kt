@@ -9,7 +9,7 @@ import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.model.PlaylistModel
-import com.brave.playlist.util.ConstantUtils.PLAYLIST
+import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_OPTION
 import com.brave.playlist.view.PlaylistToolbar
 
@@ -24,7 +24,7 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            playlistModel = it.getParcelable(PLAYLIST)
+            playlistModel = it.getParcelable(PLAYLIST_MODEL)
             playlistOptions = it.getSerializable(PLAYLIST_OPTION) as PlaylistOptions
         }
     }
@@ -56,7 +56,7 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
         fun newInstance(playlistModel: PlaylistModel, playlistOptions: PlaylistOptions) =
             NewPlaylistFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(PLAYLIST, playlistModel)
+                    putParcelable(PLAYLIST_MODEL, playlistModel)
                     putSerializable(PLAYLIST_OPTION, playlistOptions)
                 }
             }

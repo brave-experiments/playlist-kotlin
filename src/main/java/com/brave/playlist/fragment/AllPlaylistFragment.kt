@@ -1,30 +1,20 @@
 package com.brave.playlist.fragment
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.adapter.MediaItemAdapter
 import com.brave.playlist.adapter.PlaylistAdapter
 import com.brave.playlist.adapter.RecentlyPlayedPlaylistAdapter
 import com.brave.playlist.enums.PlaylistOptions
-import com.brave.playlist.listener.MediaItemGestureHelper
-import com.brave.playlist.model.MediaModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.view.PlaylistToolbar
-import org.json.JSONArray
-import org.json.JSONObject
 
 class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist) {
     private lateinit var playlistViewModel: PlaylistViewModel
@@ -78,7 +68,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist) {
         fun newInstance(playlistModel: PlaylistModel, playlistOptions: PlaylistOptions) =
             AllPlaylistFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(ConstantUtils.PLAYLIST, playlistModel)
+                    putParcelable(ConstantUtils.PLAYLIST_MODEL, playlistModel)
                     putSerializable(ConstantUtils.PLAYLIST_OPTION, playlistOptions)
                 }
             }
