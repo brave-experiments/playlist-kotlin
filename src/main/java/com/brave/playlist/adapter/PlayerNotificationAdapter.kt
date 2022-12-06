@@ -23,11 +23,7 @@ class PlayerNotificationAdapter(
     }
 
     override fun createCurrentContentIntent(player: Player): PendingIntent? {
-        val intent = Intent(context, PlaylistOnboardingActivity::class.java)
-        return PendingIntent.getActivity(
-            context, 0, intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
+        return null
     }
 
     override fun getCurrentContentText(player: Player): String {

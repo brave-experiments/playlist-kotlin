@@ -1,13 +1,20 @@
 package com.brave.playlist
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import com.brave.playlist.adapter.PlayerNotificationAdapter
 import com.brave.playlist.model.MediaModel
 import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
+import com.brave.playlist.util.PlaylistUtils.createNotificationChannel
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -49,6 +56,7 @@ class PlaylistVideoService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        createNotificationChannel(applicationContext)
         val trackSelector = DefaultTrackSelector(applicationContext).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
@@ -64,6 +72,12 @@ class PlaylistVideoService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return START_NOT_STICKY
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     inner class PlaylistVideoServiceBinder : Binder() {

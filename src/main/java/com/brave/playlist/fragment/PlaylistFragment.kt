@@ -1,5 +1,6 @@
 package com.brave.playlist.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.MediaItemAdapter
@@ -20,6 +22,7 @@ import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.listener.*
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistOptionsBottomSheet
 import com.brave.playlist.view.PlaylistToolbar
 import org.json.JSONArray
@@ -200,6 +203,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
     }
 
     private fun openPlaylistPlayer(selectedMediaModel: MediaModel) {
+        activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
         val playlistPlayerFragment =
             playlistModel?.let { PlaylistPlayerFragment.newInstance(it, selectedMediaModel) }
         if (playlistPlayerFragment != null) {

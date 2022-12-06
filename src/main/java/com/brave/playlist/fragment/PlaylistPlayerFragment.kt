@@ -1,18 +1,22 @@
 package com.brave.playlist.fragment
 
+import android.R.attr.description
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.app.NotificationCompat.PRIORITY_HIGH
 import androidx.fragment.app.Fragment
-import com.brave.playlist.R
 import com.brave.playlist.PlaylistVideoService
+import com.brave.playlist.R
 import com.brave.playlist.model.MediaModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
@@ -23,7 +27,9 @@ import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.StyledPlayerView
+
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener {
     private var exoPlayer: Player? = null
@@ -65,7 +71,29 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             if (service is PlaylistVideoService.PlaylistVideoServiceBinder) {
                 exoPlayer = service.getExoPlayerInstance()
-                service.getPlayerNotificationManagerInstance()?.setPlayer(exoPlayer)
+
+                val playerNotificationManager = service.getPlayerNotificationManagerInstance()
+                playerNotificationManager?.setPlayer(exoPlayer)
+
+                // Below code can be used if we want to add media session
+
+//                val mediaSession = MediaSessionCompat(requireContext(), "Player")
+//                mediaSession.isActive = true
+//                mediaSession.setMetadata(
+//                    MediaMetadataCompat.Builder()
+//                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "title")
+//                        .putString(
+//                            MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION,
+//                            "description"
+//                        )
+//                        .build()
+//                )
+//                val mediaSessionConnector = MediaSessionConnector(mediaSession)
+//                mediaSessionConnector.setPlayer(exoPlayer)
+//                playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
+//                playerNotificationManager?.setPlayer(exoPlayer)
+//                playerNotificationManager?.setPriority(PRIORITY_HIGH)
+
                 setToolbar()
                 setNextMedia()
                 setPrevMedia()
