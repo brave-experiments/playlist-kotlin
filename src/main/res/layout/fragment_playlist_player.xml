@@ -1,212 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<com.brave.playlist.slidingpanel.BottomPanelLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ic_media_player_bg"
-    android:orientation="vertical">
+    app:scrollableView="@+id/rvPlaylists"
+    android:gravity="bottom">
 
-    <com.brave.playlist.view.PlaylistToolbar
-        android:id="@+id/playlistToolbar"
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:optionButtonIcon="@drawable/ic_arrow_down_playlist"
-        app:showOptions="true" />
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_media_player_bg"
+        android:orientation="vertical">
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
-        android:id="@+id/styledPlayerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.4"
-        app:resize_mode="fill"
-        app:use_controller="false" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layoutVideoControls"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.6"
-        android:clipToPadding="false"
-        android:paddingStart="32dp"
-        android:paddingTop="22dp"
-        android:paddingEnd="32dp">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvVideoSource"
-            android:layout_width="wrap_content"
+        <com.brave.playlist.view.PlaylistToolbar
+            android:id="@+id/playlistToolbar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_play_filled"
-            android:drawablePadding="5dp"
-            android:text="@string/watch_later"
-            android:textColor="@color/media_stats_color"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:optionButtonIcon="@drawable/ic_arrow_down_playlist"
+            app:showOptions="true" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvVideoTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/create_your_first_playlist"
-            android:textColor="@color/playlist_text_color"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@id/ivVideoOptions"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvVideoSource" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivVideoOptions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="-12dp"
-            android:padding="12dp"
-            app:layout_constraintBottom_toBottomOf="@id/tvVideoTitle"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/tvVideoTitle"
-            app:srcCompat="@drawable/ic_options_toolbar_playlist" />
-
-        <androidx.appcompat.widget.AppCompatSeekBar
-            android:id="@+id/videoSeekBar"
-            style="@style/playlistSeekBar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="44dp"
-            android:layout_marginEnd="30dp"
-            android:scaleX="1.35"
-            android:scaleY="1.35"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvVideoTitle" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvVideoTimeElapsed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:textColor="@color/playlist_text_color"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@id/videoSeekBar"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tvVideoTimeRemaining"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:textColor="@color/playlist_text_color"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toTopOf="@id/videoSeekBar"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <View
-            android:id="@+id/marginView"
-            android:layout_width="0dp"
+        <com.google.android.exoplayer2.ui.StyledPlayerView
+            android:id="@+id/styledPlayerView"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="36dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/videoSeekBar" />
+            android:layout_weight="0.4"
+            app:resize_mode="fill"
+            app:use_controller="false" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivPrevVideo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:padding="8dp"
-            app:layout_constraintEnd_toStartOf="@id/ivSeekBack15Seconds"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/marginView"
-            app:srcCompat="@drawable/ic_playlist_prev_media" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivSeekBack15Seconds"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            app:layout_constraintEnd_toStartOf="@id/ivPlayPauseVideo"
-            app:layout_constraintStart_toEndOf="@id/ivPrevVideo"
-            app:layout_constraintTop_toBottomOf="@id/marginView"
-            app:srcCompat="@drawable/ic_playlist_rewind_15" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivPlayPauseVideo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-6dp"
-            android:padding="8dp"
-            app:layout_constraintEnd_toStartOf="@id/ivSeekForward15Seconds"
-            app:layout_constraintStart_toEndOf="@id/ivSeekBack15Seconds"
-            app:layout_constraintTop_toBottomOf="@id/marginView"
-            app:srcCompat="@drawable/ic_playlist_play_media" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivSeekForward15Seconds"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            app:layout_constraintEnd_toStartOf="@id/ivNextVideo"
-            app:layout_constraintStart_toEndOf="@id/ivPlayPauseVideo"
-            app:layout_constraintTop_toBottomOf="@id/marginView"
-            app:srcCompat="@drawable/ic_playlist_forward_15" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivNextVideo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:padding="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivSeekForward15Seconds"
-            app:layout_constraintTop_toBottomOf="@id/marginView"
-            app:srcCompat="@drawable/ic_playlist_next_media" />
-
-        <View
-            android:id="@+id/marginView2"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutVideoControls"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="36dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivPlayPauseVideo" />
+            android:layout_weight="0.6"
+            android:clipToPadding="false"
+            android:paddingStart="32dp"
+            android:paddingTop="22dp"
+            android:paddingEnd="32dp">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivPlaylistRepeat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            app:layout_constraintEnd_toStartOf="@id/ivPlaylistShuffle"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/marginView2"
-            app:srcCompat="@drawable/ic_playlist_repeat_all_off"
-            app:tint="@color/playlist_behavior" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvVideoSource"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_play_filled"
+                android:drawablePadding="5dp"
+                android:text="@string/watch_later"
+                android:textColor="@color/media_stats_color"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivPlaylistShuffle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
-            android:padding="12dp"
-            app:layout_constraintEnd_toStartOf="@id/ivPlaylistMediaSpeed"
-            app:layout_constraintStart_toEndOf="@id/ivPlaylistRepeat"
-            app:layout_constraintTop_toBottomOf="@id/marginView2"
-            app:srcCompat="@drawable/ic_playlist_shuffle_off"
-            app:tint="@color/playlist_behavior" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvVideoTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/create_your_first_playlist"
+                android:textColor="@color/playlist_text_color"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toStartOf="@id/ivVideoOptions"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvVideoSource" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivPlaylistMediaSpeed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
-            android:padding="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/ivPlaylistShuffle"
-            app:layout_constraintTop_toBottomOf="@id/marginView2"
-            app:srcCompat="@drawable/ic_playlist_speed_1x"
-            app:tint="@color/playlist_behavior" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.appcompat.widget.LinearLayoutCompat>
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivVideoOptions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="-12dp"
+                android:padding="12dp"
+                app:layout_constraintBottom_toBottomOf="@id/tvVideoTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvVideoTitle"
+                app:srcCompat="@drawable/ic_options_toolbar_playlist" />
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/videoSeekBar"
+                style="@style/playlistSeekBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="44dp"
+                android:layout_marginEnd="30dp"
+                android:scaleX="1.35"
+                android:scaleY="1.35"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvVideoTitle" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvVideoTimeElapsed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textColor="@color/playlist_text_color"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@id/videoSeekBar"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvVideoTimeRemaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:textColor="@color/playlist_text_color"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toTopOf="@id/videoSeekBar"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <View
+                android:id="@+id/marginView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="36dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/videoSeekBar" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivPrevVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="8dp"
+                app:layout_constraintEnd_toStartOf="@id/ivSeekBack15Seconds"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/marginView"
+                app:srcCompat="@drawable/ic_playlist_prev_media" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivSeekBack15Seconds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                app:layout_constraintEnd_toStartOf="@id/ivPlayPauseVideo"
+                app:layout_constraintStart_toEndOf="@id/ivPrevVideo"
+                app:layout_constraintTop_toBottomOf="@id/marginView"
+                app:srcCompat="@drawable/ic_playlist_rewind_15" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivPlayPauseVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-6dp"
+                android:padding="8dp"
+                app:layout_constraintEnd_toStartOf="@id/ivSeekForward15Seconds"
+                app:layout_constraintStart_toEndOf="@id/ivSeekBack15Seconds"
+                app:layout_constraintTop_toBottomOf="@id/marginView"
+                app:srcCompat="@drawable/ic_playlist_play_media" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivSeekForward15Seconds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                app:layout_constraintEnd_toStartOf="@id/ivNextVideo"
+                app:layout_constraintStart_toEndOf="@id/ivPlayPauseVideo"
+                app:layout_constraintTop_toBottomOf="@id/marginView"
+                app:srcCompat="@drawable/ic_playlist_forward_15" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivNextVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivSeekForward15Seconds"
+                app:layout_constraintTop_toBottomOf="@id/marginView"
+                app:srcCompat="@drawable/ic_playlist_next_media" />
+
+            <View
+                android:id="@+id/marginView2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="36dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivPlayPauseVideo" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivPlaylistRepeat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                app:layout_constraintEnd_toStartOf="@id/ivPlaylistShuffle"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/marginView2"
+                app:srcCompat="@drawable/ic_playlist_repeat_all_off"
+                app:tint="@color/playlist_behavior" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivPlaylistShuffle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:padding="12dp"
+                app:layout_constraintEnd_toStartOf="@id/ivPlaylistMediaSpeed"
+                app:layout_constraintStart_toEndOf="@id/ivPlaylistRepeat"
+                app:layout_constraintTop_toBottomOf="@id/marginView2"
+                app:srcCompat="@drawable/ic_playlist_shuffle_off"
+                app:tint="@color/playlist_behavior" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivPlaylistMediaSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivPlaylistShuffle"
+                app:layout_constraintTop_toBottomOf="@id/marginView2"
+                app:srcCompat="@drawable/ic_playlist_speed_1x"
+                app:tint="@color/playlist_behavior" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <include layout="@layout/player_bottom_view"/>
+
+</com.brave.playlist.slidingpanel.BottomPanelLayout>

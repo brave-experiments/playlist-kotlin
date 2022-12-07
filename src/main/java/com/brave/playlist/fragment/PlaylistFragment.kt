@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -16,15 +17,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.adapter.MediaItemAdapter
+import com.brave.playlist.adapter.PlaylistItemAdapter
 import com.brave.playlist.model.MediaModel
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.listener.*
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
-import com.brave.playlist.util.PlaylistUtils
-import com.brave.playlist.view.PlaylistOptionsBottomSheet
+import com.brave.playlist.util.PlaylistItemGestureHelper
+import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.brave.playlist.view.PlaylistToolbar
+import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -35,7 +37,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
     private var playlistModel: PlaylistModel? = null
 
     private lateinit var playlistViewModel: PlaylistViewModel
-    private lateinit var mediaItemAdapter: MediaItemAdapter
+    private lateinit var playlistItemAdapter: PlaylistItemAdapter
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var rvPlaylist: RecyclerView
     private lateinit var tvTotalMediaCount: TextView
@@ -65,25 +67,25 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
             activity?.onBackPressedDispatcher?.onBackPressed()
         }
         playlistToolbar.setExitEditModeClickListener {
-            mediaItemAdapter.setEditMode(false)
+            playlistItemAdapter.setEditMode(false)
             playlistToolbar.enableEditMode(false)
         }
         playlistToolbar.setMoveClickListener {
             Toast.makeText(
                 activity,
-                "Move : " + mediaItemAdapter.getSelectedItems().size,
+                "Move : " + playlistItemAdapter.getSelectedItems().size,
                 Toast.LENGTH_LONG
             ).show()
-            mediaItemAdapter.setEditMode(false)
+            playlistItemAdapter.setEditMode(false)
             playlistToolbar.enableEditMode(false)
         }
         playlistToolbar.setDeleteClickListener {
             Toast.makeText(
                 activity,
-                "Delete : " + mediaItemAdapter.getSelectedItems().size,
+                "Delete : " + playlistItemAdapter.getSelectedItems().size,
                 Toast.LENGTH_LONG
             ).show()
-            mediaItemAdapter.setEditMode(false)
+            playlistItemAdapter.setEditMode(false)
             playlistToolbar.enableEditMode(false)
         }
         rvPlaylist = view.findViewById(R.id.rvPlaylists)
@@ -118,6 +120,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 playlistList
             )
 
+            val ivPlaylistCover:AppCompatImageView = view.findViewById(R.id.ivPlaylistCover)
+            Glide.with(requireContext())
+                .load(playlistList[0].thumbnailPath)
+                .placeholder(R.drawable.playlist_placeholder)
+            .into(ivPlaylistCover)
+
             if (playlistList.size > 0) {
                 layoutPlayMedia.setOnClickListener {
 //                    viewModel.setSelectedPlaylistItem(playlistList[0])
@@ -132,11 +140,11 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
             tvTotalMediaCount.text = getString(R.string.number_of_items, playlistList.size.toString())
 
-            mediaItemAdapter = MediaItemAdapter(playlistList, this, this)
-            val callback = MediaItemGestureHelper(view.context, rvPlaylist, mediaItemAdapter, this)
+            playlistItemAdapter = PlaylistItemAdapter(playlistList, this, this)
+            val callback = PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
             itemTouchHelper = ItemTouchHelper(callback)
             itemTouchHelper.attachToRecyclerView(rvPlaylist)
-            rvPlaylist.adapter = mediaItemAdapter
+            rvPlaylist.adapter = playlistItemAdapter
         }
 
         ivPlaylistOptions.setOnClickListener {
@@ -228,7 +236,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
     override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
         if (playlistOptionsModel.optionType == PlaylistOptions.EDIT_PLAYLIST) {
-            mediaItemAdapter.setEditMode(true)
+            playlistItemAdapter.setEditMode(true)
             playlistToolbar.enableEditMode(true)
         } else if (playlistOptionsModel.optionType == PlaylistOptions.RENAME_PLAYLIST) {
             val newPlaylistFragment = playlistModel?.let {

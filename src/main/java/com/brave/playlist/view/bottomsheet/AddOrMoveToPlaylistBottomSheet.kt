@@ -1,4 +1,4 @@
-package com.brave.playlist.view
+package com.brave.playlist.view.bottomsheet
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -1,24 +1,25 @@
 package com.brave.playlist.fragment
 
-import android.R.attr.description
+
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.app.NotificationCompat.PRIORITY_HIGH
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.R
+import com.brave.playlist.adapter.PlaylistItemAdapter
+import com.brave.playlist.listener.OnPlaylistItemClickListener
 import com.brave.playlist.model.MediaModel
 import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.slidingpanel.BottomPanelLayout
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
@@ -27,11 +28,11 @@ import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ui.StyledPlayerView
 
 
-class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener {
+class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
+    OnPlaylistItemClickListener {
     private var exoPlayer: Player? = null
     private var duration: Long = 0
     private var isUserTrackingTouch = false
@@ -61,7 +62,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     private var playlistModel: PlaylistModel? = null
     private var selectedPlaylistItem: MediaModel? = null
-    private var playlistItems: ArrayList<MediaModel>? = arrayListOf()
+    private var playlistItems = mutableListOf<MediaModel>()
+
+    private lateinit var rvPlaylist: RecyclerView
+    private lateinit var playlistItemAdapter: PlaylistItemAdapter
+    private lateinit var bottomPanelLayout: BottomPanelLayout
 
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -135,10 +140,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivSeekForward15Seconds = view.findViewById(R.id.ivSeekForward15Seconds)
         ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
 
-        selectedPlaylistItem?.let { playlistItems?.add(it) }
+        bottomPanelLayout = view.findViewById(R.id.sliding_layout)
+
+        selectedPlaylistItem?.let { playlistItems.add(it) }
         playlistModel?.items?.forEach {
             if (it.id != selectedPlaylistItem?.id) {
-                playlistItems?.add(it)
+                playlistItems.add(it)
             }
         }
 
@@ -147,10 +154,16 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 PLAYLIST_NAME,
                 if (playlistModel?.id == "default") getString(R.string.watch_later) else playlistModel?.name
             )
-            putParcelableArrayListExtra(PLAYER_ITEMS, playlistItems)
+            putParcelableArrayListExtra(PLAYER_ITEMS, ArrayList(playlistItems))
         }
         activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
         activity?.startService(intent)
+
+        rvPlaylist = view.findViewById(R.id.rvPlaylists)
+
+        playlistItemAdapter = PlaylistItemAdapter(playlistItems, this)
+        playlistItemAdapter.setBottomLayout()
+        rvPlaylist.adapter = playlistItemAdapter
     }
 
     override fun onDestroyView() {
@@ -171,7 +184,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             exoPlayer?.let {
                 duration = it.duration
                 updateTime(it.currentPosition)
-                tvVideoTitle.text = playlistItems?.get(it.currentPeriodIndex)?.name
+                tvVideoTitle.text = playlistItems[it.currentPeriodIndex].name
                 ivNextVideo.isEnabled = it.hasNextMediaItem()
                 ivNextVideo.alpha = if (it.hasNextMediaItem()) 1.0f else 0.4f
                 ivPrevVideo.isEnabled = it.hasPreviousMediaItem()
@@ -249,7 +262,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         exoPlayer?.repeatMode = repeatMode
         exoPlayer?.setPlaybackSpeed(playbackSpeed)
         exoPlayer?.playWhenReady = playWhenReady
-        playlistItems?.forEach { mediaModel ->
+        playlistItems.forEach { mediaModel ->
             exoPlayer?.addMediaItem(MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"))
 //            exoPlayer?.addMediaItem(MediaItem.fromUri(mediaModel.mediaPath))
         }
@@ -403,6 +416,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         val outMinutes = if (minutes < 10) "0${minutes}" else "$minutes"
         val outHours = if (hours == 0L) "" else if (hours < 10) "0$hours:" else "$hours:"
         return "${(if (isNegative) "-" else "")}$outHours$outMinutes:$outSeconds"
+    }
+
+    override fun onPlaylistItemClick(count: Int) {
+        exoPlayer?.seekTo(count,0)
+        exoPlayer?.playWhenReady = true
+        bottomPanelLayout.smoothToBottom()
     }
 
     companion object {

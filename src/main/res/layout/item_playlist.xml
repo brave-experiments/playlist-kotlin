@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:background="?attr/selectableItemBackground"
     app:cardBackgroundColor="@android:color/transparent"
     app:cardCornerRadius="8dp"
     app:cardElevation="0dp">
@@ -14,8 +15,10 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivPlaylistThumbnail"
-            android:layout_width="108dp"
-            android:layout_height="98dp"
+            android:layout_width="96dp"
+            android:layout_height="64dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
             android:background="@color/playlist_background"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

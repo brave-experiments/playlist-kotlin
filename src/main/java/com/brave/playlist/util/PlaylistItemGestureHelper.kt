@@ -1,4 +1,4 @@
-package com.brave.playlist.listener
+package com.brave.playlist.util
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,22 +10,22 @@ import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.R
 import com.brave.playlist.adapter.AbstractRecyclerViewAdapter
+import com.brave.playlist.listener.OnItemInteractionListener
 import kotlin.math.min
 
 
 @SuppressLint("ClickableViewAccessibility")
-class MediaItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHolder<M>, M>(
+class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHolder<M>, M>(
     context: Context,
     private val recyclerView: RecyclerView,
     private val adapter: AbstractRecyclerViewAdapter<VH, M>,
     private val onItemInteractionListener: OnItemInteractionListener
 ) :
-    ItemTouchHelper.SimpleCallback(
+    SimpleCallback(
         UP or DOWN,
         START or END
     ), RecyclerView.OnItemTouchListener {

@@ -16,7 +16,7 @@ import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.model.SnackBarActionModel
 import com.brave.playlist.view.MovableImageButton
-import com.brave.playlist.view.PlaylistOptionsBottomSheet
+import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.google.android.material.snackbar.Snackbar
 
 object PlaylistViewUtils {

@@ -1,9 +1,9 @@
 package com.brave.playlist.adapter
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import android.graphics.Color
-import android.net.Uri
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -16,26 +16,34 @@ import com.brave.playlist.extension.sizeStr
 import com.brave.playlist.listener.OnPlaylistItemClickListener
 import com.brave.playlist.listener.OnStartDragListener
 import com.brave.playlist.model.MediaModel
+import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-
-class MediaItemAdapter(
+class PlaylistItemAdapter(
     mediaItemList: MutableList<MediaModel>,
-    private val onStartDragListener: OnStartDragListener,
-    private val onPlaylistItemClickListener: OnPlaylistItemClickListener
+    private val onPlaylistItemClickListener: OnPlaylistItemClickListener?,
+    private val onStartDragListener: OnStartDragListener? = null,
 ) :
-    AbstractRecyclerViewAdapter<MediaItemAdapter.MediaItemViewHolder, MediaModel>(mediaItemList) {
+    AbstractRecyclerViewAdapter<PlaylistItemAdapter.MediaItemViewHolder, MediaModel>(mediaItemList) {
 
     private var editMode = false
+    private var isBottomLayout = false
 
     fun setEditMode(enable: Boolean) {
         editMode = enable
         itemList.forEach { it.isSelected = false }
         notifyItemRangeChanged(0, size)
+    }
+
+    fun setBottomLayout() {
+        isBottomLayout = true
     }
 
     inner class MediaItemViewHolder(view: View) :
@@ -65,14 +73,33 @@ class MediaItemAdapter(
 //                val myBitmap = BitmapFactory.decodeFile(thumbnailFile.absolutePath)
 //                ivMediaThumbnail.setImageBitmap(myBitmap)
 //            }
+//            val requestManager: RequestManager = Glide.with(itemView.context)
+//            val requestBuilder: RequestBuilder<*> = requestManager.load(model.thumbnailPath)
+//            requestBuilder.into(ivMediaThumbnail)
+//            Glide.with(itemView.context)
+//                .load(File("https://www.gstatic.com/webp/gallery/1.webp"))
+//            .into(ivMediaThumbnail)
+
             Glide.with(itemView.context)
-                .load(File(model.mediaPath))
-            .into(ivMediaThumbnail)
+                .asBitmap()
+                .load(model.thumbnailPath)
+                .into(object : CustomTarget<Bitmap>(){
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        ivMediaThumbnail.setImageBitmap(PlaylistUtils.getRoundedCornerBitmap(resource))
+                    }
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        // this is called when imageView is cleared on lifecycle call or for
+                        // some other reason.
+                        // if you are referencing the bitmap somewhere else too other than this imageView
+                        // clear it here as you can no longer have the bitmap
+                    }
+                })
+
             tvMediaFileSize.text = File(model.mediaPath).sizeStr()
             val df = SimpleDateFormat("mm:ss", Locale.getDefault())
             tvMediaDuration.text = model.duration.toLongOrNull()
                 ?.let { df.format(Date(TimeUnit.MICROSECONDS.toSeconds(it) * 1000L)) }.toString()
-            Log.e("BravePlaylist", model.name);
+            Log.e("BravePlaylist", model.name)
             ivDragMedia.visibility = if (editMode) View.VISIBLE else View.GONE
             itemView.setOnClickListener {
                 if (editMode) {
@@ -84,15 +111,15 @@ class MediaItemAdapter(
                             count++
                         }
                     }
-                    onPlaylistItemClickListener.onPlaylistItemClick(count)
+                    onPlaylistItemClickListener?.onPlaylistItemClick(count)
                 } else {
-                    onPlaylistItemClickListener.onPlaylistItemClick(mediaModel = model)
+                    if (isBottomLayout) onPlaylistItemClickListener?.onPlaylistItemClick(position) else onPlaylistItemClickListener?.onPlaylistItemClick(mediaModel = model)
 //                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
                 }
             }
             ivDragMedia.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN)
-                    onStartDragListener.onStartDrag(this)
+                    onStartDragListener?.onStartDrag(this)
                 false
             }
         }
