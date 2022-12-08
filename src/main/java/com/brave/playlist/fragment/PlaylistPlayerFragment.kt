@@ -5,12 +5,15 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.IBinder
 import android.view.View
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
@@ -59,6 +62,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var ivPlayPauseVideo: AppCompatImageView
     private lateinit var ivSeekForward15Seconds: AppCompatImageView
     private lateinit var ivSeekBack15Seconds: AppCompatImageView
+    private lateinit var layoutVideoControls: ConstraintLayout
 
     private var playlistModel: PlaylistModel? = null
     private var selectedPlaylistItem: MediaModel? = null
@@ -67,6 +71,23 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var rvPlaylist: RecyclerView
     private lateinit var playlistItemAdapter: PlaylistItemAdapter
     private lateinit var bottomPanelLayout: BottomPanelLayout
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Toast.makeText(requireContext(), "landscape", Toast.LENGTH_SHORT).show()
+            styledPlayerView.useController = true
+            layoutVideoControls.visibility = View.GONE
+            playlistToolbar.visibility=View.GONE
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(requireContext(), "portrait", Toast.LENGTH_SHORT).show()
+            styledPlayerView.useController = false
+            layoutVideoControls.visibility = View.VISIBLE
+            playlistToolbar.visibility=View.VISIBLE
+        }
+    }
 
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -141,8 +162,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
 
         bottomPanelLayout = view.findViewById(R.id.sliding_layout)
-
         selectedPlaylistItem?.let { playlistItems.add(it) }
+        layoutVideoControls = view.findViewById(R.id.layoutVideoControls)
+
         playlistModel?.items?.forEach {
             if (it.id != selectedPlaylistItem?.id) {
                 playlistItems.add(it)
