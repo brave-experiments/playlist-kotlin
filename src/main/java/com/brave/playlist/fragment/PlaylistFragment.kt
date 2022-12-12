@@ -123,7 +123,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
             val ivPlaylistCover:AppCompatImageView = view.findViewById(R.id.ivPlaylistCover)
             Glide.with(requireContext())
                 .load(playlistList[0].thumbnailPath)
-                .placeholder(R.drawable.playlist_placeholder)
+                .placeholder(R.drawable.ic_playlist_placeholder)
+                .error(R.drawable.ic_playlist_placeholder)
             .into(ivPlaylistCover)
 
             if (playlistList.size > 0) {

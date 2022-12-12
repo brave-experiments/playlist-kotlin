@@ -20,15 +20,59 @@
             app:optionButtonIcon="@drawable/ic_arrow_down_playlist"
             app:showOptions="true" />
 
-        <com.google.android.exoplayer2.ui.StyledPlayerView
-            android:id="@+id/styledPlayerView"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.4"
-            app:resize_mode="fit"
-            app:show_shuffle_button="true"
-            app:show_buffering="when_playing"
-            app:use_controller="false" />
+            android:layout_weight="0.4">
+
+            <com.google.android.exoplayer2.ui.StyledPlayerView
+                android:id="@+id/styledPlayerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:resize_mode="fill"
+                app:use_controller="false" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/hover_controls_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#4D000000"
+                android:paddingTop="16dp"
+                android:paddingEnd="16dp"
+                android:layout_gravity="top|end"
+                android:gravity="center_vertical"
+                android:visibility="gone"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="16dp"
+                android:orientation="horizontal">
+
+                <androidx.mediarouter.app.MediaRouteButton
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="32dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:id="@+id/media_route_button"/>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="32dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:srcCompat="@drawable/ic_picture_in_picture"/>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/fullscreen_img"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:srcCompat="@drawable/ic_fullscreen"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </FrameLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutVideoControls"

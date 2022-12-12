@@ -82,6 +82,8 @@ class PlaylistItemAdapter(
 
             Glide.with(itemView.context)
                 .asBitmap()
+                .placeholder(R.drawable.ic_playlist_item_placeholder)
+                .error(R.drawable.ic_playlist_item_placeholder)
                 .load(model.thumbnailPath)
                 .into(object : CustomTarget<Bitmap>(){
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -114,7 +116,6 @@ class PlaylistItemAdapter(
                     onPlaylistItemClickListener?.onPlaylistItemClick(count)
                 } else {
                     if (isBottomLayout) onPlaylistItemClickListener?.onPlaylistItemClick(position) else onPlaylistItemClickListener?.onPlaylistItemClick(mediaModel = model)
-//                    PlaylistUtils.openPlaylistPlayer(itemView.context, model)
                 }
             }
             ivDragMedia.setOnTouchListener { _, event ->
