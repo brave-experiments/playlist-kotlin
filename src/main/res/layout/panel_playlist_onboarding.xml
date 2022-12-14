@@ -43,6 +43,7 @@
             app:tabIndicatorHeight="0dp"
             app:tabPaddingEnd="-2dp"
             app:tabPaddingStart="-2dp"
+            app:tabBackground="@drawable/tab_selector"
             app:tabRippleColor="@android:color/transparent" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 

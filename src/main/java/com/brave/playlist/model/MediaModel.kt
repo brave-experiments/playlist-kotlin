@@ -8,6 +8,7 @@ data class MediaModel(
     val name: String,
     val pageSource: String,
     val mediaPath: String,
+    val mediaSrc: String,
     val thumbnailPath: String,
     val author: String,
     val duration: String,
@@ -27,6 +28,7 @@ data class MediaModel(
         name = parcel.readString().toString(),
         pageSource = parcel.readString().toString(),
         mediaPath = parcel.readString().toString(),
+        mediaSrc = parcel.readString().toString(),
         thumbnailPath = parcel.readString().toString(),
         author = parcel.readString().toString(),
         duration = parcel.readString().toString(),
@@ -39,6 +41,7 @@ data class MediaModel(
         parcel.writeString(name)
         parcel.writeString(pageSource)
         parcel.writeString(mediaPath)
+        parcel.writeString(mediaSrc)
         parcel.writeString(thumbnailPath)
         parcel.writeString(author)
         parcel.writeString(duration)

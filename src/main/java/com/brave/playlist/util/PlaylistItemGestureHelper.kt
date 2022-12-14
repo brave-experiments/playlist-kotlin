@@ -84,7 +84,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
                 swipePosition = -1
             buttonPositions.remove(viewHolder.adapterPosition)
             adapter.removeAt(viewHolder.adapterPosition)
-            onItemInteractionListener.onItemDelete()
+            onItemInteractionListener.onItemDelete(viewHolder.adapterPosition)
         } else if (direction == END)
             oldSwipePosition = swipePosition
     }

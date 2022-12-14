@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.brave.playlist.R
 
@@ -14,6 +15,10 @@ class EmptyPlaylistFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        return inflater.inflate(R.layout.fragment_empty_playlist, container, false)
+        val view = inflater.inflate(R.layout.fragment_empty_playlist, container, false)
+        view.findViewById<Button>(R.id.btBrowseForMedia).setOnClickListener {
+            requireActivity().finish()
+        }
+        return view
     }
 }

@@ -215,8 +215,8 @@ class BottomPanelLayout @JvmOverloads constructor(
             defAttrs.recycle()
             val ta = context.obtainStyledAttributes(attrs, R.styleable.BottomPanelLayout)
             if (ta != null) {
-//                mPanelHeight =
-//                    ta.getDimensionPixelSize(R.styleable.SlidingUpPanelLayout_umanoPanelHeight, -1)
+                mPanelHeight =
+                    ta.getDimensionPixelSize(R.styleable.BottomPanelLayout_panelHeight, -1)
 //                mShadowHeight =
 //                    ta.getDimensionPixelSize(R.styleable.SlidingUpPanelLayout_umanoShadowHeight, -1)
 //                mParallaxOffset = ta.getDimensionPixelSize(
@@ -1232,7 +1232,7 @@ class BottomPanelLayout @JvmOverloads constructor(
         /**
          * Default peeking out panel height
          */
-        private const val DEFAULT_PANEL_HEIGHT = 68 // dp;
+        const val DEFAULT_PANEL_HEIGHT = 68 // dp;
 
         /**
          * Default anchor point height

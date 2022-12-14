@@ -42,6 +42,10 @@ class PlaylistItemAdapter(
         notifyItemRangeChanged(0, size)
     }
 
+    fun getEditMode(): Boolean {
+        return editMode
+    }
+
     fun setBottomLayout() {
         isBottomLayout = true
     }

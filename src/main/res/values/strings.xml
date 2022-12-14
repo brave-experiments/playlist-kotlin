@@ -38,7 +38,9 @@
     <string name="edit_text">Edit</string>
     <string name="rename_text">Rename</string>
     <string name="remove_playlist_offline_data">Remove playlist offline data</string>
+    <string name="remove_all_offline_data">Remove all offline data</string>
     <string name="download_playlist_for_offline_use">Download playlist for offline use</string>
+    <string name="download_all_playlists_for_offline_use">Download all playlists for offline use</string>
     <string name="delete_playlist">Delete playlist</string>
     <string name="number_of_items">%s items</string>
 </resources>

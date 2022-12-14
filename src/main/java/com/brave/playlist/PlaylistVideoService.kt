@@ -6,6 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import com.brave.playlist.adapter.PlayerNotificationAdapter
 import com.brave.playlist.model.MediaModel
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
@@ -14,6 +17,7 @@ import com.brave.playlist.util.PlaylistUtils.createNotificationChannel
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener
+import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
@@ -31,10 +35,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private var castPlayer: CastPlayer? = null
     private var castContext: CastContext? = null
     private val mediaQueue: ArrayList<MediaItem> = ArrayList()
+    private val castMediaQueue: ArrayList<MediaItem> = ArrayList()
     private var playerView: StyledPlayerView? = null
+    private var mediaSessionConnector : MediaSessionConnector? = null
 
     private var currentItemIndex: Int = 0
     private var currentPlayer: Player? = null
+
+    private val images = arrayListOf<String>("https://picsum.photos/200", "https://picsum.photos/id/237/200")
 
     companion object {
         const val PLAYLIST_CHANNEL_ID = "Playlist Channel"
@@ -58,18 +66,25 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             NOTIFICATION_ID,
             PLAYLIST_CHANNEL_ID
         ).setMediaDescriptionAdapter(playerNotificationAdapter).build()
+
         playlistMediaModel?.forEach { mediaModel ->
             val movieMetadata : MediaMetadata =
             MediaMetadata.Builder().setTitle(mediaModel.name).setArtist(mediaModel.author)
                 .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
             val mediaItem = MediaItem.Builder()
-//                    .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-                .setUri(Uri.parse(mediaModel.mediaPath))
+                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+//                .setUri(Uri.parse(mediaModel.mediaPath))
+                .setMediaMetadata(movieMetadata)
+                .setMimeType(MimeTypes.VIDEO_MP4).build()
+            val castMediaItem = MediaItem.Builder()
+                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+//                .setUri(mediaModel.mediaSrc)
                 .setMediaMetadata(movieMetadata)
                 .setMimeType(MimeTypes.VIDEO_MP4).build()
             val mediaSource: MediaSource =
                 DefaultMediaSourceFactory(applicationContext).createMediaSource(mediaItem)
             mediaQueue.add(mediaItem)
+            castMediaQueue.add(castMediaItem)
         }
 
         setCurrentPlayer(if (castPlayer?.isCastSessionAvailable == true) castPlayer else localPlayer)
@@ -80,6 +95,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     override fun onUnbind(intent: Intent?): Boolean {
         playlistName = null
         playlistMediaModel = null
+        mediaSessionConnector = null
         return super.onUnbind(intent)
     }
 
@@ -98,6 +114,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private fun release() {
         currentItemIndex = C.INDEX_UNSET
         mediaQueue.clear()
+        castMediaQueue.clear()
         playerNotificationManager?.setPlayer(null)
         castPlayer?.setSessionAvailabilityListener(null)
         castPlayer?.release()
@@ -152,10 +169,18 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     // CastPlayer.SessionAvailabilityListener implementation.
     override fun onCastSessionAvailable() {
         setCurrentPlayer(castPlayer)
+        val intent = Intent()
+        intent.action = "action"
+        intent.putExtra("should_show_controls", false)
+        sendBroadcast(intent)
     }
 
     override fun onCastSessionUnavailable() {
         setCurrentPlayer(localPlayer)
+        val intent = Intent()
+        intent.action = "action"
+        intent.putExtra("should_show_controls", true)
+        sendBroadcast(intent)
     }
 
     // Internal methods.
@@ -175,9 +200,16 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         if (currentPlayer === castPlayer) {
             playerView?.controllerShowTimeoutMs = 0
             playerView?.useController = true
+            playerView?.controllerHideOnTouch = false
+            playerView?.showController()
         } else { // currentPlayer == localPlayer
             playerView?.useController = false
+            val mediaSession = MediaSessionCompat(applicationContext, "Player")
+            mediaSessionConnector = MediaSessionConnector(mediaSession)
+            mediaSessionConnector?.setPlayer(currentPlayer)
+            mediaSession.isActive = true
             playerNotificationManager?.setPlayer(currentPlayer)
+            playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
             playerView?.controllerShowTimeoutMs = StyledPlayerControlView.DEFAULT_SHOW_TIMEOUT_MS
         }
 
@@ -204,7 +236,11 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         this.currentPlayer = currentPlayer
 
         // Media queue management.
-        currentPlayer?.setMediaItems(mediaQueue, currentItemIndex, playbackPositionMs)
+        if (currentPlayer === castPlayer) {
+            currentPlayer?.setMediaItems(castMediaQueue, currentItemIndex, playbackPositionMs)
+        } else {
+            currentPlayer?.setMediaItems(mediaQueue, currentItemIndex, playbackPositionMs)
+        }
         currentPlayer?.playWhenReady = playWhenReady
         currentPlayer?.prepare()
     }
@@ -214,7 +250,11 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         if (currentPlayer!!.currentTimeline.windowCount != mediaQueue.size) {
             // This only happens with the cast player. The receiver app in the cast device clears the
             // timeline when the last item of the timeline has been played to end.
-            currentPlayer!!.setMediaItems(mediaQueue, itemIndex, C.TIME_UNSET)
+            if (currentPlayer === castPlayer) {
+                currentPlayer!!.setMediaItems(castMediaQueue, itemIndex, C.TIME_UNSET)
+            } else {
+                currentPlayer!!.setMediaItems(mediaQueue, itemIndex, C.TIME_UNSET)
+            }
         } else {
             currentPlayer!!.seekTo(itemIndex, C.TIME_UNSET)
         }

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:scrollableView="@+id/rvPlaylists"
+    app:panelHeight="68dp"
     android:gravity="bottom">
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -21,6 +22,7 @@
             app:showOptions="true" />
 
         <FrameLayout
+            android:id="@+id/player_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="0.4">
@@ -29,7 +31,7 @@
                 android:id="@+id/styledPlayerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:resize_mode="fill"
+                app:resize_mode="fit"
                 app:use_controller="false" />
 
             <androidx.appcompat.widget.LinearLayoutCompat

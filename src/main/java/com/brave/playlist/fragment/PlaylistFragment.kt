@@ -1,12 +1,16 @@
 package com.brave.playlist.fragment
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
+import android.provider.MediaStore.Audio.Media
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
@@ -44,6 +48,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
     private lateinit var layoutPlayMedia: LinearLayoutCompat
     private lateinit var ivPlaylistOptions: ImageView
     private lateinit var layoutShuffleMedia: LinearLayoutCompat
+    private lateinit var ivPlaylistCover: AppCompatImageView
     private lateinit var itemTouchHelper: ItemTouchHelper
     private lateinit var playlistOptionsListener: PlaylistOptionsListener
 
@@ -85,6 +90,13 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 "Delete : " + playlistItemAdapter.getSelectedItems().size,
                 Toast.LENGTH_LONG
             ).show()
+            playlistViewModel.setDeletePlaylistItems(
+                PlaylistModel(
+                    playlistModel?.id.toString(),
+                    playlistModel?.name.toString(),
+                    playlistItemAdapter.getSelectedItems()
+                )
+            )
             playlistItemAdapter.setEditMode(false)
             playlistToolbar.enableEditMode(false)
         }
@@ -94,6 +106,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
         layoutPlayMedia.isVisible
         layoutShuffleMedia = view.findViewById(R.id.layoutShuffleMedia)
         ivPlaylistOptions = view.findViewById(R.id.ivPlaylistOptions)
+        ivPlaylistCover = view.findViewById(R.id.ivPlaylistCover)
 
         playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             Log.e("BravePlaylist", playlistData.toString())
@@ -107,6 +120,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                     jsonObject.getString("name"),
                     jsonObject.getString("page_source"),
                     jsonObject.getString("media_path"),
+                    jsonObject.getString("media_src"),
                     jsonObject.getString("thumbnail_path"),
                     jsonObject.getString("author"),
                     jsonObject.getString("duration")
@@ -120,12 +134,15 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 playlistList
             )
 
-            val ivPlaylistCover:AppCompatImageView = view.findViewById(R.id.ivPlaylistCover)
-            Glide.with(requireContext())
-                .load(playlistList[0].thumbnailPath)
-                .placeholder(R.drawable.ic_playlist_placeholder)
-                .error(R.drawable.ic_playlist_placeholder)
-            .into(ivPlaylistCover)
+            if (playlistList.size > 0) {
+                Glide.with(requireContext())
+                    .load(playlistList[0].thumbnailPath)
+                    .placeholder(R.drawable.ic_playlist_placeholder)
+                    .error(R.drawable.ic_playlist_placeholder)
+                    .into(ivPlaylistCover)
+            } else {
+                ivPlaylistCover.setImageResource(R.drawable.ic_playlist_placeholder)
+            }
 
             if (playlistList.size > 0) {
                 layoutPlayMedia.setOnClickListener {
@@ -139,10 +156,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 }
             }
 
-            tvTotalMediaCount.text = getString(R.string.number_of_items, playlistList.size.toString())
+            tvTotalMediaCount.text =
+                getString(R.string.number_of_items, playlistList.size.toString())
 
             playlistItemAdapter = PlaylistItemAdapter(playlistList, this, this)
-            val callback = PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
+            val callback =
+                PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
             itemTouchHelper = ItemTouchHelper(callback)
             itemTouchHelper.attachToRecyclerView(rvPlaylist)
             rvPlaylist.adapter = playlistItemAdapter
@@ -180,10 +199,33 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                 ), this
             ).show(parentFragmentManager, null)
         }
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(requireActivity(), object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (playlistItemAdapter.getEditMode()) {
+                        playlistItemAdapter.setEditMode(false)
+                        playlistToolbar.enableEditMode(false)
+                    } else {
+                        this.remove()
+                        requireActivity().onBackPressed()
+                    }
+                }
+            }
+            )
     }
 
-    override fun onItemDelete() {
-
+    override fun onItemDelete(position: Int) {
+        playlistViewModel.setDeletePlaylistItems(
+            PlaylistModel(
+                playlistModel?.id.toString(),
+                playlistModel?.name.toString(),
+                arrayListOf(
+                    playlistModel?.items!![position]
+                )
+            )
+        )
     }
 
     override fun onRemoveFromOffline(position: Int) {

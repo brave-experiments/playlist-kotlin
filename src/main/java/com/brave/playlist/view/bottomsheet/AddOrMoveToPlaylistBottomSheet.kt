@@ -31,7 +31,7 @@ class AddOrMoveToPlaylistBottomSheet(private val playlists: MutableList<Playlist
 
         val rvPlaylists: RecyclerView = view.findViewById(R.id.rvPlaylists)
         rvPlaylists.layoutManager = LinearLayoutManager(view.context)
-        rvPlaylists.adapter = PlaylistAdapter(playlists)
+        rvPlaylists.adapter = PlaylistAdapter(playlists, null)
 
         val behavior = BottomSheetBehavior.from(layoutBottomSheet)
         behavior.state = BottomSheetBehavior.STATE_EXPANDED

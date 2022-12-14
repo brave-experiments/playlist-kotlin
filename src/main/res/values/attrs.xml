@@ -10,7 +10,7 @@
         <attr name="optionButtonIcon" format="reference" />
     </declare-styleable>
     <declare-styleable name="BottomPanelLayout">
-<!--        <attr name="umanoPanelHeight" format="dimension" />-->
+        <attr name="panelHeight" format="dimension" />
 <!--        <attr name="umanoShadowHeight" format="dimension" />-->
 <!--        <attr name="umanoParallaxOffset" format="dimension" />-->
 <!--        <attr name="umanoFadeColor" format="color" />-->

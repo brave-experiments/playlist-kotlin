@@ -3,10 +3,7 @@ package com.brave.playlist.fragment
 
 import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -14,12 +11,15 @@ import android.os.*
 import android.util.Rational
 import android.view.MotionEvent
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat.registerReceiver
 import androidx.fragment.app.Fragment
 import androidx.mediarouter.app.MediaRouteButton
 import androidx.recyclerview.widget.RecyclerView
@@ -39,7 +39,6 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.material.card.MaterialCardView
 
@@ -47,6 +46,7 @@ import com.google.android.material.card.MaterialCardView
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
     OnPlaylistItemClickListener {
     private var isPIPModeEnabled: Boolean = true
+    private var isCastInProgress : Boolean = false
     private var duration: Long = 0
     private var isUserTrackingTouch = false
     private var currentMediaIndex = 0
@@ -76,6 +76,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var ivSeekBack15Seconds: AppCompatImageView
     private lateinit var layoutVideoControls: ConstraintLayout
     private lateinit var layoutBottom: MaterialCardView
+    private lateinit var layoutPlayer : FrameLayout
 
     private var playlistModel: PlaylistModel? = null
     private var selectedPlaylistItem: MediaModel? = null
@@ -83,7 +84,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     private lateinit var rvPlaylist: RecyclerView
     private lateinit var playlistItemAdapter: PlaylistItemAdapter
-    private lateinit var bottomPanelLayout: BottomPanelLayout
+    private lateinit var mainLayout: BottomPanelLayout
 
     private var playlistVideoService: PlaylistVideoService? = null
 
@@ -91,19 +92,24 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         super.onConfigurationChanged(newConfig)
 
         // Checks the orientation of the screen
+        val density = requireContext().resources.displayMetrics.density
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Toast.makeText(requireContext(), "landscape", Toast.LENGTH_SHORT).show()
+            mainLayout.panelHeight = 0
             styledPlayerView.useController = true
+            styledPlayerView.controllerHideOnTouch = false
+            styledPlayerView.showController()
             layoutVideoControls.visibility = View.GONE
             playlistToolbar.visibility = View.GONE
-//            layoutBottom.visibility = View.GONE
             fullscreenImg.setImageResource(R.drawable.ic_close_fullscreen)
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Toast.makeText(requireContext(), "portrait", Toast.LENGTH_SHORT).show()
-            styledPlayerView.useController = false
-            layoutVideoControls.visibility = View.VISIBLE
+            mainLayout.panelHeight = (BottomPanelLayout.DEFAULT_PANEL_HEIGHT * density + 0.5f).toInt()
+            if (!isCastInProgress) {
+                styledPlayerView.useController = false
+                layoutVideoControls.visibility = View.VISIBLE
+            }
             playlistToolbar.visibility = View.VISIBLE
-//            layoutBottom.visibility = View.VISIBLE
             fullscreenImg.setImageResource(R.drawable.ic_fullscreen)
         }
     }
@@ -116,25 +122,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             if (service is PlaylistVideoService.PlaylistVideoServiceBinder) {
                 playlistVideoService = service.getServiceInstance()
-
-                // Below code can be used if we want to add media session
-
-//                val mediaSession = MediaSessionCompat(requireContext(), "Player")
-//                mediaSession.isActive = true
-//                mediaSession.setMetadata(
-//                    MediaMetadataCompat.Builder()
-//                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "title")
-//                        .putString(
-//                            MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION,
-//                            "description"
-//                        )
-//                        .build()
-//                )
-//                val mediaSessionConnector = MediaSessionConnector(mediaSession)
-//                mediaSessionConnector.setPlayer(exoPlayer)
-//                playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
-//                playerNotificationManager?.setPlayer(exoPlayer)
-//                playerNotificationManager?.setPriority(PRIORITY_HIGH)
 
                 setToolbar()
                 setNextMedia()
@@ -157,6 +144,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             playlistModel = it.getParcelable(PLAYLIST_MODEL)
             selectedPlaylistItem = it.getParcelable(SELECTED_PLAYLIST_ITEM)
         }
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("action")
+        activity?.registerReceiver(broadcastReceiver, intentFilter)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -196,8 +186,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivSeekForward15Seconds = view.findViewById(R.id.ivSeekForward15Seconds)
         ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
 
-        bottomPanelLayout = view.findViewById(R.id.sliding_layout)
+        mainLayout = view.findViewById(R.id.sliding_layout)
         layoutBottom = view.findViewById(R.id.bottom_layout)
+        layoutPlayer = view.findViewById(R.id.player_layout)
 
         val mediaRouteButton: MediaRouteButton =
             view.findViewById(R.id.media_route_button)
@@ -231,10 +222,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         playlistItemAdapter.setBottomLayout()
         rvPlaylist.adapter = playlistItemAdapter
 
-//        requireActivity()
-//            .onBackPressedDispatcher
-//            .addCallback(requireActivity(), object : OnBackPressedCallback(true) {
-//                override fun handleOnBackPressed() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(requireActivity(), object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
 //                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
 //                        && requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
 //                        && isPIPModeEnabled) {
@@ -242,9 +233,15 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //                    } else {
 //                        requireActivity().onBackPressed()
 //                    }
-//                }
-//            }
-//            )
+                    if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    } else {
+                        this.remove()
+                        requireActivity().onBackPressed()
+                    }
+                }
+            }
+            )
     }
 
     private fun showHoveringControls() {
@@ -258,6 +255,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onDestroyView() {
         releasePlayer()
+        activity?.unregisterReceiver(broadcastReceiver);
         super.onDestroyView()
     }
 
@@ -517,7 +515,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //        exoPlayer?.seekTo(count,0)
 //        exoPlayer?.playWhenReady = true
         playlistVideoService?.setCurrentItem(count)
-        bottomPanelLayout.smoothToBottom()
+        mainLayout.smoothToBottom()
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
@@ -555,6 +553,33 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 30MS window in even a restricted memory device (756mb+) is more than enough time to check, but also not have the system complain about holding an action hostage.
              */
 //            Handler().postDelayed({checkPIPPermission()}, 30)
+        }
+    }
+
+    var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            val action = intent.action
+            if (action.equals("action")) {
+                val shouldShowControls = intent.getBooleanExtra("should_show_controls", true)
+                isCastInProgress = !shouldShowControls
+                layoutVideoControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
+            } else {
+
+            }
+
+//            val datapassed = intent.getIntExtra("DATAPASSED", 0
+//            })
+//            val s = intent.action.toString()
+//            val s1 = intent.getStringExtra("DATAPASSED")
+//            Toast.makeText(
+//                context,
+//                """
+//                Triggered by Service!
+//                Data passed: ${s1.toString()}
+//                """.trimIndent(),
+//                Toast.LENGTH_LONG
+//            ).show()
+//            layoutVideoControls.visibility = if (layoutVideoControls.isShown) View.GONE else View.VISIBLE
         }
     }
 
