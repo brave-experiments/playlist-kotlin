@@ -4,7 +4,7 @@ import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 
-class PlaylistModel(val id: String, val name: String, val items: List<MediaModel>) : Parcelable {
+data class PlaylistModel(val id: String, val name: String, val items: List<PlaylistItemModel>) : Parcelable {
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<PlaylistModel> {
@@ -16,8 +16,8 @@ class PlaylistModel(val id: String, val name: String, val items: List<MediaModel
     private constructor(parcel: Parcel) : this(
         id = parcel.readString().toString(),
         name = parcel.readString().toString(),
-        arrayListOf<MediaModel>().apply {
-            parcel.readList(this, MediaModel::class.java.classLoader)
+        arrayListOf<PlaylistItemModel>().apply {
+            parcel.readList(this, PlaylistItemModel::class.java.classLoader)
         }
     )
 

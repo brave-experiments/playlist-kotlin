@@ -3,7 +3,7 @@ package com.brave.playlist.model
 import android.os.Parcel
 import android.os.Parcelable
 
-data class MediaModel(
+data class PlaylistItemModel(
     val id: String,
     val name: String,
     val pageSource: String,
@@ -17,9 +17,9 @@ data class MediaModel(
 ) : Parcelable {
     companion object {
         @JvmField
-        val CREATOR = object : Parcelable.Creator<MediaModel> {
-            override fun createFromParcel(parcel: Parcel) = MediaModel(parcel)
-            override fun newArray(size: Int) = arrayOfNulls<MediaModel>(size)
+        val CREATOR = object : Parcelable.Creator<PlaylistItemModel> {
+            override fun createFromParcel(parcel: Parcel) = PlaylistItemModel(parcel)
+            override fun newArray(size: Int) = arrayOfNulls<PlaylistItemModel>(size)
         }
     }
 

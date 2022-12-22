@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.R
 import com.brave.playlist.adapter.AbstractRecyclerViewAdapter
-import com.brave.playlist.listener.OnItemInteractionListener
+import com.brave.playlist.listener.ItemInteractionListener
 import kotlin.math.min
 
 
@@ -23,7 +23,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
     context: Context,
     private val recyclerView: RecyclerView,
     private val adapter: AbstractRecyclerViewAdapter<VH, M>,
-    private val onItemInteractionListener: OnItemInteractionListener
+    private val itemInteractionListener: ItemInteractionListener
 ) :
     SimpleCallback(
         UP or DOWN,
@@ -84,7 +84,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
                 swipePosition = -1
             buttonPositions.remove(viewHolder.adapterPosition)
             adapter.removeAt(viewHolder.adapterPosition)
-            onItemInteractionListener.onItemDelete(viewHolder.adapterPosition)
+            itemInteractionListener.onItemDelete(viewHolder.layoutPosition)
         } else if (direction == END)
             oldSwipePosition = swipePosition
     }
@@ -241,8 +241,8 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
     private fun instantiateOptions(position: Int): List<OptionButton> =
         listOf(
-            OptionButton(position, onItemInteractionListener::onRemoveFromOffline),
-            OptionButton(position, onItemInteractionListener::onUpload)
+            OptionButton(position, itemInteractionListener::onRemoveFromOffline),
+            OptionButton(position, itemInteractionListener::onUpload)
         )
 
     inner class OptionButton(

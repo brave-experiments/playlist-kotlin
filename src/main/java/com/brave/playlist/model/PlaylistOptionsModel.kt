@@ -2,9 +2,10 @@ package com.brave.playlist.model
 
 import com.brave.playlist.enums.PlaylistOptions
 
-class PlaylistOptionsModel(
+data class PlaylistOptionsModel(
     val optionTitle: String,
     val optionIcon: Int,
     val optionType: PlaylistOptions,
-    val playlistModel:PlaylistModel? = null
+    val playlistModel:PlaylistModel? = null,
+    val playlistItemModels: ArrayList<PlaylistItemModel> = arrayListOf() // Used for multiple items
 )

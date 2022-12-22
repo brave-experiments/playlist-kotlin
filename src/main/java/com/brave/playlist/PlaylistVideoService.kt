@@ -6,11 +6,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.brave.playlist.adapter.PlayerNotificationAdapter
-import com.brave.playlist.model.MediaModel
+import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.PlaylistUtils.createNotificationChannel
@@ -29,7 +27,7 @@ import com.google.android.gms.cast.framework.CastContext
 
 class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityListener {
     private var playlistName: String? = null
-    private var playlistMediaModel: ArrayList<MediaModel>? = arrayListOf()
+    private var playlistPlaylistItemModel: ArrayList<PlaylistItemModel>? = arrayListOf()
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var localPlayer: ExoPlayer? = null
     private var castPlayer: CastPlayer? = null
@@ -56,33 +54,32 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     override fun onBind(intent: Intent?): IBinder {
         intent?.let {
             playlistName = it.getStringExtra(PLAYLIST_NAME)
-            playlistMediaModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
+            playlistPlaylistItemModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
         }
 
         val playerNotificationAdapter =
-            PlayerNotificationAdapter(applicationContext, playlistMediaModel, playlistName)
+            PlayerNotificationAdapter(applicationContext, playlistPlaylistItemModel, playlistName)
         playerNotificationManager = PlayerNotificationManager.Builder(
             applicationContext,
             NOTIFICATION_ID,
             PLAYLIST_CHANNEL_ID
         ).setMediaDescriptionAdapter(playerNotificationAdapter).build()
 
-        playlistMediaModel?.forEach { mediaModel ->
+        playlistPlaylistItemModel?.forEach { mediaModel ->
             val movieMetadata : MediaMetadata =
             MediaMetadata.Builder().setTitle(mediaModel.name).setArtist(mediaModel.author)
                 .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
+            val mediaUri = if(mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc
             val mediaItem = MediaItem.Builder()
-                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-//                .setUri(Uri.parse(mediaModel.mediaPath))
+//                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+                .setUri(Uri.parse(mediaUri))
                 .setMediaMetadata(movieMetadata)
                 .setMimeType(MimeTypes.VIDEO_MP4).build()
             val castMediaItem = MediaItem.Builder()
                 .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-//                .setUri(mediaModel.mediaSrc)
+                .setUri(mediaModel.mediaSrc)
                 .setMediaMetadata(movieMetadata)
                 .setMimeType(MimeTypes.VIDEO_MP4).build()
-            val mediaSource: MediaSource =
-                DefaultMediaSourceFactory(applicationContext).createMediaSource(mediaItem)
             mediaQueue.add(mediaItem)
             castMediaQueue.add(castMediaItem)
         }
@@ -94,7 +91,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     override fun onUnbind(intent: Intent?): Boolean {
         playlistName = null
-        playlistMediaModel = null
+        playlistPlaylistItemModel = null
         mediaSessionConnector = null
         return super.onUnbind(intent)
     }
@@ -104,6 +101,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         createNotificationChannel(applicationContext)
         currentItemIndex = C.INDEX_UNSET
         localPlayer = ExoPlayer.Builder(applicationContext).build()
+        localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         localPlayer?.addListener(this)
         castContext = CastContext.getSharedInstance()
         castPlayer = castContext?.let { CastPlayer(it) }

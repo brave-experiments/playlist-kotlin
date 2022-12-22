@@ -19,7 +19,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 class PlaylistOnboardingPanel(fragmentActivity: FragmentActivity, anchorView: View, parent: View) {
 
     init {
-
         val view = View.inflate(fragmentActivity, R.layout.panel_playlist_onboarding, null)
         val width = LinearLayout.LayoutParams.MATCH_PARENT
         val height = LinearLayout.LayoutParams.WRAP_CONTENT

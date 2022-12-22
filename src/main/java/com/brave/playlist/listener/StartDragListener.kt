@@ -2,7 +2,7 @@ package com.brave.playlist.listener
 
 import androidx.recyclerview.widget.RecyclerView
 
-interface OnStartDragListener {
+interface StartDragListener {
     /**
      * Called when a view is requesting a start of a drag.
      *

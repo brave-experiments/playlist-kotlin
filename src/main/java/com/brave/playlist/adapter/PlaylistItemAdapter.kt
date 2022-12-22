@@ -13,9 +13,9 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
 import com.brave.playlist.extension.sizeStr
-import com.brave.playlist.listener.OnPlaylistItemClickListener
-import com.brave.playlist.listener.OnStartDragListener
-import com.brave.playlist.model.MediaModel
+import com.brave.playlist.listener.PlaylistItemClickListener
+import com.brave.playlist.listener.StartDragListener
+import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -27,11 +27,11 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class PlaylistItemAdapter(
-    mediaItemList: MutableList<MediaModel>,
-    private val onPlaylistItemClickListener: OnPlaylistItemClickListener?,
-    private val onStartDragListener: OnStartDragListener? = null,
+    mediaItemList: MutableList<PlaylistItemModel>,
+    private val playlistItemClickListener: PlaylistItemClickListener?,
+    private val startDragListener: StartDragListener? = null,
 ) :
-    AbstractRecyclerViewAdapter<PlaylistItemAdapter.MediaItemViewHolder, MediaModel>(mediaItemList) {
+    AbstractRecyclerViewAdapter<PlaylistItemAdapter.MediaItemViewHolder, PlaylistItemModel>(mediaItemList) {
 
     private var editMode = false
     private var isBottomLayout = false
@@ -51,7 +51,7 @@ class PlaylistItemAdapter(
     }
 
     inner class MediaItemViewHolder(view: View) :
-        AbstractViewHolder<MediaModel>(view) {
+        AbstractViewHolder<PlaylistItemModel>(view) {
         private val ivMediaThumbnail: AppCompatImageView
         private val tvMediaTitle: AppCompatTextView
         private val tvMediaDuration: AppCompatTextView
@@ -69,7 +69,7 @@ class PlaylistItemAdapter(
         }
 
         @SuppressLint("ClickableViewAccessibility")
-        override fun onBind(position: Int, model: MediaModel) {
+        override fun onBind(position: Int, model: PlaylistItemModel) {
             setViewOnSelected(model.isSelected)
             tvMediaTitle.text = model.name
 //            val thumbnailFile = File(model.thumbnailPath)
@@ -117,14 +117,14 @@ class PlaylistItemAdapter(
                             count++
                         }
                     }
-                    onPlaylistItemClickListener?.onPlaylistItemClick(count)
+                    playlistItemClickListener?.onPlaylistItemClick(count)
                 } else {
-                    if (isBottomLayout) onPlaylistItemClickListener?.onPlaylistItemClick(position) else onPlaylistItemClickListener?.onPlaylistItemClick(mediaModel = model)
+                    if (isBottomLayout) playlistItemClickListener?.onPlaylistItemClick(position) else playlistItemClickListener?.onPlaylistItemClick(playlistItemModel = model)
                 }
             }
             ivDragMedia.setOnTouchListener { _, event ->
                 if (event.actionMasked == MotionEvent.ACTION_DOWN)
-                    onStartDragListener?.onStartDrag(this)
+                    startDragListener?.onStartDrag(this)
                 false
             }
         }
@@ -144,8 +144,8 @@ class PlaylistItemAdapter(
         return MediaItemViewHolder(view)
     }
 
-    fun getSelectedItems(): ArrayList<MediaModel> {
-        val selectedItems = arrayListOf<MediaModel>()
+    fun getSelectedItems(): ArrayList<PlaylistItemModel> {
+        val selectedItems = arrayListOf<PlaylistItemModel>()
         itemList.forEach {
             if (it.isSelected) {
                 selectedItems.add(it)

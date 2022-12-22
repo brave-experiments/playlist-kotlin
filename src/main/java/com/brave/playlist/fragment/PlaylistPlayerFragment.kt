@@ -19,22 +19,28 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat.registerReceiver
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.mediarouter.app.MediaRouteButton
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
+import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistItemAdapter
-import com.brave.playlist.listener.OnPlaylistItemClickListener
-import com.brave.playlist.model.MediaModel
+import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.listener.PlaylistItemClickListener
+import com.brave.playlist.listener.PlaylistOptionsListener
+import com.brave.playlist.model.PlaylistItemModel
+import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.slidingpanel.BottomPanelLayout
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM
 import com.brave.playlist.view.PlaylistToolbar
+import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -44,9 +50,10 @@ import com.google.android.material.card.MaterialCardView
 
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
-    OnPlaylistItemClickListener {
+    PlaylistItemClickListener, PlaylistOptionsListener {
+    private lateinit var playlistViewModel: PlaylistViewModel
     private var isPIPModeEnabled: Boolean = true
-    private var isCastInProgress : Boolean = false
+    private var isCastInProgress: Boolean = false
     private var duration: Long = 0
     private var isUserTrackingTouch = false
     private var currentMediaIndex = 0
@@ -76,11 +83,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var ivSeekBack15Seconds: AppCompatImageView
     private lateinit var layoutVideoControls: ConstraintLayout
     private lateinit var layoutBottom: MaterialCardView
-    private lateinit var layoutPlayer : FrameLayout
+    private lateinit var layoutPlayer: FrameLayout
+    private lateinit var ivVideoOptions: AppCompatImageView
 
     private var playlistModel: PlaylistModel? = null
-    private var selectedPlaylistItem: MediaModel? = null
-    private var playlistItems = mutableListOf<MediaModel>()
+    private var selectedPlaylistItem: PlaylistItemModel? = null
+    private var playlistItems = mutableListOf<PlaylistItemModel>()
 
     private lateinit var rvPlaylist: RecyclerView
     private lateinit var playlistItemAdapter: PlaylistItemAdapter
@@ -90,28 +98,33 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-
-        // Checks the orientation of the screen
-        val density = requireContext().resources.displayMetrics.density
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Toast.makeText(requireContext(), "landscape", Toast.LENGTH_SHORT).show()
-            mainLayout.panelHeight = 0
-            styledPlayerView.useController = true
-            styledPlayerView.controllerHideOnTouch = false
-            styledPlayerView.showController()
-            layoutVideoControls.visibility = View.GONE
-            playlistToolbar.visibility = View.GONE
-            fullscreenImg.setImageResource(R.drawable.ic_close_fullscreen)
+            updateLandscapeView()
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Toast.makeText(requireContext(), "portrait", Toast.LENGTH_SHORT).show()
-            mainLayout.panelHeight = (BottomPanelLayout.DEFAULT_PANEL_HEIGHT * density + 0.5f).toInt()
-            if (!isCastInProgress) {
-                styledPlayerView.useController = false
-                layoutVideoControls.visibility = View.VISIBLE
-            }
-            playlistToolbar.visibility = View.VISIBLE
-            fullscreenImg.setImageResource(R.drawable.ic_fullscreen)
+            updatePortraitView()
         }
+    }
+
+    private fun updatePortraitView() {
+        mainLayout.mSlideState = BottomPanelLayout.PanelState.COLLAPSED
+        if (!isCastInProgress) {
+            styledPlayerView.useController = false
+            layoutVideoControls.visibility = View.VISIBLE
+        }
+        playlistToolbar.visibility = View.VISIBLE
+        fullscreenImg.setImageResource(R.drawable.ic_fullscreen)
+    }
+
+    private fun updateLandscapeView() {
+        mainLayout.mSlideState = BottomPanelLayout.PanelState.HIDDEN
+        styledPlayerView.useController = true
+        styledPlayerView.controllerHideOnTouch = false
+        styledPlayerView.showController()
+        layoutVideoControls.visibility = View.GONE
+        playlistToolbar.visibility = View.GONE
+        fullscreenImg.setImageResource(R.drawable.ic_close_fullscreen)
     }
 
     private val connection = object : ServiceConnection {
@@ -152,6 +165,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        playlistViewModel = activity?.let {
+            ViewModelProvider(
+                it, ViewModelProvider.NewInstanceFactory()
+            )
+        }!![PlaylistViewModel::class.java]
+
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
         tvVideoTitle = view.findViewById(R.id.tvVideoTitle)
         tvVideoSource = view.findViewById(R.id.tvVideoSource)
@@ -170,6 +189,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         fullscreenImg.setOnClickListener {
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             } else {
                 activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             }
@@ -185,6 +205,49 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivPlayPauseVideo = view.findViewById(R.id.ivPlayPauseVideo)
         ivSeekForward15Seconds = view.findViewById(R.id.ivSeekForward15Seconds)
         ivSeekBack15Seconds = view.findViewById(R.id.ivSeekBack15Seconds)
+        ivVideoOptions = view.findViewById(R.id.ivVideoOptions)
+        ivVideoOptions.setOnClickListener {
+            PlaylistOptionsBottomSheet(
+                mutableListOf(
+                    PlaylistOptionsModel(
+                        it.resources.getString(R.string.move_item),
+                        R.drawable.ic_move_media,
+                        PlaylistOptions.MOVE_PLAYLIST_ITEM,
+                        playlistModel
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.copy_item),
+                        R.drawable.ic_copy_media,
+                        PlaylistOptions.COPY_PLAYLIST_ITEM,
+                        playlistModel
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.delete_item_offline_data),
+                        R.drawable.ic_remove_offline_data_playlist,
+                        PlaylistOptions.DELETE_ITEMS_OFFLINE_DATA,
+                        playlistModel
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.share_item),
+                        R.drawable.ic_share,
+                        PlaylistOptions.SHARE_PLAYLIST_ITEM,
+                        playlistModel
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.open_in_new_tab),
+                        R.drawable.ic_new_tab,
+                        PlaylistOptions.OPEN_IN_NEW_TAB,
+                        playlistModel
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.open_in_private_tab),
+                        R.drawable.ic_private_tab,
+                        PlaylistOptions.OPEN_IN_PRIVATE_TAB,
+                        playlistModel
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.delete_item),
+                        R.drawable.ic_playlist_delete,
+                        PlaylistOptions.DELETE_PLAYLIST_ITEM,
+                        playlistModel
+                    )
+                ), this
+            ).show(parentFragmentManager, null)
+        }
 
         mainLayout = view.findViewById(R.id.sliding_layout)
         layoutBottom = view.findViewById(R.id.bottom_layout)
@@ -222,6 +285,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         playlistItemAdapter.setBottomLayout()
         rvPlaylist.adapter = playlistItemAdapter
 
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            updateLandscapeView()
+        } else {
+            updatePortraitView()
+        }
+
         requireActivity()
             .onBackPressedDispatcher
             .addCallback(requireActivity(), object : OnBackPressedCallback(true) {
@@ -235,6 +304,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //                    }
                     if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     } else {
                         this.remove()
                         requireActivity().onBackPressed()
@@ -535,12 +605,30 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
     }
 
+    override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
+        playlistVideoService?.getCurrentPlayer()?.stop()
+        val currentPlaylistItem =
+            playlistItems[playlistVideoService?.getCurrentPlayer()?.currentPeriodIndex!!]
+        playlistModel?.id.let {
+            playlistViewModel.setPlaylistItemOption(
+                PlaylistItemOptionModel(
+                    playlistOptionsModel.optionType,
+                    currentPlaylistItem,
+                    playlistModel?.id
+                )
+            )
+        }
+        activity?.onBackPressedDispatcher?.onBackPressed()
+    }
+
     @Suppress("DEPRECATION")
-    fun enterPIPMode(){
+    fun enterPIPMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
-            && requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            && requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+        ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val params = PictureInPictureParams.Builder().setAspectRatio(Rational(styledPlayerView.width, styledPlayerView.height))
+                val params = PictureInPictureParams.Builder()
+                    .setAspectRatio(Rational(styledPlayerView.width, styledPlayerView.height))
                 activity?.enterPictureInPictureMode(params.build())
             } else {
                 activity?.enterPictureInPictureMode()
@@ -556,15 +644,13 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         }
     }
 
-    var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+    private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
             if (action.equals("action")) {
                 val shouldShowControls = intent.getBooleanExtra("should_show_controls", true)
                 isCastInProgress = !shouldShowControls
                 layoutVideoControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
-            } else {
-
             }
 
 //            val datapassed = intent.getIntExtra("DATAPASSED", 0
@@ -587,7 +673,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         private const val SEEK_VALUE_MS = 15000
 
         @JvmStatic
-        fun newInstance(playlistModel: PlaylistModel, selectedPlaylistItem: MediaModel) =
+        fun newInstance(playlistModel: PlaylistModel, selectedPlaylistItem: PlaylistItemModel) =
             PlaylistPlayerFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(PLAYLIST_MODEL, playlistModel)

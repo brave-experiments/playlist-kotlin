@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:scrollableView="@+id/rvPlaylists"
+    android:paddingTop="48dp"
     app:panelHeight="68dp"
     android:gravity="bottom">
 
@@ -25,13 +26,12 @@
             android:id="@+id/player_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.4">
+            android:layout_weight="1">
 
             <com.google.android.exoplayer2.ui.StyledPlayerView
                 android:id="@+id/styledPlayerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:resize_mode="fit"
+                android:layout_height="wrap_content"
                 app:use_controller="false" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
@@ -79,8 +79,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layoutVideoControls"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.6"
+            android:layout_height="wrap_content"
             android:clipToPadding="false"
             android:paddingStart="32dp"
             android:paddingTop="22dp"

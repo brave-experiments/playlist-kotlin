@@ -1,10 +1,8 @@
 package com.brave.playlist.fragment
 
 import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore.Audio.Media
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -22,21 +20,23 @@ import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistItemAdapter
-import com.brave.playlist.model.MediaModel
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.listener.*
+import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.PlaylistItemGestureHelper
-import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
+import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
+import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.*
 
-class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteractionListener,
-    View.OnClickListener, OnStartDragListener, PlaylistOptionsListener,
-    OnPlaylistItemClickListener {
+class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
+    View.OnClickListener, StartDragListener, PlaylistOptionsListener,
+    PlaylistItemClickListener {
 
     private var playlistModel: PlaylistModel? = null
 
@@ -50,14 +50,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
     private lateinit var layoutShuffleMedia: LinearLayoutCompat
     private lateinit var ivPlaylistCover: AppCompatImageView
     private lateinit var itemTouchHelper: ItemTouchHelper
-    private lateinit var playlistOptionsListener: PlaylistOptionsListener
-
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        arguments?.let {
-//            playlistData = it.getString(PLAYLIST_DATA)
-//        }
-//    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -76,11 +68,21 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
             playlistToolbar.enableEditMode(false)
         }
         playlistToolbar.setMoveClickListener {
-            Toast.makeText(
-                activity,
-                "Move : " + playlistItemAdapter.getSelectedItems().size,
-                Toast.LENGTH_LONG
-            ).show()
+            PlaylistOptionsBottomSheet(
+                mutableListOf(
+                    PlaylistOptionsModel(
+                        it.resources.getString(R.string.move_item),
+                        R.drawable.ic_move_media,
+                        PlaylistOptions.MOVE_PLAYLIST_ITEMS,
+                        playlistItemModels = playlistItemAdapter.getSelectedItems()
+                    ), PlaylistOptionsModel(
+                        it.resources.getString(R.string.copy_item),
+                        R.drawable.ic_copy_media,
+                        PlaylistOptions.COPY_PLAYLIST_ITEMS,
+                        playlistItemModels = playlistItemAdapter.getSelectedItems()
+                    )
+                ), this
+            ).show(parentFragmentManager, null)
             playlistItemAdapter.setEditMode(false)
             playlistToolbar.enableEditMode(false)
         }
@@ -110,12 +112,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
         playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             Log.e("BravePlaylist", playlistData.toString())
-            val playlistList = mutableListOf<MediaModel>()
+            val playlistList = mutableListOf<PlaylistItemModel>()
             val playlistJsonObject = JSONObject(playlistData)
             val jsonArray: JSONArray = playlistJsonObject.getJSONArray("items")
             for (i in 0 until jsonArray.length()) {
                 val jsonObject = jsonArray.getJSONObject(i)
-                val mediaModel = MediaModel(
+                val playlistItemModel = PlaylistItemModel(
                     jsonObject.getString("id"),
                     jsonObject.getString("name"),
                     jsonObject.getString("page_source"),
@@ -125,7 +127,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                     jsonObject.getString("author"),
                     jsonObject.getString("duration")
                 )
-                playlistList.add(mediaModel)
+                playlistList.add(playlistItemModel)
             }
 
             playlistModel = PlaylistModel(
@@ -152,7 +154,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
 
                 layoutShuffleMedia.setOnClickListener {
 //                    viewModel.setSelectedPlaylistItem(playlistList[0])
-                    openPlaylistPlayer(playlistList[0])
+                    openPlaylistPlayer(playlistList[(0 until playlistList.size).shuffled().last()])
                 }
             }
 
@@ -244,24 +246,28 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
         itemTouchHelper.startDrag(viewHolder)
     }
 
-    override fun onPlaylistItemClick(mediaModel: MediaModel) {
+    override fun onPlaylistItemClick(playlistItemModel: PlaylistItemModel) {
 //        viewModel.setSelectedPlaylistItem(mediaModel)
-        openPlaylistPlayer(mediaModel)
+        openPlaylistPlayer(playlistItemModel)
     }
 
     override fun onPlaylistItemClick(count: Int) {
         playlistToolbar.updateSelectedItems(count)
     }
 
-    private fun openPlaylistPlayer(selectedMediaModel: MediaModel) {
-        activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
-        val playlistPlayerFragment =
-            playlistModel?.let { PlaylistPlayerFragment.newInstance(it, selectedMediaModel) }
-        if (playlistPlayerFragment != null) {
-            parentFragmentManager.beginTransaction()
-                .replace(android.R.id.content, playlistPlayerFragment)
-                .addToBackStack(PlaylistFragment::class.simpleName)
-                .commit()
+    private fun openPlaylistPlayer(selectedPlaylistItemModel: PlaylistItemModel) {
+        if (PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+
+        } else {
+            activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
+            val playlistPlayerFragment =
+                playlistModel?.let { PlaylistPlayerFragment.newInstance(it, selectedPlaylistItemModel) }
+            if (playlistPlayerFragment != null) {
+                parentFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, playlistPlayerFragment)
+                    .addToBackStack(PlaylistFragment::class.simpleName)
+                    .commit()
+            }
         }
     }
 
@@ -281,6 +287,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
         if (playlistOptionsModel.optionType == PlaylistOptions.EDIT_PLAYLIST) {
             playlistItemAdapter.setEditMode(true)
             playlistToolbar.enableEditMode(true)
+        } else if (playlistOptionsModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEMS || playlistOptionsModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEMS) {
+            playlistViewModel.setPlaylistMultipleItemOption(playlistOptionsModel)
         } else if (playlistOptionsModel.optionType == PlaylistOptions.RENAME_PLAYLIST) {
             val newPlaylistFragment = playlistModel?.let {
                 NewPlaylistFragment.newInstance(
@@ -296,11 +304,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), OnItemInteraction
                     .commit()
             }
         }
-//        playlistOptionsListener.onOptionClicked(playlistOptionsModel)
-        playlistViewModel.setSelectedOption(playlistOptionsModel.optionType)
-    }
-
-    fun setPlaylistOptionsListener(playlistOptionsListener: PlaylistOptionsListener) {
-        this.playlistOptionsListener = playlistOptionsListener
+        playlistViewModel.setPlaylistOption(playlistOptionsModel)
     }
 }

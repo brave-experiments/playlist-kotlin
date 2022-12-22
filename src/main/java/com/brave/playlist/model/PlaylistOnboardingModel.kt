@@ -3,7 +3,7 @@ package com.brave.playlist.model
 import android.os.Parcel
 import android.os.Parcelable
 
-class PlaylistOnboardingModel(
+data class PlaylistOnboardingModel(
     val title: String,
     val message: String,
     val illustration: Int,

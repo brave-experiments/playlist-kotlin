@@ -136,7 +136,7 @@ class BottomPanelLayout @JvmOverloads constructor(
         EXPANDED, COLLAPSED, ANCHORED, HIDDEN, DRAGGING
     }
 
-    private var mSlideState: PanelState? = DEFAULT_SLIDE_STATE
+    var mSlideState: PanelState? = DEFAULT_SLIDE_STATE
 
     /**
      * If the current slide state is DRAGGING, this will store the last non dragging state
@@ -245,10 +245,10 @@ class BottomPanelLayout @JvmOverloads constructor(
 //                    R.styleable.SlidingUpPanelLayout_umanoAnchorPoint,
 //                    DEFAULT_ANCHOR_POINT
 //                )
-//                mSlideState = PanelState.values()[ta.getInt(
-//                    R.styleable.SlidingUpPanelLayout_umanoInitialState,
-//                    DEFAULT_SLIDE_STATE.ordinal
-//                )]
+                mSlideState = PanelState.values()[ta.getInt(
+                    R.styleable.BottomPanelLayout_initialState,
+                    DEFAULT_SLIDE_STATE.ordinal
+                )]
 //                val interpolatorResId =
 //                    ta.getResourceId(R.styleable.SlidingUpPanelLayout_umanoScrollInterpolator, -1)
 //                if (interpolatorResId != -1) {

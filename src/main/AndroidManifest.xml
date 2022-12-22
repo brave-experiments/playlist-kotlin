@@ -2,20 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.brave.playlist">
 
-    <!--    Below permission is required for android 13-->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application android:usesCleartextTraffic="true">
-
-        <meta-data android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
-            android:value="com.google.android.exoplayer2.ext.cast.DefaultCastOptionsProvider"/>
         <activity
             android:name=".activity.PlaylistOnboardingActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
-        <service android:name=".PlaylistVideoService" />
+        <service android:name=".PlaylistVideoService"
+            android:exported="false"/>
     </application>
 
 </manifest>

@@ -2,19 +2,17 @@ package com.brave.playlist.adapter
 
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.brave.playlist.R
-import com.brave.playlist.activity.PlaylistOnboardingActivity
-import com.brave.playlist.model.MediaModel
+import com.brave.playlist.model.PlaylistItemModel
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 
 
 class PlayerNotificationAdapter(
     val context: Context,
-    private val playlistItems: ArrayList<MediaModel>?,
+    private val playlistItems: ArrayList<PlaylistItemModel>?,
     private val playlistName: String?
 ) : PlayerNotificationManager.MediaDescriptionAdapter {
 

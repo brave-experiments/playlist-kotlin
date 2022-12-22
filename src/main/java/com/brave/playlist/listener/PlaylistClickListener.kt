@@ -2,6 +2,6 @@ package com.brave.playlist.listener
 
 import com.brave.playlist.model.PlaylistModel
 
-interface OnPlaylistListener {
+interface PlaylistClickListener {
     fun onPlaylistClick(playlistModel: PlaylistModel) {}
 }

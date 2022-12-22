@@ -1,7 +1,6 @@
 package com.brave.playlist.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
@@ -13,22 +12,19 @@ import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistAdapter
 import com.brave.playlist.adapter.RecentlyPlayedPlaylistAdapter
 import com.brave.playlist.enums.PlaylistOptions
-import com.brave.playlist.listener.OnPlaylistListener
+import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.listener.PlaylistOptionsListener
-import com.brave.playlist.model.MediaModel
+import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.ConstantUtils
-import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
 import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 
 
 class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOptionsListener,
-    OnPlaylistListener {
+    PlaylistClickListener {
     private lateinit var playlistViewModel: PlaylistViewModel
 
     private lateinit var playlistToolbar: PlaylistToolbar
@@ -65,12 +61,12 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                     ), PlaylistOptionsModel(
                         it.resources.getString(R.string.remove_all_offline_data),
                         R.drawable.ic_remove_offline_data_playlist,
-                        PlaylistOptions.REMOVE_PLAYLIST_OFFLINE_DATA,
+                        PlaylistOptions.REMOVE_ALL_OFFLINE_DATA,
                         playlistModel
                     ), PlaylistOptionsModel(
                         it.resources.getString(R.string.download_all_playlists_for_offline_use),
                         R.drawable.ic_cloud_download,
-                        PlaylistOptions.DOWNLOAD_PLAYLIST_FOR_OFFLINE_USE,
+                        PlaylistOptions.DOWNLOAD_ALL_PLAYLISTS_FOR_OFFLINE_USE,
                         playlistModel
                     )
                 ), this
@@ -94,12 +90,12 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
             val allPlaylistList = mutableListOf<PlaylistModel>()
             val allPlaylistJsonArray = JSONArray(allPlaylistData)
             for (i in 0 until allPlaylistJsonArray.length()) {
-                val playlistList = mutableListOf<MediaModel>()
+                val playlistList = mutableListOf<PlaylistItemModel>()
                 val playlistJsonObject = allPlaylistJsonArray.getJSONObject(i)
                 val jsonArray: JSONArray = playlistJsonObject.getJSONArray("items")
                 for (j in 0 until jsonArray.length()) {
                     val jsonObject = jsonArray.getJSONObject(j)
-                    val mediaModel = MediaModel(
+                    val playlistItemModel = PlaylistItemModel(
                         jsonObject.getString("id"),
                         jsonObject.getString("name"),
                         jsonObject.getString("page_source"),
@@ -109,7 +105,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                         jsonObject.getString("author"),
                         jsonObject.getString("duration")
                     )
-                    playlistList.add(mediaModel)
+                    playlistList.add(playlistItemModel)
                 }
 
                 allPlaylistList.add(
@@ -132,7 +128,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
     }
 
     override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
-
+        playlistViewModel.setAllPlaylistOption(playlistOptionsModel)
     }
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {

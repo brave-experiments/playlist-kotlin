@@ -5,8 +5,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.graphics.*
+import android.net.Uri
 import android.os.Build
 import com.brave.playlist.PlaylistVideoService
+import java.util.*
 
 
 object PlaylistUtils {
@@ -42,5 +44,12 @@ object PlaylistUtils {
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
         canvas.drawBitmap(bitmap, rect, rect, paint)
         return output
+    }
+
+    fun isMediaSourceExpired(mediaSrc : String): Boolean {
+        val uri: Uri =
+            Uri.parse(mediaSrc)
+        val expireMillis : Long? = uri.getQueryParameter("expire")?.toLong()?.times(1000L)
+        return Date() > expireMillis?.let { Date(it) }
     }
 }

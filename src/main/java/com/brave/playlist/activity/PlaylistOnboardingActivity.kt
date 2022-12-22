@@ -1,52 +1,55 @@
 package com.brave.playlist.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.AppCompatTextView
+import androidx.viewpager2.widget.ViewPager2
 import com.brave.playlist.R
-import com.brave.playlist.view.PlaylistToolbar
+import com.brave.playlist.adapter.PlaylistOnboardingFragmentStateAdapter
+import com.brave.playlist.model.PlaylistOnboardingModel
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 
-class PlaylistOnboardingActivity : AppCompatActivity(R.layout.activity_playlist_onboarding) {
-
-    private lateinit var btCreateAPlaylist: AppCompatButton
-    private lateinit var tvSkipPlaylist: AppCompatTextView
-    private lateinit var playlistToolbar: PlaylistToolbar
-
+class PlaylistOnboardingActivity : AppCompatActivity(R.layout.playlist_onboarding_activity) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        btCreateAPlaylist = findViewById(R.id.btCreateAPlaylist)
-        tvSkipPlaylist = findViewById(R.id.tvSkipPlaylist)
-        playlistToolbar = findViewById(R.id.playlistToolbar)
+        val playlistOnboardingViewPager: ViewPager2 = findViewById(R.id.playlistOnboardingViewPager)
 
-        btCreateAPlaylist.setOnClickListener { navigateToAddNewPlaylistActivity() }
-        tvSkipPlaylist.setOnClickListener { navigateToAllPlaylistActivity() }
+        val adapter = PlaylistOnboardingFragmentStateAdapter(this, listOf(
+            PlaylistOnboardingModel(getString(R.string.playlist_onboarding_title_1), getString(R.string.playlist_onboarding_text_1), R.drawable.ic_playlist_onboarding_icon, R.drawable.ic_playlist_onboarding_graphic_bg),
+            PlaylistOnboardingModel(getString(R.string.playlist_onboarding_title_2), getString(R.string.playlist_onboarding_text_2), R.drawable.ic_playlist_buttononboard_img2, R.drawable.ic_playlist_buttononboard_img2_bg),
+            PlaylistOnboardingModel(getString(R.string.playlist_onboarding_title_3), getString(R.string.playlist_onboarding_text_3), R.drawable.ic_playlist_buttononboard_img3, R.drawable.ic_playlist_buttononboard_img2_bg)
+        ))
+        playlistOnboardingViewPager.adapter = adapter
 
-//        showOnboardingButton();
+        val nextButton: AppCompatButton = findViewById(R.id.btNextOnboarding)
+        nextButton.setOnClickListener {
+            if (playlistOnboardingViewPager.currentItem == 2) {
+                finish()
+            } else {
+                playlistOnboardingViewPager.currentItem =
+                    playlistOnboardingViewPager.currentItem + 1
+            }
+        }
+
+        playlistOnboardingViewPager.registerOnPageChangeCallback(object :
+            ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                if (position == 2) {
+                    nextButton.text = getString(R.string.browse_for_media)
+                } else {
+                    nextButton.text = getString(R.string.playlist_next)
+                }
+                adapter.notifyItemChanged(position)
+            }
+        })
+
+        val tabLayout: TabLayout = findViewById(R.id.playlistOnboardingTabLayout)
+        TabLayoutMediator(tabLayout, playlistOnboardingViewPager) { tab, _ ->
+            tab.setIcon(R.drawable.ic_tab_layout_dot_selector)
+        }.attach()
     }
-
-    private fun navigateToAddNewPlaylistActivity() {
-//        startActivity(Intent(this, AddNewPlaylistActivity::class.java))
-    }
-
-    private fun navigateToAllPlaylistActivity() {
-//        startActivity(Intent(this, AllPlaylistActivity::class.java))
-    }
-
-//    private fun showOnboardingButton() {
-//        val movableImageButton: View = findViewById(R.id.movableImageButton)
-//        val parent = findViewById<ViewGroup>(R.id.parent)
-//
-//        val transition = Slide(Gravity.BOTTOM)
-//            .addTarget(R.id.movableImageButton)
-//            .setDuration(500)
-//            .setInterpolator(BraveBounceInterpolator())
-//
-//        TransitionManager.beginDelayedTransition(parent, transition)
-//
-//        movableImageButton.visibility = View.VISIBLE
-//    }
 }

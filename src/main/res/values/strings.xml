@@ -43,4 +43,13 @@
     <string name="download_all_playlists_for_offline_use">Download all playlists for offline use</string>
     <string name="delete_playlist">Delete playlist</string>
     <string name="number_of_items">%s items</string>
+    <string name="move_item">Move</string>
+    <string name="copy_item">Copy</string>
+    <string name="delete_item_offline_data">Delete item\'s offline data</string>
+    <string name="share_item">Share</string>
+    <string name="open_in_new_tab">Open in new tab</string>
+    <string name="open_in_private_tab">Open in private tab</string>
+    <string name="delete_item">Delete</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

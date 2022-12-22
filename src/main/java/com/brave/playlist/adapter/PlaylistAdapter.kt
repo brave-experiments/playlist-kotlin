@@ -8,14 +8,14 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
-import com.brave.playlist.listener.OnPlaylistListener
+import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 
-class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val onPlaylistListener : OnPlaylistListener?) :
+class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val playlistClickListener : PlaylistClickListener?) :
     AbstractRecyclerViewAdapter<PlaylistAdapter.AllPlaylistViewHolder, PlaylistModel>(allPlaylists) {
 
     inner class AllPlaylistViewHolder(view: View) :
@@ -65,7 +65,7 @@ class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val onPl
             tvPlaylistItemCount.text =
                 itemView.context.getString(R.string.number_items, model.items.size)
             itemView.setOnClickListener {
-                onPlaylistListener?.onPlaylistClick(model)
+                playlistClickListener?.onPlaylistClick(model)
             }
         }
     }
