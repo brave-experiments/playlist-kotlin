@@ -12,12 +12,16 @@ import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.PlaylistUtils.createNotificationChannel
-import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.DefaultLoadControl
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.StyledPlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -27,7 +31,7 @@ import com.google.android.gms.cast.framework.CastContext
 
 class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityListener {
     private var playlistName: String? = null
-    private var playlistPlaylistItemModel: ArrayList<PlaylistItemModel>? = arrayListOf()
+    private var playlistItemsModel: ArrayList<PlaylistItemModel>? = arrayListOf()
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var localPlayer: ExoPlayer? = null
     private var castPlayer: CastPlayer? = null
@@ -54,18 +58,18 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     override fun onBind(intent: Intent?): IBinder {
         intent?.let {
             playlistName = it.getStringExtra(PLAYLIST_NAME)
-            playlistPlaylistItemModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
+            playlistItemsModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
         }
 
         val playerNotificationAdapter =
-            PlayerNotificationAdapter(applicationContext, playlistPlaylistItemModel, playlistName)
+            PlayerNotificationAdapter(applicationContext, playlistItemsModel, playlistName)
         playerNotificationManager = PlayerNotificationManager.Builder(
             applicationContext,
             NOTIFICATION_ID,
             PLAYLIST_CHANNEL_ID
         ).setMediaDescriptionAdapter(playerNotificationAdapter).build()
 
-        playlistPlaylistItemModel?.forEach { mediaModel ->
+        playlistItemsModel?.forEach { mediaModel ->
             val movieMetadata : MediaMetadata =
             MediaMetadata.Builder().setTitle(mediaModel.name).setArtist(mediaModel.author)
                 .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
@@ -91,7 +95,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     override fun onUnbind(intent: Intent?): Boolean {
         playlistName = null
-        playlistPlaylistItemModel = null
+        playlistItemsModel = null
         mediaSessionConnector = null
         return super.onUnbind(intent)
     }
@@ -100,7 +104,10 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         super.onCreate()
         createNotificationChannel(applicationContext)
         currentItemIndex = C.INDEX_UNSET
-        localPlayer = ExoPlayer.Builder(applicationContext).build()
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(32 * 1024, 64 * 1024, 1024, 1024)
+            .build()
+        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl).build()
         localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         localPlayer?.addListener(this)
         castContext = CastContext.getSharedInstance()

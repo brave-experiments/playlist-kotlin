@@ -10,6 +10,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
 import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -31,12 +32,12 @@ class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val play
         }
 
         override fun onBind(position: Int, model: PlaylistModel) {
-            if (model.items.isNotEmpty()) {
+            if (model.items.isNullOrEmpty() && model.items?.get(0)?.thumbnailPath.isNullOrEmpty()) {
                 Glide.with(itemView.context)
                     .asBitmap()
                     .placeholder(R.drawable.ic_playlist_item_placeholder)
                     .error(R.drawable.ic_playlist_item_placeholder)
-                    .load(model.items[0].thumbnailPath)
+                    .load(model.items?.get(0)?.thumbnailPath)
                     .into(object : CustomTarget<Bitmap>() {
                         override fun onResourceReady(
                             resource: Bitmap,
@@ -61,9 +62,9 @@ class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val play
             }
 
             tvPlaylistTitle.text =
-                if (model.id == "default") itemView.context.resources.getString(R.string.watch_later) else model.name
+                if (model.id == DEFAULT_PLAYLIST) itemView.context.resources.getString(R.string.watch_later) else model.name
             tvPlaylistItemCount.text =
-                itemView.context.getString(R.string.number_items, model.items.size)
+                itemView.context.getString(R.string.number_items, model.items?.size)
             itemView.setOnClickListener {
                 playlistClickListener?.onPlaylistClick(model)
             }

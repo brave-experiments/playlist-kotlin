@@ -5,6 +5,7 @@ import android.os.Parcelable
 
 data class PlaylistItemModel(
     val id: String,
+    val playlistId: String,
     val name: String,
     val pageSource: String,
     val mediaPath: String,
@@ -25,6 +26,7 @@ data class PlaylistItemModel(
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readString().toString(),
+        playlistId = parcel.readString().toString(),
         name = parcel.readString().toString(),
         pageSource = parcel.readString().toString(),
         mediaPath = parcel.readString().toString(),
@@ -38,6 +40,7 @@ data class PlaylistItemModel(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
+        parcel.writeString(playlistId)
         parcel.writeString(name)
         parcel.writeString(pageSource)
         parcel.writeString(mediaPath)

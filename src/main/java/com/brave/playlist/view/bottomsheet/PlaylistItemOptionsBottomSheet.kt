@@ -7,16 +7,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.R
-import com.brave.playlist.adapter.PlaylistOptionsBottomSheetAdapter
+import com.brave.playlist.adapter.PlaylistItemOptionsBottomSheetAdapter
 import com.brave.playlist.extension.setTopCornersRounded
-import com.brave.playlist.listener.PlaylistOptionsListener
-import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.listener.PlaylistItemOptionsListener
+import com.brave.playlist.model.PlaylistItemOptionModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.card.MaterialCardView
 
-class PlaylistOptionsBottomSheet(private val playlistOptionsModel: MutableList<PlaylistOptionsModel>, private val playlistOptionsListener: PlaylistOptionsListener) :
-    BottomSheetDialogFragment(),PlaylistOptionsListener {
+class PlaylistItemOptionsBottomSheet(private val playlistItemOptionModel: MutableList<PlaylistItemOptionModel>, private val playlistItemOptionsListener: PlaylistItemOptionsListener) :
+    BottomSheetDialogFragment(), PlaylistItemOptionsListener {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,7 +33,7 @@ class PlaylistOptionsBottomSheet(private val playlistOptionsModel: MutableList<P
 
         val rvBottomSheet: RecyclerView = view.findViewById(R.id.rvBottomSheet)
         rvBottomSheet.layoutManager = LinearLayoutManager(view.context)
-        rvBottomSheet.adapter = PlaylistOptionsBottomSheetAdapter(playlistOptionsModel, this)
+        rvBottomSheet.adapter = PlaylistItemOptionsBottomSheetAdapter(playlistItemOptionModel, this)
 
         val behavior = BottomSheetBehavior.from(layoutBottomSheet)
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -43,8 +43,8 @@ class PlaylistOptionsBottomSheet(private val playlistOptionsModel: MutableList<P
             ?.setBackgroundResource(android.R.color.transparent)
     }
 
-    override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
-        playlistOptionsListener.onOptionClicked(playlistOptionsModel)
+    override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
+        playlistItemOptionsListener.onOptionClicked(playlistItemOptionModel)
         dismiss()
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:foreground="?attr/selectableItemBackground"
@@ -15,9 +16,19 @@
         android:id="@+id/ivMediaThumbnail"
         android:layout_width="96dp"
         android:layout_height="64dp"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivMediaStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivMediaThumbnail"
+        android:layout_margin="8dp"
+        app:srcCompat="@drawable/ic_downloaded" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivMediaSelected"
@@ -33,11 +44,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:maxLines="3"
+        android:ellipsize="end"
         android:text="@string/create_toolbar_playlist"
         android:textColor="@color/playlist_text_color"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/layoutMediaStats"
-        app:layout_constraintEnd_toStartOf="@id/ivDragMedia"
+        app:layout_constraintEnd_toStartOf="@id/layout_options"
         app:layout_constraintStart_toEndOf="@id/ivMediaThumbnail"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
@@ -49,7 +62,7 @@
         android:layout_marginStart="12dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/ivDragMedia"
+        app:layout_constraintEnd_toStartOf="@id/layout_options"
         app:layout_constraintStart_toEndOf="@id/ivMediaThumbnail"
         app:layout_constraintTop_toBottomOf="@id/tvMediaTitle">
 
@@ -65,17 +78,41 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:text="15 MB"
             android:textColor="@color/media_stats_color" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/ivDragMedia"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvMediaDownloadProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="12dp"
+        app:layout_constraintTop_toBottomOf="@id/layoutMediaStats"
+        app:layout_constraintStart_toEndOf="@id/ivMediaThumbnail"
+        android:layout_marginStart="12dp"
+        android:visibility="gone"
+        android:textColor="@color/media_stats_color" />
+
+    <FrameLayout
+        android:id="@+id/layout_options"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_drag" />
+        app:layout_constraintTop_toTopOf="parent">
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivDragMedia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_drag" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivMediaOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_options_toolbar_playlist"
+            app:tint="@color/icon_tint" />
+    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

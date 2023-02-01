@@ -31,10 +31,8 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
     ), RecyclerView.OnItemTouchListener {
 
     private val deleteIcon: Drawable?
-    private val uploadIcon: Drawable?
     private val removeOfflineIcon: Drawable?
     private val deleteIconBg: Drawable
-    private val uploadIconBg: Drawable
     private val removeOfflineIconBg: Drawable
     private val buttonPositions: MutableMap<Int, List<OptionButton>> = mutableMapOf()
     private val gestureDetector: GestureDetector
@@ -54,12 +52,9 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
     init {
         deleteIcon = AppCompatResources.getDrawable(context, R.drawable.ic_playlist_delete)
-        uploadIcon =
-            AppCompatResources.getDrawable(context, R.drawable.ic_upload_media)
         removeOfflineIcon =
             AppCompatResources.getDrawable(context, R.drawable.ic_remove_offline_data_playlist)
         deleteIconBg = ColorDrawable(context.getColor(R.color.swipe_delete))
-        uploadIconBg = ColorDrawable(context.getColor(R.color.upload_option_bg))
         removeOfflineIconBg = ColorDrawable(context.getColor(R.color.remove_offline_option_bg))
         gestureDetector = GestureDetector(context, gestureListener)
         recyclerView.addOnItemTouchListener(this)
@@ -102,7 +97,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         if (dX < 0)
             onSwipeLeft(viewHolder, dX, c)
         else if (dX > 0) {
-            newDX = min(onSwipeRight(viewHolder, dX, c), dX)
+            onSwipeRight(viewHolder, dX, c)
             swipePosition = viewHolder.adapterPosition
         } else {
             swipePosition = -1
@@ -114,7 +109,6 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
     private fun resetButtons(c: Canvas) {
         resetDrawableBounds(deleteIconBg, c)
-        resetDrawableBounds(uploadIconBg, c)
         resetDrawableBounds(removeOfflineIconBg, c)
     }
 
@@ -123,9 +117,9 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         drawable.draw(c)
     }
 
-    private fun onSwipeRight(viewHolder: RecyclerView.ViewHolder, dX: Float, c: Canvas): Float {
-        if (uploadIcon == null || removeOfflineIcon == null)
-            return 0f
+    private fun onSwipeRight(viewHolder: RecyclerView.ViewHolder, dX: Float, c: Canvas) {
+        if (removeOfflineIcon == null)
+            return
 
         val itemView = viewHolder.itemView
 
@@ -164,33 +158,6 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
         removeOfflineIconBg.draw(c)
         removeOfflineIcon.draw(c)
-
-        val uploadIconMargin = (itemView.height - uploadIcon.intrinsicHeight) / 2
-        val uploadIconTop = itemView.top + (itemView.height - uploadIcon.intrinsicHeight) / 2
-        val uploadIconBottom = uploadIconTop + uploadIcon.intrinsicHeight
-        val uploadIconLeft = offlineIconRight + offlineIconMargin + uploadIconMargin
-        val uploadIconRight = uploadIconLeft + uploadIcon.intrinsicWidth
-
-        if (rightBound >= uploadIconRight)
-            uploadIcon.setBounds(uploadIconLeft, uploadIconTop, uploadIconRight, uploadIconBottom)
-        else
-            uploadIcon.setBounds(0, 0, 0, 0)
-
-        if (rightBound >= offlineIconRight + offlineIconMargin) {
-            buttonPositions[viewHolder.adapterPosition]!![1].viewRect = Rect(
-                offlineIconRight + offlineIconMargin,
-                itemView.top,
-                min(rightBound, uploadIconRight + uploadIconMargin),
-                itemView.bottom
-            )
-            uploadIconBg.bounds = buttonPositions[viewHolder.adapterPosition]!![1].viewRect!!
-        } else
-            uploadIconBg.setBounds(0, 0, 0, 0)
-
-        uploadIconBg.draw(c)
-        uploadIcon.draw(c)
-
-        return (uploadIconRight + uploadIconMargin).toFloat()
     }
 
     private fun onSwipeLeft(viewHolder: RecyclerView.ViewHolder, dX: Float, c: Canvas) {
@@ -241,8 +208,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
     private fun instantiateOptions(position: Int): List<OptionButton> =
         listOf(
-            OptionButton(position, itemInteractionListener::onRemoveFromOffline),
-            OptionButton(position, itemInteractionListener::onUpload)
+            OptionButton(position, itemInteractionListener::onRemoveFromOffline)
         )
 
     inner class OptionButton(

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.brave.playlist">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application android:usesCleartextTraffic="true">
         <activity
-            android:name=".activity.PlaylistOnboardingActivity"
+            android:name=".activity.PlaylistMenuOnboardingActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />

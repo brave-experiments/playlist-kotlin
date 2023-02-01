@@ -38,7 +38,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:background="@android:color/transparent"
-        app:tabBackground="@drawable/tab_selector"
+        app:tabBackground="@drawable/playlist_onboarding_tab_selector"
         app:tabIndicatorHeight="0dp"
         app:tabPaddingEnd="-2dp"
         app:tabPaddingStart="-2dp"

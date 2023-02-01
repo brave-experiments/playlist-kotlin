@@ -9,7 +9,6 @@ import com.brave.playlist.model.PlaylistItemModel
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 
-
 class PlayerNotificationAdapter(
     val context: Context,
     private val playlistItems: ArrayList<PlaylistItemModel>?,

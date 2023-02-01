@@ -52,4 +52,13 @@ object PlaylistUtils {
         val expireMillis : Long? = uri.getQueryParameter("expire")?.toLong()?.times(1000L)
         return Date() > expireMillis?.let { Date(it) }
     }
+
+    fun getStatusBarHeight(context: Context): Int {
+        var result = 0
+        val resourceId: Int = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = context.resources.getDimensionPixelSize(resourceId)
+        }
+        return result
+    }
 }

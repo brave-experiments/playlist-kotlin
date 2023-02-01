@@ -9,12 +9,12 @@ import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.model.RenamePlaylistModel
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_OPTION
 import com.brave.playlist.view.PlaylistToolbar
 
 class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
-
     private lateinit var playlistViewModel: PlaylistViewModel
     private lateinit var etPlaylistName: AppCompatEditText
     private lateinit var playlistToolbar: PlaylistToolbar
@@ -45,20 +45,23 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
         playlistToolbar.setToolbarTitle(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.new_playlist) else getString(R.string.rename_text))
         playlistToolbar.setActionText(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.create_toolbar_playlist) else getString(R.string.rename_text))
         playlistToolbar.setActionButtonClickListener {
-            playlistViewModel.setCreatePlaylistOption(etPlaylistName.text.toString())
+            if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) {
+                playlistViewModel.setCreatePlaylistOption(etPlaylistName.text.toString())
+            } else {
+                playlistViewModel.setRenamePlaylistOption(RenamePlaylistModel(playlistModel?.id, etPlaylistName.text.toString()))
+            }
             activity?.onBackPressedDispatcher?.onBackPressed()
         }
-
         etPlaylistName.requestFocus()
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(playlistModel: PlaylistModel?, playlistOptions: PlaylistOptions) =
+        fun newInstance(playlistOptions: PlaylistOptions, playlistModel: PlaylistModel? = null) =
             NewPlaylistFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(PLAYLIST_MODEL, playlistModel)
                     putSerializable(PLAYLIST_OPTION, playlistOptions)
+                    putParcelable(PLAYLIST_MODEL, playlistModel)
                 }
             }
     }
