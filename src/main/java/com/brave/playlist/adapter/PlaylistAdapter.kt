@@ -32,12 +32,12 @@ class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val play
         }
 
         override fun onBind(position: Int, model: PlaylistModel) {
-            if (model.items.isNullOrEmpty() && model.items?.get(0)?.thumbnailPath.isNullOrEmpty()) {
+            if (!model.items.isNullOrEmpty() && !model.items[0].thumbnailPath.isNullOrEmpty()) {
                 Glide.with(itemView.context)
                     .asBitmap()
                     .placeholder(R.drawable.ic_playlist_item_placeholder)
                     .error(R.drawable.ic_playlist_item_placeholder)
-                    .load(model.items?.get(0)?.thumbnailPath)
+                    .load(model.items[0].thumbnailPath)
                     .into(object : CustomTarget<Bitmap>() {
                         override fun onResourceReady(
                             resource: Bitmap,

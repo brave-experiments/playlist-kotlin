@@ -30,6 +30,7 @@ import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistItemAdapter
+import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
 import com.brave.playlist.model.*
@@ -41,6 +42,7 @@ import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistItemGestureHelper
+import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
@@ -244,7 +246,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                     playlistItems[playlistVideoService?.getCurrentPlayer()?.currentPeriodIndex!!]
                 MenuUtils.showPlaylistItemMenu(
                     view.context, parentFragmentManager,
-                    currentPlaylistItem, playlistId = model.id, playlistItemOptionsListener = this
+                    currentPlaylistItem, playlistId = model.id, playlistItemOptionsListener = this,
+                    true
                 )
             }
         }
@@ -652,7 +655,15 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
 //        playlistVideoService?.getCurrentPlayer()?.stop()
-        playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
+            playlistItemOptionModel.playlistItemModel?.pageSource?.let {
+                PlaylistUtils.showSharingDialog(requireContext(),
+                    it
+                )
+            }
+        } else {
+            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        }
 //            if (playlistOptionsModel.optionType != PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistOptionsModel.optionType != PlaylistOptions.COPY_PLAYLIST_ITEM) {
 //                activity?.onBackPressedDispatcher?.onBackPressed()
 //            }

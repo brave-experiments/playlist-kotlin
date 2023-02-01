@@ -3,8 +3,11 @@ package com.brave.playlist.util
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.util.Log
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
+import java.lang.Exception
 
 
 object MediaUtils {
@@ -16,18 +19,23 @@ object MediaUtils {
        return time?.toLong()
     }
 
-    @Throws(IOException::class)
     fun getFileSizeFromUri(context: Context, uri: Uri): Long {
         var fileSize = 0L
-        val inputStream = context.contentResolver.openInputStream(uri)
-        if (inputStream != null) {
-            val bytes = ByteArray(1024)
-            var read = -1
-            while (inputStream.read(bytes).also { read = it } >= 0) {
-                fileSize += read.toLong()
+        var inputStream: InputStream? = null
+        try {
+            inputStream = context.contentResolver.openInputStream(uri)
+            if (inputStream != null) {
+                val bytes = ByteArray(1024)
+                var read: Int
+                while (inputStream.read(bytes).also { read = it } >= 0) {
+                    fileSize += read.toLong()
+                }
             }
+        } catch (ex: Exception) {
+            Log.e("BravePlaylist", ex.message.toString());
+        } finally {
+            inputStream?.close()
         }
-        inputStream!!.close()
         return fileSize
     }
 }

@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
 import android.net.Uri
 import android.os.Build
@@ -60,5 +61,13 @@ object PlaylistUtils {
             result = context.resources.getDimensionPixelSize(resourceId)
         }
         return result
+    }
+
+    fun showSharingDialog(context: Context, text: String) {
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, text)
+        context.startActivity(Intent.createChooser(intent, "Share with:"))
     }
 }

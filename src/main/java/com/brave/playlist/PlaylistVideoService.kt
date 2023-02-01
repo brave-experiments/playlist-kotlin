@@ -107,7 +107,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(32 * 1024, 64 * 1024, 1024, 1024)
             .build()
-        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl).build()
+        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl).setReleaseTimeoutMs(5000).build()
         localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         localPlayer?.addListener(this)
         castContext = CastContext.getSharedInstance()

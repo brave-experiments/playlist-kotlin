@@ -70,7 +70,6 @@
             android:id="@+id/tvMediaDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="7:12"
             android:textColor="@color/media_stats_color" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -78,18 +77,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:visibility="gone"
+            android:textColor="@color/media_stats_color" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvMediaDownloadProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
             android:textColor="@color/media_stats_color" />
     </androidx.appcompat.widget.LinearLayoutCompat>
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/tvMediaDownloadProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/layoutMediaStats"
-        app:layout_constraintStart_toEndOf="@id/ivMediaThumbnail"
-        android:layout_marginStart="12dp"
-        android:visibility="gone"
-        android:textColor="@color/media_stats_color" />
 
     <FrameLayout
         android:id="@+id/layout_options"

@@ -143,17 +143,12 @@ class PlaylistItemAdapter(
                 ivMediaThumbnail.setImageResource(R.drawable.ic_playlist_item_placeholder)
             }
 
-            Thread {
-                try {
-                    if (model.isCached) {
-                        val fileSize = MediaUtils.getFileSizeFromUri(itemView.context, Uri.parse(model.mediaPath))
-                        tvMediaFileSize.text =
-                            Formatter.formatShortFileSize(itemView.context, fileSize)
-                    }
-                } catch (ex:IOException) {
-                    Log.e("BravePlaylist", ex.message.toString());
-                }
-            }.start()
+//            if (model.isCached) {
+//                val fileSize = MediaUtils.getFileSizeFromUri(itemView.context, Uri.parse(model.mediaPath))
+//                tvMediaFileSize.text =
+//                    Formatter.formatShortFileSize(itemView.context, fileSize)
+//            }
+
             tvMediaFileSize.visibility = if (model.isCached) View.VISIBLE else View.GONE
 
             if (!model.duration.isNullOrEmpty()) {

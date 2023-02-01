@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.text.format.Formatter
 import android.util.Log
 import android.view.View
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
@@ -45,7 +44,6 @@ import com.brave.playlist.view.PlaylistToolbar
 import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.IOException
 
 class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
     View.OnClickListener, StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
@@ -145,23 +143,34 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 playlistList
             )
 
-            Thread {
-                playlistList.forEach {
-                    try {
-                        if (it.isCached) {
-                            val fileSize = MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
-                            totalFileSize += fileSize
-                        }
-                    } catch (ex: IOException) {
-                        Log.e("BravePlaylist", ex.message.toString());
-                    }
-                }
-                activity?.runOnUiThread {
-                    if (totalFileSize > 0) {
-                        tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
-                    }
-                }
-            }.start()
+//            Thread {
+//                playlistList.forEach {
+//                    try {
+//                        if (it.isCached) {
+//                            val fileSize = MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
+//                            totalFileSize += fileSize
+//                        }
+//                    } catch (ex: IOException) {
+//                        Log.e("BravePlaylist", ex.message.toString());
+//                    }
+//                }
+//                activity?.runOnUiThread {
+//                    if (totalFileSize > 0) {
+//                        tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
+//                    }
+//                }
+//            }.start()
+
+//            playlistList.forEach {
+//                if (it.isCached) {
+//                    val fileSize =
+//                        MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
+//                    totalFileSize += fileSize
+//                }
+//            }
+//            if (totalFileSize > 0) {
+//                tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
+//            }
 
             if (playlistList.size > 0) {
                 Glide.with(requireContext())
@@ -238,15 +247,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     }
 
     override fun onRemoveFromOffline(position: Int) {
-//        playlistViewModel.setPlaylistItemOption(
-//            PlaylistItemOptionModel(
-//                PlaylistOptions.DELETE_ITEMS_OFFLINE_DATA,
-//                playlistModel?.items!![position],
-//                playlistModel?.id
-//            )
-//        )
-
-
         playlistViewModel.setDeletePlaylistItems(
             PlaylistModel(
                 playlistModel?.id.toString(),
@@ -256,6 +256,13 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 )
             )
         )
+    }
+
+    override fun onShare(position: Int) {
+        super.onShare(position)
+        val playlistItemModel = playlistModel?.items!![position]
+        //Share model
+        PlaylistUtils.showSharingDialog(requireContext(), playlistItemModel.pageSource)
     }
 
     override fun onClick(v: View) {
@@ -276,40 +283,50 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
     override fun onPlaylistItemMenuClick(view:View, playlistItemModel: PlaylistItemModel) {
             MenuUtils.showPlaylistItemMenu(view.context, parentFragmentManager,
-                playlistItemModel = playlistItemModel, playlistId = playlistItemModel.playlistId , playlistItemOptionsListener = this)
+                playlistItemModel = playlistItemModel, playlistId = playlistItemModel.playlistId , playlistItemOptionsListener = this, playlistModel?.name == DEFAULT_PLAYLIST)
     }
 
     private fun openPlaylistPlayer(selectedPlaylistItemModel: PlaylistItemModel) {
-        var isExpired: Boolean = false
-        val webView: WebView? = activity?.let { WebView(it) }
-//        val webSettings : WebSettings? = webView?.settings
-//        webSettings?.javaScriptEnabled = true
-        val webViewClientImpl = WebViewClientImpl(webViewResponseListener = object : WebViewResponseListener {
-            override fun onPageLoadFinished() {
-                Log.e("BravePlaylist", "onPageLoadFinished");
-                if (isExpired) {
-                    Log.e("BravePlaylist", "expired");
-                    // Download new content and open playlist player
-                } else {
-                    activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
-                    val playlistPlayerFragment =
-                        playlistModel?.let { PlaylistPlayerFragment.newInstance(selectedPlaylistItemModel.id, it) }
-                    if (playlistPlayerFragment != null) {
-                        parentFragmentManager.beginTransaction()
-                            .replace(android.R.id.content, playlistPlayerFragment)
-                            .addToBackStack(PlaylistFragment::class.simpleName)
-                            .commit()
-                    }
-                }
-                webView?.destroy()
-            }
-            override fun onError() {
-                Log.e("BravePlaylist", "error");
-                isExpired = true
-            }
-        })
-        webView?.webViewClient = webViewClientImpl
-        webView?.loadUrl(selectedPlaylistItemModel.mediaSrc)
+//        var isExpired = false
+//        val webView: WebView? = activity?.let { WebView(it) }
+////        val webSettings : WebSettings? = webView?.settings
+////        webSettings?.javaScriptEnabled = true
+//        val webViewClientImpl = WebViewClientImpl(webViewResponseListener = object : WebViewResponseListener {
+//            override fun onPageLoadFinished() {
+//                Log.e("BravePlaylist", "onPageLoadFinished");
+//                if (isExpired) {
+//                    Log.e("BravePlaylist", "expired");
+//                    // Download new content and open playlist player
+//                } else {
+//                    activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
+//                    val playlistPlayerFragment =
+//                        playlistModel?.let { PlaylistPlayerFragment.newInstance(selectedPlaylistItemModel.id, it) }
+//                    if (playlistPlayerFragment != null) {
+//                        parentFragmentManager.beginTransaction()
+//                            .replace(android.R.id.content, playlistPlayerFragment)
+//                            .addToBackStack(PlaylistFragment::class.simpleName)
+//                            .commit()
+//                    }
+//                }
+//                webView?.destroy()
+//            }
+//            override fun onError() {
+//                Log.e("BravePlaylist", "error");
+//                isExpired = true
+//            }
+//        })
+//        webView?.webViewClient = webViewClientImpl
+//        webView?.loadUrl(selectedPlaylistItemModel.mediaSrc)
+
+        activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
+        val playlistPlayerFragment =
+            playlistModel?.let { PlaylistPlayerFragment.newInstance(selectedPlaylistItemModel.id, it) }
+        if (playlistPlayerFragment != null) {
+            parentFragmentManager.beginTransaction()
+                .replace(android.R.id.content, playlistPlayerFragment)
+                .addToBackStack(PlaylistFragment::class.simpleName)
+                .commit()
+        }
 
 
 //        if (selectedPlaylistItemModel.isCached || !PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
@@ -354,6 +371,14 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     }
 
     override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
-        playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
+            playlistItemOptionModel.playlistItemModel?.pageSource?.let {
+                PlaylistUtils.showSharingDialog(requireContext(),
+                    it
+                )
+            }
+        } else {
+            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        }
     }
 }
