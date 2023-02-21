@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/create_a_playlist"
+            android:text="@string/playlist_create_text"
             android:textColor="@color/playlist_text_color" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/create_toolbar_playlist"
+            android:text="@string/playlist_create_toolbar_text"
             android:textAllCaps="true"
             android:textColor="@color/red_playlist" />
     </androidx.appcompat.widget.LinearLayoutCompat>

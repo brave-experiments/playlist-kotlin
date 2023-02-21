@@ -20,7 +20,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
         android:gravity="center"
-        android:textColor="@color/playlist_text_color"
+        android:textColor="@android:color/white"
         android:textSize="24sp" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -31,5 +31,5 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
         android:gravity="center"
-        android:textColor="@color/playlist_text_color" />
+        android:textColor="@android:color/white" />
 </androidx.appcompat.widget.LinearLayoutCompat>

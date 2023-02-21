@@ -13,6 +13,7 @@ data class PlaylistItemModel(
     val thumbnailPath: String,
     val author: String,
     val duration: String,
+    val lastPlayedPosition : Int,
     val isCached:Boolean = false,
     var isSelected: Boolean = false
 ) : Parcelable {
@@ -34,6 +35,7 @@ data class PlaylistItemModel(
         thumbnailPath = parcel.readString().toString(),
         author = parcel.readString().toString(),
         duration = parcel.readString().toString(),
+        lastPlayedPosition = parcel.readInt(),
         isCached = parcel.readInt() == 1,
         isSelected = parcel.readInt() == 1
     )
@@ -48,6 +50,7 @@ data class PlaylistItemModel(
         parcel.writeString(thumbnailPath)
         parcel.writeString(author)
         parcel.writeString(duration)
+        parcel.writeInt(lastPlayedPosition)
         parcel.writeInt(if(isCached) 1 else 0)
         parcel.writeInt(if(isSelected) 1 else 0)
     }

@@ -26,7 +26,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="24dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="@string/add_to_playlist"
+                android:text="@string/playlist_add_to_playlist"
                 android:textColor="@color/playlist_text_color"
                 android:textSize="20sp" />
 

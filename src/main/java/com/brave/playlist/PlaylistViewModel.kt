@@ -84,7 +84,7 @@ class PlaylistViewModel : ViewModel() {
 
     private val mutableFetchPlaylistData = MutableLiveData<String>()
     val fetchPlaylistData: LiveData<String> get() = mutableFetchPlaylistData
-    fun fetchPlaylistData(playlistId: String?) {
+    fun fetchPlaylistData(playlistId: String) {
         mutableFetchPlaylistData.value = playlistId
     }
 

@@ -1,33 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:foreground="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:paddingStart="20dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="20dp"
-    android:paddingBottom="10dp">
+    android:foreground="?attr/selectableItemBackground"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="10dp">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/ivMediaThumbnail"
-        android:layout_width="96dp"
-        android:layout_height="64dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/thumbnailView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@android:color/transparent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivMediaThumbnail"
+            android:layout_width="96dp"
+            android:layout_height="64dp"
+            android:scaleType="centerCrop" />
+
+    </androidx.cardview.widget.CardView>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivMediaStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ivMediaThumbnail"
         android:layout_margin="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/thumbnailView"
         app:srcCompat="@drawable/ic_downloaded" />
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -35,8 +42,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        app:layout_constraintEnd_toEndOf="@id/ivMediaThumbnail"
-        app:layout_constraintTop_toTopOf="@id/ivMediaThumbnail"
+        app:layout_constraintEnd_toEndOf="@id/thumbnailView"
+        app:layout_constraintTop_toTopOf="@id/thumbnailView"
         app:srcCompat="@drawable/ic_check_circle_filled" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -44,14 +51,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:maxLines="3"
         android:ellipsize="end"
-        android:text="@string/create_toolbar_playlist"
+        android:maxLines="3"
+        android:text="@string/playlist_create_toolbar_text"
         android:textColor="@color/playlist_text_color"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/layoutMediaStats"
         app:layout_constraintEnd_toStartOf="@id/layout_options"
-        app:layout_constraintStart_toEndOf="@id/ivMediaThumbnail"
+        app:layout_constraintStart_toEndOf="@id/thumbnailView"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
@@ -63,7 +70,7 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/layout_options"
-        app:layout_constraintStart_toEndOf="@id/ivMediaThumbnail"
+        app:layout_constraintStart_toEndOf="@id/thumbnailView"
         app:layout_constraintTop_toBottomOf="@id/tvMediaTitle">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -77,15 +84,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:visibility="gone"
-            android:textColor="@color/media_stats_color" />
+            android:textColor="@color/media_stats_color"
+            android:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvMediaDownloadProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:textColor="@color/media_stats_color" />
+            android:layout_marginStart="16dp"
+            android:textColor="@color/media_stats_color"
+            android:visibility="gone" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <FrameLayout
@@ -95,15 +103,18 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivDragMedia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            app:srcCompat="@drawable/ic_drag" />
+            android:padding="16dp"
+            app:srcCompat="@drawable/ic_drag"
+            app:tint="@color/icon_tint"/>
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivMediaOptions"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -1,12 +1,9 @@
 package com.brave.playlist.fragment
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.format.Formatter
 import android.util.Log
 import android.view.View
-import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -22,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.WebViewClientImpl
 import com.brave.playlist.adapter.PlaylistItemAdapter
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.listener.ItemInteractionListener
@@ -30,20 +26,26 @@ import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.listener.StartDragListener
-import com.brave.playlist.listener.WebViewResponseListener
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
-import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistItemGestureHelper
 import com.brave.playlist.util.PlaylistUtils
+import com.brave.playlist.util.PlaylistPreferenceUtils
+import com.brave.playlist.util.PlaylistPreferenceUtils.RECENTLY_PLAYED_PLAYLIST
+import com.brave.playlist.util.PlaylistPreferenceUtils.get
+import com.brave.playlist.util.PlaylistPreferenceUtils.set
 import com.brave.playlist.view.PlaylistToolbar
 import com.bumptech.glide.Glide
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.LinkedList
 
 class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
     View.OnClickListener, StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
@@ -83,7 +85,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             playlistViewModel.reorderPlaylistItems(playlistItemAdapter.getPlaylistItems())
         }
         playlistToolbar.setMoveClickListener {
-            MenuUtils.showMoveOrCopyMenu(it, parentFragmentManager, playlistItemAdapter.getSelectedItems(), this)
+            MenuUtils.showMoveOrCopyMenu(
+                it,
+                parentFragmentManager,
+                playlistItemAdapter.getSelectedItems(),
+                this
+            )
             playlistItemAdapter.setEditMode(false)
             playlistToolbar.enableEditMode(false)
         }
@@ -100,9 +107,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                     playlistItemAdapter.getSelectedItems()
                 )
             )
-            playlistItemAdapter.setEditMode(false)
-            playlistToolbar.enableEditMode(false)
-            playlistViewModel.reorderPlaylistItems(playlistItemAdapter.getPlaylistItems())
         }
         rvPlaylist = view.findViewById(R.id.rvPlaylists)
         tvTotalMediaCount = view.findViewById(R.id.tvTotalMediaCount)
@@ -132,6 +136,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                     jsonObject.getString("thumbnail_path"),
                     jsonObject.getString("author"),
                     jsonObject.getString("duration"),
+                    jsonObject.getInt("last_played_position"),
                     jsonObject.getBoolean("cached")
                 )
                 playlistList.add(playlistItemModel)
@@ -178,11 +183,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                     .placeholder(R.drawable.ic_playlist_placeholder)
                     .error(R.drawable.ic_playlist_placeholder)
                     .into(ivPlaylistCover)
-            } else {
-                ivPlaylistCover.setImageResource(R.drawable.ic_playlist_placeholder)
-            }
-
-            if (playlistList.size > 0) {
                 layoutPlayMedia.setOnClickListener {
                     openPlaylistPlayer(playlistList[0])
                 }
@@ -190,19 +190,28 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 layoutShuffleMedia.setOnClickListener {
                     openPlaylistPlayer(playlistList[(0 until playlistList.size).shuffled().last()])
                 }
+
+                tvTotalMediaCount.text =
+                    getString(R.string.playlist_number_of_items, playlistList.size.toString())
+
+                tvPlaylistName.text =
+                    if (playlistModel?.id.equals(DEFAULT_PLAYLIST)) resources.getString(R.string.playlist_play_later) else playlistModel?.name
+
+                playlistItemAdapter = PlaylistItemAdapter(playlistList, this, this)
+                val callback =
+                    PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
+                itemTouchHelper = ItemTouchHelper(callback)
+                itemTouchHelper.attachToRecyclerView(rvPlaylist)
+                rvPlaylist.adapter = playlistItemAdapter
+            } else {
+                ivPlaylistCover.setImageResource(R.drawable.ic_playlist_placeholder)
+                parentFragmentManager
+                    .beginTransaction()
+                    .replace(android.R.id.content, EmptyPlaylistFragment())
+                    .commit()
             }
 
-            tvTotalMediaCount.text =
-                getString(R.string.number_of_items, playlistList.size.toString())
-
-            tvPlaylistName.text = if (playlistModel?.id.equals(DEFAULT_PLAYLIST)) resources.getString(R.string.watch_later) else playlistModel?.name
-
-            playlistItemAdapter = PlaylistItemAdapter(playlistList, this, this)
-            val callback =
-                PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
-            itemTouchHelper = ItemTouchHelper(callback)
-            itemTouchHelper.attachToRecyclerView(rvPlaylist)
-            rvPlaylist.adapter = playlistItemAdapter
+            playlistToolbar.enableEditMode(false)
 
             playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
                 playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
@@ -211,8 +220,10 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
         ivPlaylistOptions.setOnClickListener {
             playlistModel?.let { model ->
-                MenuUtils.showPlaylistMenu(view.context, parentFragmentManager,
-                    model, this)
+                MenuUtils.showPlaylistMenu(
+                    view.context, parentFragmentManager,
+                    model, this, model.id == DEFAULT_PLAYLIST
+                )
             }
         }
 
@@ -240,22 +251,30 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 playlistModel?.id.toString(),
                 playlistModel?.name.toString(),
                 arrayListOf(
-                    playlistModel?.items!![position]
+                    playlistItemAdapter.getPlaylistItems()[position]
                 )
             )
         )
     }
 
     override fun onRemoveFromOffline(position: Int) {
-        playlistViewModel.setDeletePlaylistItems(
-            PlaylistModel(
-                playlistModel?.id.toString(),
-                playlistModel?.name.toString(),
-                arrayListOf(
-                    playlistModel?.items!![position]
-                )
-            )
+//        playlistViewModel.setDeletePlaylistItems(
+//            PlaylistModel(
+//                playlistModel?.id.toString(),
+//                playlistModel?.name.toString(),
+//                arrayListOf(
+//                    playlistModel?.items!![position]
+//                )
+//            )
+//        )
+        val playlistOptionsModel = PlaylistItemOptionModel(
+            requireContext().resources.getString(R.string.playlist_delete_item_offline_data),
+            R.drawable.ic_remove_offline_data_playlist,
+            PlaylistOptions.DELETE_ITEMS_OFFLINE_DATA,
+            playlistItemModel = playlistItemAdapter.getPlaylistItems()[position],
+            playlistId = playlistModel?.id.toString()
         )
+        playlistViewModel.setPlaylistItemOption(playlistOptionsModel)
     }
 
     override fun onShare(position: Int) {
@@ -281,9 +300,15 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         playlistToolbar.updateSelectedItems(count)
     }
 
-    override fun onPlaylistItemMenuClick(view:View, playlistItemModel: PlaylistItemModel) {
-            MenuUtils.showPlaylistItemMenu(view.context, parentFragmentManager,
-                playlistItemModel = playlistItemModel, playlistId = playlistItemModel.playlistId , playlistItemOptionsListener = this, playlistModel?.name == DEFAULT_PLAYLIST)
+    override fun onPlaylistItemMenuClick(view: View, playlistItemModel: PlaylistItemModel) {
+        MenuUtils.showPlaylistItemMenu(
+            view.context,
+            parentFragmentManager,
+            playlistItemModel = playlistItemModel,
+            playlistId = playlistItemModel.playlistId,
+            playlistItemOptionsListener = this,
+            playlistModel?.name == DEFAULT_PLAYLIST
+        )
     }
 
     private fun openPlaylistPlayer(selectedPlaylistItemModel: PlaylistItemModel) {
@@ -291,13 +316,34 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 //        val webView: WebView? = activity?.let { WebView(it) }
 ////        val webSettings : WebSettings? = webView?.settings
 ////        webSettings?.javaScriptEnabled = true
-//        val webViewClientImpl = WebViewClientImpl(webViewResponseListener = object : WebViewResponseListener {
+//        val webViewClientImpl = WebViewClientImpl(webViewResponseListener = object :
+//            WebViewResponseListener {
 //            override fun onPageLoadFinished() {
 //                Log.e("BravePlaylist", "onPageLoadFinished");
 //                if (isExpired) {
 //                    Log.e("BravePlaylist", "expired");
 //                    // Download new content and open playlist player
+//                    Toast.makeText(requireContext(), "Playlist item is expired", Toast.LENGTH_SHORT).show()
 //                } else {
+//                    var recentPlaylistIds = LinkedList<String>()
+//                    val recentPlaylistJson = PreferenceUtils.defaultPrefs(requireContext())[RECENTLY_PLAYED_PLAYLIST, ""]
+//                    if (recentPlaylistJson.isNotEmpty()) {
+//                        Log.e("recent_playlist", "recentPlaylistJson : "+recentPlaylistJson)
+////            val type: Type = object : TypeToken<LinkedList<String>>() {}.type
+////            recentPlaylist = Gson().fromJson(recentPlaylistJson, type)
+//                        recentPlaylistIds = GsonBuilder().create().fromJson(
+//                            recentPlaylistJson,
+//                            TypeToken.getParameterized(LinkedList::class.java, String::class.java).type
+//                        )
+//                        if (recentPlaylistIds.contains(playlistModel?.id)) {
+//                            recentPlaylistIds.remove(playlistModel?.id)
+//                        }
+//                    }
+//                    recentPlaylistIds.addFirst(playlistModel?.id)
+//
+//                    Log.e("recent_playlist", "after recentPlaylistJson : "+Gson().toJson(recentPlaylistIds))
+//                    PreferenceUtils.defaultPrefs(requireContext())[RECENTLY_PLAYED_PLAYLIST] = Gson().toJson(recentPlaylistIds)
+//
 //                    activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
 //                    val playlistPlayerFragment =
 //                        playlistModel?.let { PlaylistPlayerFragment.newInstance(selectedPlaylistItemModel.id, it) }
@@ -318,30 +364,56 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 //        webView?.webViewClient = webViewClientImpl
 //        webView?.loadUrl(selectedPlaylistItemModel.mediaSrc)
 
-        activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
-        val playlistPlayerFragment =
-            playlistModel?.let { PlaylistPlayerFragment.newInstance(selectedPlaylistItemModel.id, it) }
-        if (playlistPlayerFragment != null) {
-            parentFragmentManager.beginTransaction()
-                .replace(android.R.id.content, playlistPlayerFragment)
-                .addToBackStack(PlaylistFragment::class.simpleName)
-                .commit()
+        if (!PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+            var recentPlaylistIds = LinkedList<String>()
+            val recentPlaylistJson =
+                PlaylistPreferenceUtils.defaultPrefs(requireContext())[RECENTLY_PLAYED_PLAYLIST, ""]
+            if (recentPlaylistJson.isNotEmpty()) {
+                Log.e("recent_playlist", "recentPlaylistJson : " + recentPlaylistJson)
+//            val type: Type = object : TypeToken<LinkedList<String>>() {}.type
+//            recentPlaylist = Gson().fromJson(recentPlaylistJson, type)
+                recentPlaylistIds = GsonBuilder().create().fromJson(
+                    recentPlaylistJson,
+                    TypeToken.getParameterized(LinkedList::class.java, String::class.java).type
+                )
+                if (recentPlaylistIds.contains(playlistModel?.id)) {
+                    recentPlaylistIds.remove(playlistModel?.id)
+                }
+            }
+            recentPlaylistIds.addFirst(playlistModel?.id)
+
+            Log.e(
+                "recent_playlist",
+                "after recentPlaylistJson : " + Gson().toJson(recentPlaylistIds)
+            )
+            PlaylistPreferenceUtils.defaultPrefs(requireContext())[RECENTLY_PLAYED_PLAYLIST] =
+                Gson().toJson(recentPlaylistIds)
+
+            activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
+            val playlistPlayerFragment =
+                playlistModel?.let {
+                    PlaylistPlayerFragment.newInstance(
+                        selectedPlaylistItemModel.id,
+                        it
+                    )
+                }
+            if (playlistPlayerFragment != null) {
+                parentFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, playlistPlayerFragment)
+                    .addToBackStack(PlaylistFragment::class.simpleName)
+                    .commit()
+            }
+        } else {
+            Toast.makeText(requireContext(), "Playlist item is expired", Toast.LENGTH_SHORT).show()
+            val playlistItemOptionModel = PlaylistItemOptionModel(
+                requireContext().resources.getString(R.string.playlist_open_in_private_tab),
+                R.drawable.ic_private_tab,
+                PlaylistOptions.RECOVER_PLAYLIST_ITEM,
+                playlistItemModel = selectedPlaylistItemModel,
+                playlistId = selectedPlaylistItemModel.playlistId
+            )
+            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }
-
-
-//        if (selectedPlaylistItemModel.isCached || !PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
-//            activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
-//            val playlistPlayerFragment =
-//                playlistModel?.let { PlaylistPlayerFragment.newInstance(selectedPlaylistItemModel.id, it) }
-//            if (playlistPlayerFragment != null) {
-//                parentFragmentManager.beginTransaction()
-//                    .replace(android.R.id.content, playlistPlayerFragment)
-//                    .addToBackStack(PlaylistFragment::class.simpleName)
-//                    .commit()
-//            } else {
-//                // Download new content and open playlist player
-//            }
-//        }
     }
 
     override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
@@ -373,7 +445,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
         if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
-                PlaylistUtils.showSharingDialog(requireContext(),
+                PlaylistUtils.showSharingDialog(
+                    requireContext(),
                     it
                 )
             }

@@ -44,10 +44,10 @@ object MenuUtils {
 //                playlistId = playlistId
 //            )
 //        )
-        if (shouldHideDeleteOption) {
+        if (!shouldHideDeleteOption) {
             optionsList.add(
                 PlaylistItemOptionModel(
-                    context.resources.getString(R.string.delete_item_offline_data),
+                    context.resources.getString(R.string.playlist_delete_item_offline_data),
                     R.drawable.ic_remove_offline_data_playlist,
                     PlaylistOptions.DELETE_ITEMS_OFFLINE_DATA,
                     playlistItemModel = playlistItemModel,
@@ -57,7 +57,7 @@ object MenuUtils {
         }
         optionsList.add(
             PlaylistItemOptionModel(
-                context.resources.getString(R.string.share_item),
+                context.resources.getString(R.string.playlist_share_item),
                 R.drawable.ic_share,
                 PlaylistOptions.SHARE_PLAYLIST_ITEM,
                 playlistItemModel = playlistItemModel,
@@ -66,7 +66,7 @@ object MenuUtils {
         )
         optionsList.add(
             PlaylistItemOptionModel(
-                context.resources.getString(R.string.open_in_new_tab),
+                context.resources.getString(R.string.playlist_open_in_new_tab),
                 R.drawable.ic_new_tab,
                 PlaylistOptions.OPEN_IN_NEW_TAB,
                 playlistItemModel = playlistItemModel,
@@ -75,7 +75,7 @@ object MenuUtils {
         )
         optionsList.add(
             PlaylistItemOptionModel(
-                context.resources.getString(R.string.open_in_private_tab),
+                context.resources.getString(R.string.playlist_open_in_private_tab),
                 R.drawable.ic_private_tab,
                 PlaylistOptions.OPEN_IN_PRIVATE_TAB,
                 playlistItemModel = playlistItemModel,
@@ -84,19 +84,12 @@ object MenuUtils {
         )
         optionsList.add(
             PlaylistItemOptionModel(
-                context.resources.getString(R.string.open_in_private_tab),
-                R.drawable.ic_private_tab,
-                PlaylistOptions.OPEN_IN_PRIVATE_TAB,
+                context.resources.getString(R.string.playlist_delete_item),
+                R.drawable.ic_playlist_delete,
+                PlaylistOptions.DELETE_PLAYLIST_ITEM,
                 playlistItemModel = playlistItemModel,
                 playlistId = playlistId
             )
-        )
-        PlaylistItemOptionModel(
-            context.resources.getString(R.string.delete_item),
-            R.drawable.ic_playlist_delete,
-            PlaylistOptions.DELETE_PLAYLIST_ITEM,
-            playlistItemModel = playlistItemModel,
-            playlistId = playlistId
         )
         PlaylistItemOptionsBottomSheet(
             optionsList, playlistItemOptionsListener
@@ -113,12 +106,12 @@ object MenuUtils {
         PlaylistOptionsBottomSheet(
             mutableListOf(
                 PlaylistOptionsModel(
-                    context.resources.getString(R.string.remove_all_offline_data),
+                    context.resources.getString(R.string.playlist_remove_all_offline_data),
                     R.drawable.ic_remove_offline_data_playlist,
                     PlaylistOptions.REMOVE_ALL_OFFLINE_DATA,
                     allPlaylistList
                 ), PlaylistOptionsModel(
-                    context.resources.getString(R.string.download_all_playlists_for_offline_use),
+                    context.resources.getString(R.string.playlist_download_all_playlists_for_offline_use),
                     R.drawable.ic_cloud_download,
                     PlaylistOptions.DOWNLOAD_ALL_PLAYLISTS_FOR_OFFLINE_USE,
                     allPlaylistList
@@ -137,12 +130,12 @@ object MenuUtils {
         PlaylistOptionsBottomSheet(
             mutableListOf(
                 PlaylistOptionsModel(
-                    view.resources.getString(R.string.move_item),
+                    view.resources.getString(R.string.playlist_move_item),
                     R.drawable.ic_move_media,
                     PlaylistOptions.MOVE_PLAYLIST_ITEMS,
                     playlistItemModels = selectedItems
                 ), PlaylistOptionsModel(
-                    view.resources.getString(R.string.copy_item),
+                    view.resources.getString(R.string.playlist_copy_item),
                     R.drawable.ic_copy_media,
                     PlaylistOptions.COPY_PLAYLIST_ITEMS,
                     playlistItemModels = selectedItems
@@ -163,7 +156,7 @@ object MenuUtils {
         val optionsList: MutableList<PlaylistOptionsModel> = mutableListOf()
         optionsList.add(
             PlaylistOptionsModel(
-                context.resources.getString(R.string.edit_text),
+                context.resources.getString(R.string.playlist_edit_text),
                 R.drawable.ic_edit_playlist,
                 PlaylistOptions.EDIT_PLAYLIST,
                 playlistModel = playlistModel
@@ -172,7 +165,7 @@ object MenuUtils {
         if (!isDefaultPlaylist) {
             optionsList.add(
                 PlaylistOptionsModel(
-                    context.resources.getString(R.string.rename_text),
+                    context.resources.getString(R.string.playlist_rename_text),
                     R.drawable.ic_rename_playlist,
                     PlaylistOptions.RENAME_PLAYLIST,
                     playlistModel = playlistModel
@@ -181,7 +174,7 @@ object MenuUtils {
         }
         optionsList.add(
             PlaylistOptionsModel(
-                context.resources.getString(R.string.remove_playlist_offline_data),
+                context.resources.getString(R.string.playlist_remove_playlist_offline_data),
                 R.drawable.ic_remove_offline_data_playlist,
                 PlaylistOptions.REMOVE_PLAYLIST_OFFLINE_DATA,
                 playlistModel = playlistModel
@@ -189,7 +182,7 @@ object MenuUtils {
         )
         optionsList.add(
             PlaylistOptionsModel(
-                context.resources.getString(R.string.download_playlist_for_offline_use),
+                context.resources.getString(R.string.playlist_download_playlist_for_offline_use),
                 R.drawable.ic_cloud_download,
                 PlaylistOptions.DOWNLOAD_PLAYLIST_FOR_OFFLINE_USE,
                 playlistModel = playlistModel
@@ -198,7 +191,7 @@ object MenuUtils {
         if (!isDefaultPlaylist) {
             optionsList.add(
                 PlaylistOptionsModel(
-                    context.resources.getString(R.string.delete_playlist),
+                    context.resources.getString(R.string.playlist_delete_playlist),
                     R.drawable.ic_playlist_delete,
                     PlaylistOptions.DELETE_PLAYLIST,
                     playlistModel = playlistModel

@@ -13,6 +13,8 @@
         android:layout_height="@dimen/playlist_toolbar_height"
         app:optionButtonIcon="@drawable/ic_options_toolbar_playlist"
         app:showOptions="true"
+        app:backButtonTint="@color/playlist_text_color"
+        app:optionButtonTint="@color/playlist_text_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:fontFamily="sans-serif-medium"
-        android:text="@string/string_playlists"
+        android:text="@string/playlist_playlists_text"
         android:textColor="@color/playlist_text_color"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,7 +39,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="24dp"
         android:fontFamily="sans-serif-medium"
-        android:text="@string/recently_played"
+        android:text="@string/playlist_recently_played"
         android:textColor="@color/playlist_text_color"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -55,7 +57,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvRecentlyPlayed"
-        tools:itemCount="1"
         tools:listitem="@layout/item_recently_played_playlist" />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -65,7 +66,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="32dp"
         android:fontFamily="sans-serif-medium"
-        android:text="@string/string_playlists"
+        android:text="@string/playlist_playlists_text"
         android:textColor="@color/playlist_text_color"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"

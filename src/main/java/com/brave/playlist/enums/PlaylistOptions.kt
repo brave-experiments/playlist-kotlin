@@ -26,6 +26,7 @@ enum class PlaylistOptions {
     OPEN_IN_NEW_TAB,
     OPEN_IN_PRIVATE_TAB,
     DELETE_PLAYLIST_ITEM,
+    RECOVER_PLAYLIST_ITEM,
 
     // Playlist multiple items options
     MOVE_PLAYLIST_ITEMS,

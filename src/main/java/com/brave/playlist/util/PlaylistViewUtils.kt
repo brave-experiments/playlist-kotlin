@@ -17,14 +17,16 @@ import com.brave.playlist.interpolator.BraveBounceInterpolator
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.model.SnackBarActionModel
+import com.brave.playlist.util.PlaylistPreferenceUtils.SHOULD_SHOW_PLAYLIST_ONBOARDING
+import com.brave.playlist.util.PlaylistPreferenceUtils.get
+import com.brave.playlist.util.PlaylistPreferenceUtils.set
 import com.brave.playlist.view.MovableImageButton
 import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.google.android.material.snackbar.Snackbar
 
-
 object PlaylistViewUtils {
     @JvmStatic
-    fun showPlaylistButton(activity: Activity, parent: ViewGroup, playlistOptionsListener: PlaylistOptionsListener, shouldShowOnboarding : Boolean) {
+    fun showPlaylistButton(activity: Activity, parent: ViewGroup, playlistOptionsListener: PlaylistOptionsListener) {
         val movableImageButton = MovableImageButton(activity)
         movableImageButton.id = R.id.playlist_button_id
         movableImageButton.setBackgroundResource(R.drawable.ic_playlist_floating_button_bg)
@@ -40,34 +42,36 @@ object PlaylistViewUtils {
         movableImageButton.elevation = 8.0f
         movableImageButton.visibility=View.GONE
         movableImageButton.setOnClickListener {
+            val shouldShowOnboarding: Boolean = PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING, true]
             if (shouldShowOnboarding) {
                 val playlistActivityIntent =
                     Intent(activity, PlaylistMenuOnboardingActivity::class.java)
                 playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 activity.startActivity(playlistActivityIntent)
+                PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING] = false
             } else {
                 PlaylistOptionsBottomSheet(
                     mutableListOf(
                         PlaylistOptionsModel(
-                            activity.getString(R.string.add_media),
+                            activity.getString(R.string.playlist_add_media),
                             R.drawable.ic_add_media_to_playlist,
                             PlaylistOptions.ADD_MEDIA
                         ),
                         PlaylistOptionsModel(
-                            activity.getString(R.string.open_playlist),
+                            activity.getString(R.string.playlist_open_playlist),
                             R.drawable.ic_open_playlist,
                             PlaylistOptions.OPEN_PLAYLIST
                         ),
                         PlaylistOptionsModel(
-                            activity.getString(R.string.open_playlist_settings),
+                            activity.getString(R.string.playlist_open_playlist_settings),
                             R.drawable.ic_playlist_settings,
                             PlaylistOptions.PLAYLIST_SETTINGS
                         ),
-                        PlaylistOptionsModel(
-                            activity.getString(R.string.hide_playlist_button),
-                            R.drawable.ic_playlist_hide,
-                            PlaylistOptions.PLAYLIST_HIDE
-                        )
+//                        PlaylistOptionsModel(
+//                            activity.getString(R.string.hide_playlist_button),
+//                            R.drawable.ic_playlist_hide,
+//                            PlaylistOptions.PLAYLIST_HIDE
+//                        )
                     )
                     , playlistOptionsListener).show((activity as FragmentActivity).supportFragmentManager, null)
             }

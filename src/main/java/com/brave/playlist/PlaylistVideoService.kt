@@ -261,7 +261,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                 currentPlayer!!.setMediaItems(mediaQueue, itemIndex, C.TIME_UNSET)
             }
         } else {
-            currentPlayer!!.seekTo(itemIndex, C.TIME_UNSET)
+            playlistItemsModel?.get(currentItemIndex)?.lastPlayedPosition?.toLong()
+                ?.let { currentPlayer!!.seekTo(itemIndex, it) }
         }
         currentPlayer!!.playWhenReady = true
     }

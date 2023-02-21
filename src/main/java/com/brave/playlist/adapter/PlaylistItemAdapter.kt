@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.text.format.Formatter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -18,15 +15,10 @@ import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.StartDragListener
 import com.brave.playlist.model.DownloadProgressModel
 import com.brave.playlist.model.PlaylistItemModel
-import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.IOException
 
 class PlaylistItemAdapter(
     mediaItemList: MutableList<PlaylistItemModel>,
@@ -36,9 +28,11 @@ class PlaylistItemAdapter(
     AbstractRecyclerViewAdapter<PlaylistItemAdapter.MediaItemViewHolder, PlaylistItemModel>(
         mediaItemList
     ) {
-
     private var editMode = false
     private var isBottomLayout = false
+    init {
+        editMode =false
+    }
 
     private var allViewHolderViews = HashMap<String, View>()
     fun updatePlaylistItemDownloadProgress(downloadProgressModel: DownloadProgressModel) {
@@ -53,7 +47,7 @@ class PlaylistItemAdapter(
         } else {
             ivMediaStatus?.visibility = View.GONE
             tvMediaDownloadProgress?.visibility = View.VISIBLE
-            tvMediaDownloadProgress?.text = view?.resources?.getString(R.string.percentage_text)
+            tvMediaDownloadProgress?.text = view?.resources?.getString(R.string.playlist_percentage_text)
                 ?.let { String.format(it, downloadProgressModel.percentComplete.toString()) }
         }
     }
@@ -120,25 +114,7 @@ class PlaylistItemAdapter(
                     .placeholder(R.drawable.ic_playlist_item_placeholder)
                     .error(R.drawable.ic_playlist_item_placeholder)
                     .load(model.thumbnailPath)
-                    .into(object : CustomTarget<Bitmap>() {
-                        override fun onResourceReady(
-                            resource: Bitmap,
-                            transition: Transition<in Bitmap>?
-                        ) {
-                            ivMediaThumbnail.setImageBitmap(
-                                PlaylistUtils.getRoundedCornerBitmap(
-                                    resource
-                                )
-                            )
-                        }
-
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                            // this is called when imageView is cleared on lifecycle call or for
-                            // some other reason.
-                            // if you are referencing the bitmap somewhere else too other than this imageView
-                            // clear it here as you can no longer have the bitmap
-                        }
-                    })
+                    .into(ivMediaThumbnail)
             } else {
                 ivMediaThumbnail.setImageResource(R.drawable.ic_playlist_item_placeholder)
             }
@@ -161,9 +137,9 @@ class PlaylistItemAdapter(
                     val hours =
                         ((((duration / 1000) - milliseconds) / 1000 - seconds) / 60 - minutes) / 60
 
-                    val hourTime : String = if (hours > 0) itemView.context.resources.getString(R.string.time_text , hours.toString()) else ""
-                    val minuteTime : String = if (minutes > 0) itemView.context.resources.getString(R.string.time_text , minutes.toString()) else ""
-                    tvMediaDuration.text =  itemView.context.resources.getString(R.string.duration_text , hourTime, minuteTime, seconds.toString())
+                    val hourTime : String = if (hours > 0) itemView.context.resources.getString(R.string.playlist_time_text , hours.toString()) else ""
+                    val minuteTime : String = if (minutes > 0) itemView.context.resources.getString(R.string.playlist_time_text , minutes.toString()) else ""
+                    tvMediaDuration.text =  itemView.context.resources.getString(R.string.playlist_duration_text , hourTime, minuteTime, seconds.toString())
                 }
             }
             ivMediaOptions.visibility = if (!editMode) View.VISIBLE else View.GONE
@@ -211,7 +187,7 @@ class PlaylistItemAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaItemViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_media, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.playlist_item_layout, parent, false)
         return MediaItemViewHolder(view)
     }
 

@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            android:text="@string/tap_long_press_or_drag"
+            android:text="@string/playlist_tap_long_press_or_drag"
             android:textColor="@color/playlist_text_color" />
 
         <androidx.appcompat.widget.AppCompatImageView

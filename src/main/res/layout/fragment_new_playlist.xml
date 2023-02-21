@@ -11,10 +11,11 @@
         android:id="@+id/playlistToolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/playlist_toolbar_height"
-        app:actionButtonText="@string/create_toolbar_playlist"
+        app:actionButtonText="@string/playlist_create_toolbar_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:backButtonTint="@color/playlist_text_color"
         app:showActionButton="true" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -36,7 +37,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:hint="@string/playlist_name"
+        android:hint="@string/playlist_name_text"
         android:theme="@style/TextInputLayout"
         app:hintTextAppearance="@style/HintStyle"
         app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
@@ -49,7 +50,7 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:singleLine="true"
-            android:text="@string/untitled_playlist"
+            android:text="@string/playlist_untitled_text"
             android:textColor="@color/playlist_text_color"
             android:textSize="16sp" />
     </com.google.android.material.textfield.TextInputLayout>

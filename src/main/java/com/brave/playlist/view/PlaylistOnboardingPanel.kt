@@ -50,7 +50,7 @@ class PlaylistOnboardingPanel(fragmentActivity: FragmentActivity, anchorView: Vi
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 if (position==2) {
-                    nextButton.text = fragmentActivity.getString(R.string.try_it)
+                    nextButton.text = fragmentActivity.getString(R.string.playlist_try_it)
                 }
                 adapter.notifyItemChanged(position)
             }

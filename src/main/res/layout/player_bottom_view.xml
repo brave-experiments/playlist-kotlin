@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="16dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_media"
+            tools:listitem="@layout/playlist_item_layout"
             android:nestedScrollingEnabled="true"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>

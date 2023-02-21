@@ -61,7 +61,8 @@ class MoveOrCopyToPlaylistBottomSheet(private val moveOrCopyModel: MoveOrCopyMod
                         jsonObject.getString("media_src"),
                         jsonObject.getString("thumbnail_path"),
                         jsonObject.getString("author"),
-                        jsonObject.getString("duration")
+                        jsonObject.getString("duration"),
+                        jsonObject.getInt("last_played_position"),
                     )
                     playlistList.add(playlistItemModel)
                 }

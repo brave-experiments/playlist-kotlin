@@ -10,8 +10,10 @@ import android.content.res.Configuration
 import android.os.*
 import android.util.Log
 import android.util.Rational
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.SeekBar
@@ -24,7 +26,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.mediarouter.app.MediaRouteButton
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
@@ -41,10 +42,8 @@ import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
 import com.brave.playlist.util.MenuUtils
-import com.brave.playlist.util.PlaylistItemGestureHelper
 import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
-import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -117,14 +116,15 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     private fun updatePortraitView() {
-//        val layoutParams: FrameLayout.LayoutParams =
-//            parentLayout.layoutParams as FrameLayout.LayoutParams
-//        layoutParams.topMargin = TypedValue.applyDimension(
-//            TypedValue.COMPLEX_UNIT_DIP,
-//            48F,
-//            resources.displayMetrics
-//        ).toInt()
-//        parentLayout.layoutParams = layoutParams
+        val layoutParams: FrameLayout.LayoutParams =
+            styledPlayerView.layoutParams as FrameLayout.LayoutParams
+        layoutParams.height = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            300F,
+            resources.displayMetrics
+        ).toInt()
+        styledPlayerView.layoutParams = layoutParams
+
         mainLayout.mSlideState = BottomPanelLayout.PanelState.COLLAPSED
         if (!isCastInProgress) {
             styledPlayerView.useController = false
@@ -135,14 +135,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     private fun updateLandscapeView() {
-//        val layoutParams: FrameLayout.LayoutParams =
-//            parentLayout.layoutParams as FrameLayout.LayoutParams
-//        layoutParams.topMargin = TypedValue.applyDimension(
-//            TypedValue.COMPLEX_UNIT_DIP,
-//            32F,
-//            resources.displayMetrics
-//        ).toInt()
-//        parentLayout.layoutParams = layoutParams
+        val layoutParams: FrameLayout.LayoutParams =
+            styledPlayerView.layoutParams as FrameLayout.LayoutParams
+        layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
+        styledPlayerView.layoutParams = layoutParams
         mainLayout.mSlideState = BottomPanelLayout.PanelState.HIDDEN
         styledPlayerView.useController = true
         styledPlayerView.controllerHideOnTouch = false
@@ -178,6 +174,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         arguments?.let {
             playlistModel = it.getParcelable(PLAYLIST_MODEL)
             selectedPlaylistItemId = it.getString(SELECTED_PLAYLIST_ITEM_ID).toString()
@@ -196,7 +193,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             )
         }!![PlaylistViewModel::class.java]
 
-        playlistViewModel.fetchPlaylistData(playlistModel?.id)
+        playlistModel?.id?.let { playlistViewModel.fetchPlaylistData(it) }
 
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
         tvVideoTitle = view.findViewById(R.id.tvVideoTitle)
@@ -204,9 +201,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         tvPlaylistName = view.findViewById(R.id.tvPlaylistName)
 
         tvVideoSource.text =
-            if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.watch_later) else playlistModel?.name
+            if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.playlist_play_later) else playlistModel?.name
         tvPlaylistName.text =
-            if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.watch_later) else playlistModel?.name
+            if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.playlist_play_later) else playlistModel?.name
 
         styledPlayerView = view.findViewById(R.id.styledPlayerView)
         styledPlayerView.setOnTouchListener { v, event ->
@@ -247,7 +244,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 MenuUtils.showPlaylistItemMenu(
                     view.context, parentFragmentManager,
                     currentPlaylistItem, playlistId = model.id, playlistItemOptionsListener = this,
-                    true
+                    shouldHideDeleteOption = true
                 )
             }
         }
@@ -279,6 +276,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                     jsonObject.getString("thumbnail_path"),
                     jsonObject.getString("author"),
                     jsonObject.getString("duration"),
+                    jsonObject.getInt("last_played_position"),
                     jsonObject.getBoolean("cached")
                 )
 
@@ -300,7 +298,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 .apply {
                     putExtra(
                         PLAYLIST_NAME,
-                        if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.watch_later) else playlistModel?.name
+                        if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.playlist_play_later) else playlistModel?.name
                     )
                     putParcelableArrayListExtra(PLAYER_ITEMS, ArrayList(playlistItems))
                 }
@@ -453,12 +451,17 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private fun initializePlayer() {
         playlistVideoService?.setPlayerView(styledPlayerView)
         styledPlayerView.player = playlistVideoService?.getCurrentPlayer()
-        playlistVideoService?.getCurrentPlayer()?.addListener(this)
-        playlistVideoService?.getCurrentPlayer()?.shuffleModeEnabled = isShuffleOn
-        playlistVideoService?.getCurrentPlayer()?.seekTo(currentMediaIndex, playbackPosition)
-        playlistVideoService?.getCurrentPlayer()?.repeatMode = repeatMode
-        playlistVideoService?.getCurrentPlayer()?.setPlaybackSpeed(playbackSpeed)
-        playlistVideoService?.getCurrentPlayer()?.playWhenReady = playWhenReady
+        playlistVideoService?.getCurrentPlayer()?.let {
+            it.addListener(this)
+            it.shuffleModeEnabled = isShuffleOn
+            it.seekTo(currentMediaIndex,
+                playlistItems[it.currentMediaItemIndex].lastPlayedPosition.toLong()
+            )
+            it.repeatMode = repeatMode
+            it.setPlaybackSpeed(playbackSpeed)
+        }
+//        playlistVideoService?.getCurrentPlayer()?.playWhenReady = playWhenReady
+//        playlistVideoService?.getCurrentPlayer()?.prepare()
 //        playlistItems.forEach { mediaModel ->
 //            playlistVideoService?.addItem(
 //                MediaItem.Builder()
@@ -632,7 +635,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             parentFragmentManager,
             playlistItemModel = playlistItemModel,
             playlistId = playlistItemModel.playlistId,
-            playlistItemOptionsListener = this
+            playlistItemOptionsListener = this,
+            shouldHideDeleteOption = true
         )
     }
 
@@ -657,17 +661,18 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //        playlistVideoService?.getCurrentPlayer()?.stop()
         if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
-                PlaylistUtils.showSharingDialog(requireContext(),
+                PlaylistUtils.showSharingDialog(
+                    requireContext(),
                     it
                 )
             }
         } else {
+            if (playlistItemOptionModel.optionType == PlaylistOptions.DELETE_PLAYLIST_ITEM) {
+                playlistVideoService?.getCurrentPlayer()?.stop()
+                activity?.onBackPressedDispatcher?.onBackPressed()
+            }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }
-//            if (playlistOptionsModel.optionType != PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistOptionsModel.optionType != PlaylistOptions.COPY_PLAYLIST_ITEM) {
-//                activity?.onBackPressedDispatcher?.onBackPressed()
-//            }
-
     }
 
 

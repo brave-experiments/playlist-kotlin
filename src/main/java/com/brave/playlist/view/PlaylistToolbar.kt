@@ -1,6 +1,7 @@
 package com.brave.playlist.view
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.WindowManager
 import android.widget.TextView
@@ -9,6 +10,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.widget.ImageViewCompat
 import com.brave.playlist.R
 
 class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
@@ -58,13 +60,25 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             R.drawable.ic_options_toolbar_playlist
         )
 
+        val optionButtonTint = typedArray.getResourceId(
+            R.styleable.PlaylistToolbar_optionButtonTint,
+            android.R.color.white
+        )
+
+        val backButtonTint = typedArray.getResourceId(
+            R.styleable.PlaylistToolbar_backButtonTint,
+            android.R.color.white
+        )
+
         layoutMainToolbar = findViewById(R.id.layoutMainToolbar)
         tvTitleToolbarPlaylist = findViewById(R.id.tvTitleToolbarPlaylist)
         val ivBackToolbarPlaylist: AppCompatImageView = findViewById(R.id.ivBackToolbarPlaylist)
         ivOptionsToolbarPlayList = findViewById(R.id.ivOptionsToolbarPlaylist)
         tvActionToolbarPlaylist = findViewById(R.id.tvActionToolbarPlaylist)
         ivOptionsToolbarPlayList.setImageResource(optionButtonIcon)
+        ImageViewCompat.setImageTintList(ivOptionsToolbarPlayList, ColorStateList.valueOf(getColor(optionButtonTint)))
         ivBackToolbarPlaylist.setImageResource(backButtonIcon)
+        ImageViewCompat.setImageTintList(ivBackToolbarPlaylist, ColorStateList.valueOf(getColor(backButtonTint)))
         ivOptionsToolbarPlayList.visibility = if (showOptions) VISIBLE else GONE
         tvActionToolbarPlaylist.visibility = if (showCreateButton) VISIBLE else GONE
         ivBackToolbarPlaylist.setOnClickListener {
@@ -81,7 +95,7 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
         tvItemSelected = layoutEditToolbar.findViewById(R.id.tvItemSelected)
         ivMoveItem = layoutEditToolbar.findViewById(R.id.ivMoveItem)
         ivDeleteItem = layoutEditToolbar.findViewById(R.id.ivDeleteItem)
-        tvItemSelected.text = context.getString(R.string.number_selected, 0)
+        tvItemSelected.text = context.getString(R.string.playlist_number_selected, 0)
 
         defaultStatusBarColor = if (context is AppCompatActivity)
             context.window.statusBarColor
@@ -89,8 +103,8 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             0
 
         if (requireDarkMode) {
-            tvTitleToolbarPlaylist.setTextColor(getColor(R.color.playlist_white))
-            ivBackToolbarPlaylist.setColorFilter(getColor(R.color.playlist_white))
+            tvTitleToolbarPlaylist.setTextColor(getColor(android.R.color.white))
+            ivBackToolbarPlaylist.setColorFilter(getColor(android.R.color.white))
         }
 
         typedArray.recycle()
@@ -103,7 +117,7 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     }
 
     fun updateSelectedItems(count:Int) {
-        tvItemSelected.text = context.getString(R.string.number_selected, count)
+        tvItemSelected.text = context.getString(R.string.playlist_number_selected, count)
     }
 
     fun enableEditMode(enable: Boolean) {

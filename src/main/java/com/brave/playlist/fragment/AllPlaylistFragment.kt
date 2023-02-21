@@ -1,7 +1,9 @@
 package com.brave.playlist.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,9 +19,15 @@ import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.MenuUtils
+import com.brave.playlist.util.PlaylistPreferenceUtils
+import com.brave.playlist.util.PlaylistPreferenceUtils.get
 import com.brave.playlist.view.PlaylistToolbar
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import org.json.JSONArray
+import java.util.LinkedList
 
 class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOptionsListener,
     PlaylistClickListener {
@@ -54,6 +62,20 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             val allPlaylistList = mutableListOf<PlaylistModel>()
             val allPlaylistJsonArray = JSONArray(allPlaylistData)
+
+            var recentPlaylistIds = LinkedList<String>()
+            val recentPlaylist = LinkedList<PlaylistModel>()
+            val recentPlaylistJson =
+                PlaylistPreferenceUtils.defaultPrefs(requireContext())[PlaylistPreferenceUtils.RECENTLY_PLAYED_PLAYLIST, ""]
+            if (recentPlaylistJson.isNotEmpty()) {
+                recentPlaylistIds = GsonBuilder().create().fromJson(
+                    recentPlaylistJson,
+                    TypeToken.getParameterized(LinkedList::class.java, String::class.java).type
+                )
+                Log.e("recent_playlist", "All playlist : recentPlaylistJson : "+recentPlaylistIds)
+            }
+
+            var defaultPlaylistModel:PlaylistModel? = null
             for (i in 0 until allPlaylistJsonArray.length()) {
                 val playlistList = mutableListOf<PlaylistItemModel>()
                 val playlistJsonObject = allPlaylistJsonArray.getJSONObject(i)
@@ -70,29 +92,61 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                         jsonObject.getString("thumbnail_path"),
                         jsonObject.getString("author"),
                         jsonObject.getString("duration"),
+                        jsonObject.getInt("last_played_position"),
                         jsonObject.getBoolean("cached")
                     )
                     playlistList.add(playlistItemModel)
                 }
 
-                allPlaylistList.add(
-                    PlaylistModel(
-                        playlistJsonObject.getString("id"),
-                        playlistJsonObject.getString("name"),
-                        playlistList
-                    )
+                val playlistModel = PlaylistModel(
+                    playlistJsonObject.getString("id"),
+                    playlistJsonObject.getString("name"),
+                    playlistList
                 )
+
+                if (playlistModel.id==DEFAULT_PLAYLIST) {
+                    defaultPlaylistModel = playlistModel
+                } else {
+                    allPlaylistList.add(
+                        playlistModel
+                    )
+                }
+            }
+            defaultPlaylistModel?.let { allPlaylistList.add(0, it) }
+
+            if (recentPlaylistIds.size > 0) {
+                recentPlaylistIds.forEach ids@ {
+                    allPlaylistList.forEach models@{ model ->
+                        if (model.id == it && model.items.isNotEmpty()) {
+                            recentPlaylist.add(model)
+                            return@models
+                        }
+                    }
+                }
+            }
+
+            recentPlaylist.forEach{
+                Log.e("recent_playlist", "\nafter All playlist : recentPlaylistJson : "+it.id)
             }
 
             playlistToolbar.setOptionsButtonClickListener {
-                MenuUtils.showAllPlaylistsMenu(it.context, parentFragmentManager,allPlaylistList , this)
+                MenuUtils.showAllPlaylistsMenu(
+                    it.context,
+                    parentFragmentManager,
+                    allPlaylistList,
+                    this
+                )
             }
 
             val rvRecentlyPlayed: RecyclerView = view.findViewById(R.id.rvRecentlyPlayed)
-            val rvPlaylist: RecyclerView = view.findViewById(R.id.rvPlaylists)
             rvRecentlyPlayed.layoutManager =
                 LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-            rvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(mutableListOf())
+            rvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(recentPlaylist, this)
+            rvRecentlyPlayed.visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+            view.findViewById<TextView>(R.id.tvRecentlyPlayed).visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+            view.findViewById<TextView>(R.id.tvPlaylistHeader).visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+
+            val rvPlaylist: RecyclerView = view.findViewById(R.id.rvPlaylists)
             rvPlaylist.layoutManager = LinearLayoutManager(requireContext())
             rvPlaylist.adapter = PlaylistAdapter(allPlaylistList, this)
         }

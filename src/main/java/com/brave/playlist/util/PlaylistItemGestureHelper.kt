@@ -83,8 +83,8 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
             if (viewHolder.adapterPosition == swipePosition)
                 swipePosition = -1
             buttonPositions.remove(viewHolder.adapterPosition)
-            adapter.removeAt(viewHolder.adapterPosition)
             itemInteractionListener.onItemDelete(viewHolder.layoutPosition)
+//            adapter.removeAt(viewHolder.adapterPosition)
         } else if (direction == END)
             oldSwipePosition = swipePosition
     }
@@ -242,7 +242,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
     private fun instantiateOptions(position: Int): List<OptionButton> =
         listOf(
             OptionButton(position, itemInteractionListener::onRemoveFromOffline),
-            OptionButton(position, itemInteractionListener::onRemoveFromOffline)
+            OptionButton(position, itemInteractionListener::onShare)
         )
 
     inner class OptionButton(

@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
-            android:text="@string/create_a_playlist"
+            android:text="@string/playlist_create_text"
             android:textColor="@color/playlist_text_color"
             android:textSize="20sp" />
 
@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/first_playlist_message"
+            android:text="@string/playlist_first_message_text"
             android:textColor="@color/dialog_message" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="32dp"
                 android:fontFamily="sans-serif-medium"
-                android:text="@string/remove_data"
+                android:text="@string/playlist_remove_data"
                 android:textAllCaps="true"
                 android:textColor="@color/red_playlist" />
         </androidx.appcompat.widget.LinearLayoutCompat>

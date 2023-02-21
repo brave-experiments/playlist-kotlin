@@ -38,33 +38,15 @@ class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val play
                     .placeholder(R.drawable.ic_playlist_item_placeholder)
                     .error(R.drawable.ic_playlist_item_placeholder)
                     .load(model.items[0].thumbnailPath)
-                    .into(object : CustomTarget<Bitmap>() {
-                        override fun onResourceReady(
-                            resource: Bitmap,
-                            transition: Transition<in Bitmap>?
-                        ) {
-                            ivPlaylistThumbnail.setImageBitmap(
-                                PlaylistUtils.getRoundedCornerBitmap(
-                                    resource
-                                )
-                            )
-                        }
-
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                            // this is called when imageView is cleared on lifecycle call or for
-                            // some other reason.
-                            // if you are referencing the bitmap somewhere else too other than this imageView
-                            // clear it here as you can no longer have the bitmap
-                        }
-                    })
+                    .into(ivPlaylistThumbnail)
             } else {
                 ivPlaylistThumbnail.setImageResource(R.drawable.ic_playlist_item_placeholder)
             }
 
             tvPlaylistTitle.text =
-                if (model.id == DEFAULT_PLAYLIST) itemView.context.resources.getString(R.string.watch_later) else model.name
+                if (model.id == DEFAULT_PLAYLIST) itemView.context.resources.getString(R.string.playlist_play_later) else model.name
             tvPlaylistItemCount.text =
-                itemView.context.getString(R.string.number_items, model.items?.size)
+                itemView.context.getString(R.string.playlist_number_items, model.items.size)
             itemView.setOnClickListener {
                 playlistClickListener?.onPlaylistClick(model)
             }

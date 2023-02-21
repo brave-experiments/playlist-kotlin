@@ -3,7 +3,6 @@
     <color name="playlist_background">#FFFFFF</color>
     <color name="red_playlist">#FB542B</color>
     <color name="playlist_text_color">#000000</color>
-    <color name="playlist_white">#FFFFFF</color>
     <color name="icon_tint">#000000</color>
     <color name="bottom_sheet_dim_color">#50000000</color>
     <color name="hint_color">#50FFFFFF</color>
@@ -21,4 +20,5 @@
     <color name="playlist_progress_bar_tint">#F0F2FF</color>
     <color name="playlist_progress_bar_tint_bg">#20F0F2FF</color>
     <color name="playlist_behavior">#C2C4CF</color>
+    <color name="playlist_transparent_bg">#80000000</color>
 </resources>

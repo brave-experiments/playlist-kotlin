@@ -42,8 +42,8 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
             etPlaylistName.setText(playlistModel!!.name)
         }
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
-        playlistToolbar.setToolbarTitle(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.new_playlist) else getString(R.string.rename_text))
-        playlistToolbar.setActionText(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.create_toolbar_playlist) else getString(R.string.rename_text))
+        playlistToolbar.setToolbarTitle(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.playlist_new_text) else getString(R.string.playlist_rename_text))
+        playlistToolbar.setActionText(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.playlist_create_toolbar_text) else getString(R.string.playlist_rename_text))
         playlistToolbar.setActionButtonClickListener {
             if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) {
                 playlistViewModel.setCreatePlaylistOption(etPlaylistName.text.toString())
