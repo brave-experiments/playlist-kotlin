@@ -316,6 +316,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
                 playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
             }
+
+            playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
+                playlistItemAdapter.updatePlaylistItem(it)
+            }
         }
 
         if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -340,7 +344,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     } else {
                         this.remove()
-                        requireActivity().onBackPressed()
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
                     }
                 }
             }
@@ -670,6 +674,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             if (playlistItemOptionModel.optionType == PlaylistOptions.DELETE_PLAYLIST_ITEM) {
                 playlistVideoService?.getCurrentPlayer()?.stop()
                 activity?.onBackPressedDispatcher?.onBackPressed()
+            } else if (playlistItemOptionModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEM) {
+                val moveOrCopyItems = ArrayList<PlaylistItemModel>()
+                playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
+                PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
             }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }

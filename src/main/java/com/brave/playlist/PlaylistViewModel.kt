@@ -82,6 +82,12 @@ class PlaylistViewModel : ViewModel() {
         mutableDownloadProgress.value = downloadProgressModel
     }
 
+    private val mutablePlaylistEventUpdate = MutableLiveData<PlaylistEventModel>()
+    val playlistEventUpdate: LiveData<PlaylistEventModel> get() = mutablePlaylistEventUpdate
+    fun updatePlaylistEvent (playlistEventModel: PlaylistEventModel) {
+        mutablePlaylistEventUpdate.value = playlistEventModel
+    }
+
     private val mutableFetchPlaylistData = MutableLiveData<String>()
     val fetchPlaylistData: LiveData<String> get() = mutableFetchPlaylistData
     fun fetchPlaylistData(playlistId: String) {
@@ -92,5 +98,17 @@ class PlaylistViewModel : ViewModel() {
     val reorderPlaylistItems: LiveData<List<PlaylistItemModel>> get() = mutableReorderPlaylistItems
     fun reorderPlaylistItems(playlistItems: MutableList<PlaylistItemModel>) {
         mutableReorderPlaylistItems.value = playlistItems
+    }
+
+    private val mutableMoveOrCopyItems = MutableLiveData<MoveOrCopyModel>()
+    val moveOrCopyItems: LiveData<MoveOrCopyModel> get() = mutableMoveOrCopyItems
+    fun performMoveOrCopy(moveOrCopyModel: MoveOrCopyModel) {
+        mutableMoveOrCopyItems.value = moveOrCopyModel
+    }
+
+    private val mutableDefaultPlaylist = MutableLiveData<String>()
+    val defaultPlaylist: LiveData<String> get() = mutableDefaultPlaylist
+    fun setDefaultPlaylist(playlistId: String) {
+        mutableDefaultPlaylist.value = playlistId
     }
 }

@@ -26,24 +26,24 @@ object MenuUtils {
         shouldHideDeleteOption: Boolean = false
     ) {
         val optionsList: MutableList<PlaylistItemOptionModel> = mutableListOf()
-//        optionsList.add(
-//            PlaylistItemOptionModel(
-//                context.resources.getString(R.string.move_item),
-//                R.drawable.ic_move_media,
-//                PlaylistOptions.MOVE_PLAYLIST_ITEM,
-//                playlistItemModel = playlistItemModel,
-//                playlistId = playlistId
-//            )
-//        )
-//        optionsList.add(
-//            PlaylistItemOptionModel(
-//                context.resources.getString(R.string.copy_item),
-//                R.drawable.ic_copy_media,
-//                PlaylistOptions.COPY_PLAYLIST_ITEM,
-//                playlistItemModel = playlistItemModel,
-//                playlistId = playlistId
-//            )
-//        )
+        optionsList.add(
+            PlaylistItemOptionModel(
+                context.resources.getString(R.string.playlist_move_item),
+                R.drawable.ic_move_media,
+                PlaylistOptions.MOVE_PLAYLIST_ITEM,
+                playlistItemModel = playlistItemModel,
+                playlistId = playlistId
+            )
+        )
+        optionsList.add(
+            PlaylistItemOptionModel(
+                context.resources.getString(R.string.playlist_copy_item),
+                R.drawable.ic_copy_media,
+                PlaylistOptions.COPY_PLAYLIST_ITEM,
+                playlistItemModel = playlistItemModel,
+                playlistId = playlistId
+            )
+        )
         if (!shouldHideDeleteOption) {
             optionsList.add(
                 PlaylistItemOptionModel(

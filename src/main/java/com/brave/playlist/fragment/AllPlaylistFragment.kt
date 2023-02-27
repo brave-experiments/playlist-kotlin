@@ -35,6 +35,10 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
 
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var btAddNewPlaylist: AppCompatButton
+    private lateinit var rvRecentlyPlayed: RecyclerView
+    private lateinit var rvPlaylist: RecyclerView
+    private lateinit var tvRecentlyPlayed: TextView
+    private lateinit var tvPlaylistHeader: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -58,6 +62,16 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                 .addToBackStack(AllPlaylistFragment::class.simpleName)
                 .commit()
         }
+        rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed)
+        rvPlaylist = view.findViewById(R.id.rvPlaylists)
+
+        tvRecentlyPlayed = view.findViewById(R.id.tvRecentlyPlayed)
+        tvPlaylistHeader = view.findViewById(R.id.tvPlaylistHeader)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        playlistViewModel.fetchPlaylistData("all")
 
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             val allPlaylistList = mutableListOf<PlaylistModel>()
@@ -138,15 +152,13 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                 )
             }
 
-            val rvRecentlyPlayed: RecyclerView = view.findViewById(R.id.rvRecentlyPlayed)
             rvRecentlyPlayed.layoutManager =
                 LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
             rvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(recentPlaylist, this)
             rvRecentlyPlayed.visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
-            view.findViewById<TextView>(R.id.tvRecentlyPlayed).visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
-            view.findViewById<TextView>(R.id.tvPlaylistHeader).visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+            tvRecentlyPlayed.visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+            tvPlaylistHeader.visibility = if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
 
-            val rvPlaylist: RecyclerView = view.findViewById(R.id.rvPlaylists)
             rvPlaylist.layoutManager = LinearLayoutManager(requireContext())
             rvPlaylist.adapter = PlaylistAdapter(allPlaylistList, this)
         }
@@ -157,14 +169,6 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
     }
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
-        if (playlistModel.items.isNotEmpty()) {
-            playlistViewModel.setPlaylistToOpen(playlistModel.id)
-        } else {
-            parentFragmentManager
-                .beginTransaction()
-                .replace(android.R.id.content, EmptyPlaylistFragment())
-                .addToBackStack(AllPlaylistFragment::class.simpleName)
-                .commit()
-        }
+        playlistViewModel.setPlaylistToOpen(playlistModel.id)
     }
 }

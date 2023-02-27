@@ -1,9 +1,7 @@
 package com.brave.playlist.adapter
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -11,14 +9,13 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
+import com.brave.playlist.enums.PlaylistEventEnum
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.StartDragListener
 import com.brave.playlist.model.DownloadProgressModel
+import com.brave.playlist.model.PlaylistEventModel
 import com.brave.playlist.model.PlaylistItemModel
-import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 
 class PlaylistItemAdapter(
     mediaItemList: MutableList<PlaylistItemModel>,
@@ -40,15 +37,38 @@ class PlaylistItemAdapter(
         val ivMediaStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaStatus)
         val tvMediaDownloadProgress: AppCompatTextView? =
             view?.findViewById(R.id.tvMediaDownloadProgress)
-        if (downloadProgressModel.totalBytes == downloadProgressModel.receivedBytes) {
-            tvMediaDownloadProgress?.visibility = View.GONE
-            ivMediaStatus?.visibility = View.VISIBLE
-            ivMediaStatus?.setImageResource(R.drawable.ic_downloaded)
-        } else {
+//        if (downloadProgressModel.totalBytes == downloadProgressModel.receivedBytes) {
+//            tvMediaDownloadProgress?.visibility = View.GONE
+//            ivMediaStatus?.visibility = View.VISIBLE
+//            ivMediaStatus?.setImageResource(R.drawable.ic_downloaded)
+//        } else {
+//            ivMediaStatus?.visibility = View.GONE
+//            tvMediaDownloadProgress?.visibility = View.VISIBLE
+//            tvMediaDownloadProgress?.text = view?.resources?.getString(R.string.playlist_percentage_text)
+//                ?.let { String.format(it, downloadProgressModel.percentComplete.toString()) }
+//        }
+
+        if (downloadProgressModel.totalBytes != downloadProgressModel.receivedBytes) {
             ivMediaStatus?.visibility = View.GONE
             tvMediaDownloadProgress?.visibility = View.VISIBLE
             tvMediaDownloadProgress?.text = view?.resources?.getString(R.string.playlist_percentage_text)
                 ?.let { String.format(it, downloadProgressModel.percentComplete.toString()) }
+        }
+    }
+
+    fun updatePlaylistItem(playlistEventModel: PlaylistEventModel) {
+        val view = allViewHolderViews[playlistEventModel.playlistId]
+        val ivMediaStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaStatus)
+        val tvMediaDownloadProgress: AppCompatTextView? =
+            view?.findViewById(R.id.tvMediaDownloadProgress)
+        if (playlistEventModel.playlistEventEnum == PlaylistEventEnum.kItemCached) {
+            tvMediaDownloadProgress?.visibility = View.GONE
+            ivMediaStatus?.visibility = View.VISIBLE
+            ivMediaStatus?.setImageResource(R.drawable.ic_downloaded)
+        } else if (playlistEventModel.playlistEventEnum == PlaylistEventEnum.kItemLocalDataRemoved) {
+            tvMediaDownloadProgress?.visibility = View.GONE
+            ivMediaStatus?.visibility = View.VISIBLE
+            ivMediaStatus?.setImageResource(R.drawable.ic_offline)
         }
     }
 
@@ -96,17 +116,6 @@ class PlaylistItemAdapter(
             ivMediaStatus.setImageResource(if (model.isCached) R.drawable.ic_downloaded else R.drawable.ic_offline)
             ivMediaStatus.visibility = if (!editMode) View.VISIBLE else View.GONE
             tvMediaTitle.text = model.name
-//            val thumbnailFile = File(model.thumbnailPath)
-//            if (thumbnailFile.exists()) {
-//                val myBitmap = BitmapFactory.decodeFile(thumbnailFile.absolutePath)
-//                ivMediaThumbnail.setImageBitmap(myBitmap)
-//            }
-//            val requestManager: RequestManager = Glide.with(itemView.context)
-//            val requestBuilder: RequestBuilder<*> = requestManager.load(model.thumbnailPath)
-//            requestBuilder.into(ivMediaThumbnail)
-//            Glide.with(itemView.context)
-//                .load(File("https://www.gstatic.com/webp/gallery/1.webp"))
-//            .into(ivMediaThumbnail)
 
             if (!model.thumbnailPath.isNullOrEmpty()) {
                 Glide.with(itemView.context)

@@ -4,10 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -26,6 +28,7 @@ import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.listener.StartDragListener
+import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
@@ -47,7 +50,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.LinkedList
 
-class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
+class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListener,
     View.OnClickListener, StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
     PlaylistItemClickListener {
 
@@ -66,6 +69,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     private lateinit var tvPlaylistTotalSize: AppCompatTextView
     private lateinit var itemTouchHelper: ItemTouchHelper
 
+    private lateinit var emptyView: View
+    private lateinit var playlistView: View
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         playlistViewModel = activity?.let {
@@ -73,6 +79,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 it, ViewModelProvider.NewInstanceFactory()
             )
         }!![PlaylistViewModel::class.java]
+
+        emptyView = view.findViewById(R.id.empty_view)
+        playlistView = view.findViewById(R.id.playlist_view)
 
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
         playlistToolbar.setOptionsButtonClickListener {
@@ -85,28 +94,39 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             playlistViewModel.reorderPlaylistItems(playlistItemAdapter.getPlaylistItems())
         }
         playlistToolbar.setMoveClickListener {
-            MenuUtils.showMoveOrCopyMenu(
-                it,
-                parentFragmentManager,
-                playlistItemAdapter.getSelectedItems(),
-                this
-            )
-            playlistItemAdapter.setEditMode(false)
-            playlistToolbar.enableEditMode(false)
+            if (playlistItemAdapter.getSelectedItems().size > 0) {
+                MenuUtils.showMoveOrCopyMenu(
+                    it,
+                    parentFragmentManager,
+                    playlistItemAdapter.getSelectedItems(),
+                    this
+                )
+//                playlistItemAdapter.setEditMode(false)
+//                playlistToolbar.enableEditMode(false)
+            } else {
+                Toast.makeText(
+                    activity,
+                    getString(R.string.playlist_please_select_items),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
         playlistToolbar.setDeleteClickListener {
-            Toast.makeText(
-                activity,
-                "Delete : " + playlistItemAdapter.getSelectedItems().size,
-                Toast.LENGTH_LONG
-            ).show()
-            playlistViewModel.setDeletePlaylistItems(
-                PlaylistModel(
-                    playlistModel?.id.toString(),
-                    playlistModel?.name.toString(),
-                    playlistItemAdapter.getSelectedItems()
+            if (playlistItemAdapter.getSelectedItems().size > 0) {
+                playlistViewModel.setDeletePlaylistItems(
+                    PlaylistModel(
+                        playlistModel?.id.toString(),
+                        playlistModel?.name.toString(),
+                        playlistItemAdapter.getSelectedItems()
+                    )
                 )
-            )
+            } else {
+                Toast.makeText(
+                    activity,
+                    getString(R.string.playlist_please_select_items),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
         rvPlaylist = view.findViewById(R.id.rvPlaylists)
         tvTotalMediaCount = view.findViewById(R.id.tvTotalMediaCount)
@@ -148,6 +168,13 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 playlistList
             )
 
+            view.findViewById<Button>(R.id.btBrowseForMedia).setOnClickListener {
+                requireActivity().finish()
+                if (playlistModel != null) {
+                    playlistViewModel.setDefaultPlaylist(playlistModel!!.id)
+                }
+            }
+
 //            Thread {
 //                playlistList.forEach {
 //                    try {
@@ -177,6 +204,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 //                tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
 //            }
 
+            playlistItemAdapter.setEditMode(false)
+            playlistToolbar.enableEditMode(false)
             if (playlistList.size > 0) {
                 Glide.with(requireContext())
                     .load(playlistList[0].thumbnailPath)
@@ -203,18 +232,37 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 itemTouchHelper = ItemTouchHelper(callback)
                 itemTouchHelper.attachToRecyclerView(rvPlaylist)
                 rvPlaylist.adapter = playlistItemAdapter
+                playlistView.visibility = View.VISIBLE
+                emptyView.visibility = View.GONE
+
+                playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
+                    playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
+                }
+
+                playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
+                    playlistItemAdapter.updatePlaylistItem(it)
+                }
+
+                requireActivity()
+                    .onBackPressedDispatcher
+                    .addCallback(requireActivity(), object : OnBackPressedCallback(true) {
+                        override fun handleOnBackPressed() {
+                            if (playlistItemAdapter.getEditMode()) {
+                                playlistItemAdapter.setEditMode(false)
+                                playlistToolbar.enableEditMode(false)
+                                //Reorder list
+                                playlistViewModel.reorderPlaylistItems(playlistItemAdapter.getPlaylistItems())
+                            } else {
+                                this.remove()
+                                requireActivity().onBackPressedDispatcher.onBackPressed()
+                            }
+                        }
+                    }
+                    )
             } else {
                 ivPlaylistCover.setImageResource(R.drawable.ic_playlist_placeholder)
-                parentFragmentManager
-                    .beginTransaction()
-                    .replace(android.R.id.content, EmptyPlaylistFragment())
-                    .commit()
-            }
-
-            playlistToolbar.enableEditMode(false)
-
-            playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
-                playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
+                emptyView.visibility = View.VISIBLE
+                playlistView.visibility = View.GONE
             }
         }
 
@@ -226,23 +274,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 )
             }
         }
-
-        requireActivity()
-            .onBackPressedDispatcher
-            .addCallback(requireActivity(), object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (playlistItemAdapter.getEditMode()) {
-                        playlistItemAdapter.setEditMode(false)
-                        playlistToolbar.enableEditMode(false)
-                        //Reorder list
-                        playlistViewModel.reorderPlaylistItems(playlistItemAdapter.getPlaylistItems())
-                    } else {
-                        this.remove()
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
-                    }
-                }
-            }
-            )
     }
 
     override fun onItemDelete(position: Int) {
@@ -421,7 +452,11 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             playlistItemAdapter.setEditMode(true)
             playlistToolbar.enableEditMode(true)
         } else if (playlistOptionsModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEMS || playlistOptionsModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEMS) {
-            playlistViewModel.setPlaylistMultipleItemOption(playlistOptionsModel)
+            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
+                playlistOptionsModel.optionType,
+                "",
+                playlistItemAdapter.getSelectedItems()
+            )
         } else if (playlistOptionsModel.optionType == PlaylistOptions.RENAME_PLAYLIST) {
             val newPlaylistFragment = playlistModel?.let {
                 NewPlaylistFragment.newInstance(
@@ -451,6 +486,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 )
             }
         } else {
+            if (playlistItemOptionModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEM) {
+                val moveOrCopyItems = ArrayList<PlaylistItemModel>()
+                playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
+                PlaylistUtils.moveOrCopyModel =
+                    MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
+            }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }
     }

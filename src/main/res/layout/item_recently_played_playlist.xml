@@ -18,7 +18,12 @@
             android:id="@+id/ivPlaylistCover"
             android:layout_width="308dp"
             android:layout_height="178dp"
-            android:scaleType="centerCrop"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="0dp"
+            android:scaleType="fitXY"
+            app:layout_constraintDimensionRatio="H,16:9"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
