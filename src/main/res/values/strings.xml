@@ -54,4 +54,6 @@
     <string name="playlist_time_text">%1$s:</string>
     <string name="playlist_duration_text">%1$s%2$s%3$s</string>
     <string name="playlist_please_select_items">Please select items first</string>
+    <string name="playlist_offline_message">Playlist item is not cached. Please cache the item for offline mode.</string>
+    <string name="playlist_item_expired_message">Playlist item is expired.</string>
 </resources>

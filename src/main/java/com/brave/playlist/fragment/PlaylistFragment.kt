@@ -33,6 +33,7 @@ import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.util.ConnectionUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistItemGestureHelper
@@ -120,6 +121,8 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
                         playlistItemAdapter.getSelectedItems()
                     )
                 )
+                playlistItemAdapter.setEditMode(false)
+                playlistToolbar.enableEditMode(false)
             } else {
                 Toast.makeText(
                     activity,
@@ -170,9 +173,9 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
 
             view.findViewById<Button>(R.id.btBrowseForMedia).setOnClickListener {
                 requireActivity().finish()
-                if (playlistModel != null) {
-                    playlistViewModel.setDefaultPlaylist(playlistModel!!.id)
-                }
+//                if (playlistModel != null) {
+//                    playlistViewModel.setDefaultPlaylist(playlistModel!!.id)
+//                }
             }
 
 //            Thread {
@@ -204,8 +207,6 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
 //                tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
 //            }
 
-            playlistItemAdapter.setEditMode(false)
-            playlistToolbar.enableEditMode(false)
             if (playlistList.size > 0) {
                 Glide.with(requireContext())
                     .load(playlistList[0].thumbnailPath)
@@ -232,6 +233,8 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
                 itemTouchHelper = ItemTouchHelper(callback)
                 itemTouchHelper.attachToRecyclerView(rvPlaylist)
                 rvPlaylist.adapter = playlistItemAdapter
+                playlistItemAdapter.setEditMode(false)
+                playlistToolbar.enableEditMode(false)
                 playlistView.visibility = View.VISIBLE
                 emptyView.visibility = View.GONE
 
@@ -394,6 +397,10 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
 //        })
 //        webView?.webViewClient = webViewClientImpl
 //        webView?.loadUrl(selectedPlaylistItemModel.mediaSrc)
+        if (!selectedPlaylistItemModel.isCached && !ConnectionUtils.isDeviceOnline(requireContext())) {
+            Toast.makeText(requireContext(), getString(R.string.playlist_offline_message), Toast.LENGTH_SHORT).show()
+            return
+        }
 
         if (!PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
             var recentPlaylistIds = LinkedList<String>()
@@ -435,7 +442,7 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
                     .commit()
             }
         } else {
-            Toast.makeText(requireContext(), "Playlist item is expired", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.playlist_item_expired_message), Toast.LENGTH_SHORT).show()
             val playlistItemOptionModel = PlaylistItemOptionModel(
                 requireContext().resources.getString(R.string.playlist_open_in_private_tab),
                 R.drawable.ic_private_tab,
@@ -457,6 +464,8 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
                 "",
                 playlistItemAdapter.getSelectedItems()
             )
+            playlistItemAdapter.setEditMode(false)
+            playlistToolbar.enableEditMode(false)
         } else if (playlistOptionsModel.optionType == PlaylistOptions.RENAME_PLAYLIST) {
             val newPlaylistFragment = playlistModel?.let {
                 NewPlaylistFragment.newInstance(

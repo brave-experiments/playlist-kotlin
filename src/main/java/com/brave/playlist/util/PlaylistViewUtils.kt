@@ -2,6 +2,7 @@ package com.brave.playlist.util
 
 import android.app.Activity
 import android.content.Intent
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +27,11 @@ import com.google.android.material.snackbar.Snackbar
 
 object PlaylistViewUtils {
     @JvmStatic
-    fun showPlaylistButton(activity: Activity, parent: ViewGroup, playlistOptionsListener: PlaylistOptionsListener) {
+    fun showPlaylistButton(
+        activity: Activity,
+        parent: ViewGroup,
+        playlistOptionsListener: PlaylistOptionsListener
+    ) {
         val movableImageButton = MovableImageButton(activity)
         movableImageButton.id = R.id.playlist_button_id
         movableImageButton.setBackgroundResource(R.drawable.ic_playlist_floating_button_bg)
@@ -35,20 +40,26 @@ object PlaylistViewUtils {
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT
         )
-        params.marginEnd=16
-        params.bottomMargin = 80
+        params.marginEnd = 16
+        params.bottomMargin = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            40F,
+            activity.resources.displayMetrics
+        ).toInt()
         params.gravity = Gravity.BOTTOM or Gravity.END
         movableImageButton.layoutParams = params
         movableImageButton.elevation = 8.0f
-        movableImageButton.visibility=View.GONE
+        movableImageButton.visibility = View.GONE
         movableImageButton.setOnClickListener {
-            val shouldShowOnboarding: Boolean = PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING, true]
+            val shouldShowOnboarding: Boolean =
+                PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING, true]
             if (shouldShowOnboarding) {
                 val playlistActivityIntent =
                     Intent(activity, PlaylistMenuOnboardingActivity::class.java)
                 playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 activity.startActivity(playlistActivityIntent)
-                PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING] = false
+                PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING] =
+                    false
             } else {
                 PlaylistOptionsBottomSheet(
                     mutableListOf(
@@ -72,8 +83,8 @@ object PlaylistViewUtils {
 //                            R.drawable.ic_playlist_hide,
 //                            PlaylistOptions.PLAYLIST_HIDE
 //                        )
-                    )
-                    , playlistOptionsListener).show((activity as FragmentActivity).supportFragmentManager, null)
+                    ), playlistOptionsListener
+                ).show((activity as FragmentActivity).supportFragmentManager, null)
             }
         }
         movableImageButton.allowMoving(true)
@@ -92,8 +103,8 @@ object PlaylistViewUtils {
     }
 
     @JvmStatic
-    fun showSnackBarWithActions(view : View,message: String, action : SnackBarActionModel) {
-        val snack = Snackbar.make(view,message,Snackbar.LENGTH_LONG)
+    fun showSnackBarWithActions(view: View, message: String, action: SnackBarActionModel) {
+        val snack = Snackbar.make(view, message, Snackbar.LENGTH_LONG)
         snack.setAction(action.actionText, action.onActionClickListener)
         snack.show()
     }

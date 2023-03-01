@@ -1,19 +1,16 @@
 package com.brave.playlist.util
 
-import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.model.MoveOrCopyModel
-import java.util.*
+import java.util.Date
 
 
 object PlaylistUtils {

@@ -36,6 +36,7 @@ import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
 import com.brave.playlist.model.*
 import com.brave.playlist.slidingpanel.BottomPanelLayout
+import com.brave.playlist.util.ConnectionUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
@@ -629,6 +630,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     override fun onPlaylistItemClick(count: Int) {
 //        exoPlayer?.seekTo(count,0)
 //        exoPlayer?.playWhenReady = true
+
+        if (!playlistItems[count].isCached && !ConnectionUtils.isDeviceOnline(requireContext())) {
+            Toast.makeText(requireContext(), getString(R.string.playlist_offline_message), Toast.LENGTH_SHORT).show()
+            return
+        }
         playlistVideoService?.setCurrentItem(count)
         mainLayout.smoothToBottom()
     }
