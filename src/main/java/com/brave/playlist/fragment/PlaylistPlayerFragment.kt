@@ -13,7 +13,6 @@ import android.util.Rational
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.SeekBar
@@ -43,7 +42,7 @@ import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
 import com.brave.playlist.util.MenuUtils
-import com.brave.playlist.util.PlaylistUtils
+import com.brave.playlist.util.Utils
 import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -501,8 +500,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivNextVideo.setOnClickListener {
             playlistVideoService?.getCurrentPlayer()?.let {
                 if (it.hasNextMediaItem()) {
-                    it.seekToNextMediaItem()
-                    disableNextPreviousControls()
+                    if (!playlistItems[it.nextMediaItemIndex].isCached && !ConnectionUtils.isDeviceOnline(requireContext())) {
+                        Toast.makeText(requireContext(), getString(R.string.playlist_offline_message), Toast.LENGTH_SHORT).show()
+                    } else {
+                        it.seekToNextMediaItem()
+                        disableNextPreviousControls()
+                    }
                 }
             }
         }
@@ -512,8 +515,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivPrevVideo.setOnClickListener {
             playlistVideoService?.getCurrentPlayer()?.let {
                 if (it.hasPreviousMediaItem()) {
-                    it.seekToPreviousMediaItem()
-                    disableNextPreviousControls()
+                    if (!playlistItems[it.previousMediaItemIndex].isCached && !ConnectionUtils.isDeviceOnline(requireContext())) {
+                        Toast.makeText(requireContext(), getString(R.string.playlist_offline_message), Toast.LENGTH_SHORT).show()
+                    } else {
+                        it.seekToPreviousMediaItem()
+                        disableNextPreviousControls()
+                    }
                 }
             }
         }
@@ -671,7 +678,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //        playlistVideoService?.getCurrentPlayer()?.stop()
         if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
-                PlaylistUtils.showSharingDialog(
+                Utils.showSharingDialog(
                     requireContext(),
                     it
                 )
@@ -683,7 +690,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             } else if (playlistItemOptionModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEM) {
                 val moveOrCopyItems = ArrayList<PlaylistItemModel>()
                 playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
-                PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
+                Utils.moveOrCopyModel = MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
             }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }

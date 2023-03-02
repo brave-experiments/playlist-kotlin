@@ -1,7 +1,5 @@
 package com.brave.playlist.adapter
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +9,7 @@ import com.brave.playlist.R
 import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
-import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 
 class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val playlistClickListener : PlaylistClickListener?) :
     AbstractRecyclerViewAdapter<PlaylistAdapter.AllPlaylistViewHolder, PlaylistModel>(allPlaylists) {
@@ -22,31 +17,39 @@ class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val play
     inner class AllPlaylistViewHolder(view: View) :
         AbstractViewHolder<PlaylistModel>(view) {
         private val ivPlaylistThumbnail: AppCompatImageView
+        private val ivNewPlaylistThumbnail: AppCompatImageView
         private val tvPlaylistTitle: AppCompatTextView
         private val tvPlaylistItemCount: AppCompatTextView
 
         init {
             ivPlaylistThumbnail = view.findViewById(R.id.ivPlaylistThumbnail)
+            ivNewPlaylistThumbnail = view.findViewById(R.id.ivNewPlaylistThumbnail)
             tvPlaylistTitle = view.findViewById(R.id.tvPlaylistTitle)
             tvPlaylistItemCount = view.findViewById(R.id.tvPlaylistItemCount)
         }
 
         override fun onBind(position: Int, model: PlaylistModel) {
-            if (!model.items.isNullOrEmpty() && !model.items[0].thumbnailPath.isNullOrEmpty()) {
-                Glide.with(itemView.context)
-                    .asBitmap()
-                    .placeholder(R.drawable.ic_playlist_item_placeholder)
-                    .error(R.drawable.ic_playlist_item_placeholder)
-                    .load(model.items[0].thumbnailPath)
-                    .into(ivPlaylistThumbnail)
+            if (model.id == "new_playlist") {
+                tvPlaylistItemCount.visibility = View.GONE
+                ivNewPlaylistThumbnail.visibility = View.VISIBLE
+                ivPlaylistThumbnail.visibility = View.GONE
             } else {
-                ivPlaylistThumbnail.setImageResource(R.drawable.ic_playlist_item_placeholder)
-            }
+                if (!model.items.isNullOrEmpty() && !model.items[0].thumbnailPath.isNullOrEmpty()) {
+                    Glide.with(itemView.context)
+                        .asBitmap()
+                        .placeholder(R.drawable.ic_playlist_item_placeholder)
+                        .error(R.drawable.ic_playlist_item_placeholder)
+                        .load(model.items[0].thumbnailPath)
+                        .into(ivPlaylistThumbnail)
+                } else {
+                    ivPlaylistThumbnail.setImageResource(R.drawable.ic_playlist_item_placeholder)
+                }
 
+                tvPlaylistItemCount.text =
+                    itemView.context.getString(R.string.playlist_number_items, model.items.size)
+            }
             tvPlaylistTitle.text =
                 if (model.id == DEFAULT_PLAYLIST) itemView.context.resources.getString(R.string.playlist_play_later) else model.name
-            tvPlaylistItemCount.text =
-                itemView.context.getString(R.string.playlist_number_items, model.items.size)
             itemView.setOnClickListener {
                 playlistClickListener?.onPlaylistClick(model)
             }

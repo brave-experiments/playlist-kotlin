@@ -9,7 +9,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
@@ -37,7 +36,7 @@ import com.brave.playlist.util.ConnectionUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistItemGestureHelper
-import com.brave.playlist.util.PlaylistUtils
+import com.brave.playlist.util.Utils
 import com.brave.playlist.util.PlaylistPreferenceUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils.RECENTLY_PLAYED_PLAYLIST
 import com.brave.playlist.util.PlaylistPreferenceUtils.get
@@ -315,7 +314,7 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
         super.onShare(position)
         val playlistItemModel = playlistModel?.items!![position]
         //Share model
-        PlaylistUtils.showSharingDialog(requireContext(), playlistItemModel.pageSource)
+        Utils.showSharingDialog(requireContext(), playlistItemModel.pageSource)
     }
 
     override fun onClick(v: View) {
@@ -402,7 +401,7 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
             return
         }
 
-        if (!PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+        if (!Utils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
             var recentPlaylistIds = LinkedList<String>()
             val recentPlaylistJson =
                 PlaylistPreferenceUtils.defaultPrefs(requireContext())[RECENTLY_PLAYED_PLAYLIST, ""]
@@ -459,7 +458,7 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
             playlistItemAdapter.setEditMode(true)
             playlistToolbar.enableEditMode(true)
         } else if (playlistOptionsModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEMS || playlistOptionsModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEMS) {
-            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
+            Utils.moveOrCopyModel = MoveOrCopyModel(
                 playlistOptionsModel.optionType,
                 "",
                 playlistItemAdapter.getSelectedItems()
@@ -489,7 +488,7 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
     override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
         if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
-                PlaylistUtils.showSharingDialog(
+                Utils.showSharingDialog(
                     requireContext(),
                     it
                 )
@@ -498,7 +497,7 @@ class PlaylistFragment : Fragment(R.layout.playlist_view), ItemInteractionListen
             if (playlistItemOptionModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEM) {
                 val moveOrCopyItems = ArrayList<PlaylistItemModel>()
                 playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
-                PlaylistUtils.moveOrCopyModel =
+                Utils.moveOrCopyModel =
                     MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
             }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)

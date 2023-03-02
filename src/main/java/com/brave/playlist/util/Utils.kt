@@ -12,8 +12,7 @@ import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.model.MoveOrCopyModel
 import java.util.Date
 
-
-object PlaylistUtils {
+object Utils {
     @JvmStatic lateinit var moveOrCopyModel: MoveOrCopyModel
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

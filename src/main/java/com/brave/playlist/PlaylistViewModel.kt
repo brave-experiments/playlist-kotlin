@@ -22,10 +22,10 @@ class PlaylistViewModel : ViewModel() {
     }
 
     // Using after creating new playlist
-    private val mutableCreatePlaylistOption = MutableLiveData<String>()
-    val createPlaylistOption: LiveData<String> get() = mutableCreatePlaylistOption
-    fun setCreatePlaylistOption(newName: String) {
-        mutableCreatePlaylistOption.value = newName
+    private val mutableCreatePlaylistOption = MutableLiveData<CreatePlaylistModel>()
+    val createPlaylistOption: LiveData<CreatePlaylistModel> get() = mutableCreatePlaylistOption
+    fun setCreatePlaylistOption(createPlaylistModel: CreatePlaylistModel) {
+        mutableCreatePlaylistOption.value = createPlaylistModel
     }
 
     // Using Livedata to open specific Playlist

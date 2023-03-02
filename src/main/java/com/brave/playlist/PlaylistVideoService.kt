@@ -11,7 +11,7 @@ import com.brave.playlist.adapter.PlayerNotificationAdapter
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
-import com.brave.playlist.util.PlaylistUtils.createNotificationChannel
+import com.brave.playlist.util.Utils.createNotificationChannel
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer

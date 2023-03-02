@@ -7,4 +7,5 @@ object ConstantUtils {
     const val PLAYLIST_OPTION = "playlist_option"
     const val PLAYER_ITEMS = "player_items"
     const val DEFAULT_PLAYLIST = "default"
+    const val SHOULD_MOVE_OR_COPY = "should_move_or_copy"
 }

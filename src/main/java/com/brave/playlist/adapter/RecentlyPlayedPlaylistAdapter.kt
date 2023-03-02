@@ -1,7 +1,5 @@
 package com.brave.playlist.adapter
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +9,7 @@ import com.brave.playlist.R
 import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.util.ConstantUtils
-import com.brave.playlist.util.PlaylistUtils
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 
 class RecentlyPlayedPlaylistAdapter(playlists: MutableList<PlaylistModel>,private val  playlistClickListener : PlaylistClickListener?) :
     AbstractRecyclerViewAdapter<RecentlyPlayedPlaylistAdapter.RecentlyPlayedPlaylistViewHolder, PlaylistModel>(

@@ -11,12 +11,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistAdapter
+import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.extension.setTopCornersRounded
+import com.brave.playlist.fragment.AllPlaylistFragment
+import com.brave.playlist.fragment.NewPlaylistFragment
 import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
-import com.brave.playlist.util.PlaylistUtils
+import com.brave.playlist.util.Utils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.card.MaterialCardView
@@ -26,7 +29,7 @@ class MoveOrCopyToPlaylistBottomSheet :
     BottomSheetDialogFragment(), PlaylistClickListener {
 
     private lateinit var playlistViewModel: PlaylistViewModel
-    private val moveOrCopyModel: MoveOrCopyModel = PlaylistUtils.moveOrCopyModel
+    private val moveOrCopyModel: MoveOrCopyModel = Utils.moveOrCopyModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -93,6 +96,14 @@ class MoveOrCopyToPlaylistBottomSheet :
                 }
             }
 
+            allPlaylistList.add(0,
+                PlaylistModel(
+                    "new_playlist",
+                    getString(R.string.playlist_new_text),
+                    arrayListOf()
+                )
+            )
+
             Log.e("BravePlaylist", "MoveOrCopyToPlaylistBottomSheet 4")
 
             val rvPlaylists: RecyclerView = view.findViewById(R.id.rvPlaylists)
@@ -107,8 +118,21 @@ class MoveOrCopyToPlaylistBottomSheet :
     }
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
-        PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, playlistModel.id, moveOrCopyModel.items)
-        playlistViewModel.performMoveOrCopy(PlaylistUtils.moveOrCopyModel)
+        if (playlistModel.id == "new_playlist") {
+            Utils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
+            val newPlaylistFragment = NewPlaylistFragment.newInstance(
+                PlaylistOptions.NEW_PLAYLIST,
+                shouldMoveOrCopy = true
+            )
+            parentFragmentManager
+                .beginTransaction()
+                .replace(android.R.id.content, newPlaylistFragment)
+                .addToBackStack(AllPlaylistFragment::class.simpleName)
+                .commit()
+        } else {
+            Utils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, playlistModel.id, moveOrCopyModel.items)
+            playlistViewModel.performMoveOrCopy(Utils.moveOrCopyModel)
+        }
         dismiss()
     }
 }
