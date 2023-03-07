@@ -9,10 +9,12 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import com.brave.playlist.PlaylistVideoService
+import com.brave.playlist.activity.PlaylistMenuOnboardingActivity
 import com.brave.playlist.model.MoveOrCopyModel
 import java.util.Date
 
-object Utils {
+
+object PlaylistUtils {
     @JvmStatic lateinit var moveOrCopyModel: MoveOrCopyModel
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -41,5 +43,12 @@ object Utils {
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, text)
         context.startActivity(Intent.createChooser(intent, "Share with:"))
+    }
+
+    @JvmStatic
+    fun openPlaylistMenuOnboardingActivity(context: Context) {
+        val playlistActivityIntent = Intent(context, PlaylistMenuOnboardingActivity::class.java)
+        playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        context.startActivity(playlistActivityIntent)
     }
 }

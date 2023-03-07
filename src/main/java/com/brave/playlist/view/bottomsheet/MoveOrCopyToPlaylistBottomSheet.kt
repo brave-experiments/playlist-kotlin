@@ -19,7 +19,7 @@ import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
-import com.brave.playlist.util.Utils
+import com.brave.playlist.util.PlaylistUtils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.card.MaterialCardView
@@ -29,7 +29,7 @@ class MoveOrCopyToPlaylistBottomSheet :
     BottomSheetDialogFragment(), PlaylistClickListener {
 
     private lateinit var playlistViewModel: PlaylistViewModel
-    private val moveOrCopyModel: MoveOrCopyModel = Utils.moveOrCopyModel
+    private val moveOrCopyModel: MoveOrCopyModel = PlaylistUtils.moveOrCopyModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -119,7 +119,7 @@ class MoveOrCopyToPlaylistBottomSheet :
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
         if (playlistModel.id == "new_playlist") {
-            Utils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
+            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
                 PlaylistOptions.NEW_PLAYLIST,
                 shouldMoveOrCopy = true
@@ -130,8 +130,8 @@ class MoveOrCopyToPlaylistBottomSheet :
                 .addToBackStack(AllPlaylistFragment::class.simpleName)
                 .commit()
         } else {
-            Utils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, playlistModel.id, moveOrCopyModel.items)
-            playlistViewModel.performMoveOrCopy(Utils.moveOrCopyModel)
+            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, playlistModel.id, moveOrCopyModel.items)
+            playlistViewModel.performMoveOrCopy(PlaylistUtils.moveOrCopyModel)
         }
         dismiss()
     }

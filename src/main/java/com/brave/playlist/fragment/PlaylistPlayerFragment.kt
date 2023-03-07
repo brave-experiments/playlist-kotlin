@@ -42,7 +42,7 @@ import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
 import com.brave.playlist.util.MenuUtils
-import com.brave.playlist.util.Utils
+import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -678,7 +678,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //        playlistVideoService?.getCurrentPlayer()?.stop()
         if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
-                Utils.showSharingDialog(
+                PlaylistUtils.showSharingDialog(
                     requireContext(),
                     it
                 )
@@ -690,7 +690,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             } else if (playlistItemOptionModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEM) {
                 val moveOrCopyItems = ArrayList<PlaylistItemModel>()
                 playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
-                Utils.moveOrCopyModel = MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
+                PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
             }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }

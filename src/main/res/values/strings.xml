@@ -8,11 +8,11 @@
     <string name="playlist_skip_text">Skip</string>
     <string name="playlist_play_later">Play Later</string>
     <string name="playlist_browse_and_add">Browse and add</string>
-    <string name="playlist_browse_and_add_message">Add any media from any website. Look for the + button in your address bar and tap it to add.</string>
+    <string name="playlist_browse_and_add_message">Add your favorite content. Look for the + button in the lower right part of your screen.</string>
     <string name="playlist_browse_for_media">Browse for media</string>
-    <string name="playlist_new_text">New Playlist</string>
+    <string name="playlist_new_text">New playlist</string>
     <string name="playlist_name_text">Playlist name</string>
-    <string name="playlist_untitled_text">Untitled Playlist</string>
+    <string name="playlist_untitled_text">Untitled playlist</string>
     <string name="playlist_cancel">Cancel</string>
     <string name="playlist_remove_data">Remove Data</string>
     <string name="playlist_number_selected">%d Selected</string>
@@ -21,11 +21,11 @@
     <string name="playlist_shuffle">Shuffle</string>
     <string name="playlist_recently_played">Recently played</string>
     <string name="playlist_next">Next</string>
-    <string name="playlist_tap_long_press_or_drag">Tap, long press or drag</string>
+    <string name="playlist_tap_long_press_or_drag">Tap, long press, or drag</string>
     <string name="playlist_add_to_playlist">Add to Playlist</string>
     <string name="playlist_playlists_text">Playlists</string>
     <string name="playlist_add_media">Add media</string>
-    <string name="playlist_onboarding_title_1">Save videos with Brave Playlist and watch later, even offline</string>
+    <string name="playlist_onboarding_title_1">Add videos to Brave Playlist and watch later, even offline</string>
     <string name="playlist_onboarding_text_1">Make playlists of your favorite audio and videos, and play anytime, anywhere.</string>
     <string name="playlist_onboarding_title_2">Out of cell range? Need to calm a crying toddler?</string>
     <string name="playlist_onboarding_text_2">Whether you\'re on the subway, a flight, or a long car trip. Playlist has you covered.</string>
@@ -39,8 +39,8 @@
     <string name="playlist_rename_text">Rename</string>
     <string name="playlist_remove_playlist_offline_data">Remove playlist offline data</string>
     <string name="playlist_remove_all_offline_data">Remove all offline data</string>
-    <string name="playlist_download_playlist_for_offline_use">Download playlist for offline use</string>
-    <string name="playlist_download_all_playlists_for_offline_use">Download all playlists for offline use</string>
+    <string name="playlist_download_playlist_for_offline_use">Keep playlist for offline use</string>
+    <string name="playlist_download_all_playlists_for_offline_use">Keep all playlists for offline use</string>
     <string name="playlist_delete_playlist">Delete playlist</string>
     <string name="playlist_number_of_items">%s items</string>
     <string name="playlist_move_item">Move</string>
@@ -55,5 +55,5 @@
     <string name="playlist_duration_text">%1$s%2$s%3$s</string>
     <string name="playlist_please_select_items">Please select items first</string>
     <string name="playlist_offline_message">Playlist item is not cached.\nPlease cache the item for offline mode.</string>
-    <string name="playlist_item_expired_message">Content expired. Wait a few seconds then try playing again.</string>
+    <string name="playlist_item_expired_message">Content expired. Try again in a few seconds.</string>
 </resources>

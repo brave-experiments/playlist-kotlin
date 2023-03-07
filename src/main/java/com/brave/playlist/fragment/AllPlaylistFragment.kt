@@ -19,6 +19,7 @@ import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils
@@ -71,7 +72,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
 
     override fun onResume() {
         super.onResume()
-        playlistViewModel.fetchPlaylistData("all")
+        playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             val allPlaylistList = mutableListOf<PlaylistModel>()
