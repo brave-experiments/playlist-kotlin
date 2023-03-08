@@ -2,7 +2,7 @@ package com.brave.playlist.adapter
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
+import java.util.Collections
 
 abstract class AbstractRecyclerViewAdapter<VH : AbstractRecyclerViewAdapter.AbstractViewHolder<M>, M>(
     protected val itemList: MutableList<M>
@@ -13,7 +13,7 @@ abstract class AbstractRecyclerViewAdapter<VH : AbstractRecyclerViewAdapter.Abst
 
         abstract fun onBind(position: Int, model: M)
 
-        open fun isSelected(position: Int) : Boolean = false
+        open fun isSelected(position: Int): Boolean = false
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) =

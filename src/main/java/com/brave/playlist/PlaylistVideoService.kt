@@ -39,12 +39,13 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private val mediaQueue: ArrayList<MediaItem> = ArrayList()
     private val castMediaQueue: ArrayList<MediaItem> = ArrayList()
     private var playerView: StyledPlayerView? = null
-    private var mediaSessionConnector : MediaSessionConnector? = null
+    private var mediaSessionConnector: MediaSessionConnector? = null
 
     private var currentItemIndex: Int = 0
     private var currentPlayer: Player? = null
 
-    private val images = arrayListOf<String>("https://picsum.photos/200", "https://picsum.photos/id/237/200")
+    private val images =
+        arrayListOf<String>("https://picsum.photos/200", "https://picsum.photos/id/237/200")
 
     companion object {
         const val PLAYLIST_CHANNEL_ID = "Playlist Channel"
@@ -70,10 +71,10 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         ).setMediaDescriptionAdapter(playerNotificationAdapter).build()
 
         playlistItemsModel?.forEach { mediaModel ->
-            val movieMetadata : MediaMetadata =
-            MediaMetadata.Builder().setTitle(mediaModel.name).setArtist(mediaModel.author)
-                .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
-            val mediaUri = if(mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc
+            val movieMetadata: MediaMetadata =
+                MediaMetadata.Builder().setTitle(mediaModel.name).setArtist(mediaModel.author)
+                    .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
+            val mediaUri = if (mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc
             val mediaItem = MediaItem.Builder()
 //                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
                 .setUri(Uri.parse(mediaUri))
@@ -107,7 +108,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(32 * 1024, 64 * 1024, 1024, 1024)
             .build()
-        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl).setReleaseTimeoutMs(5000).build()
+        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
+            .setReleaseTimeoutMs(5000).build()
         localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         localPlayer?.addListener(this)
         castContext = CastContext.getSharedInstance()

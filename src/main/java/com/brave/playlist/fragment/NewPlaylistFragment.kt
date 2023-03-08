@@ -46,13 +46,31 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
             etPlaylistName.setText(playlistModel!!.name)
         }
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
-        playlistToolbar.setToolbarTitle(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.playlist_new_text) else getString(R.string.playlist_rename_text))
-        playlistToolbar.setActionText(if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(R.string.playlist_create_toolbar_text) else getString(R.string.playlist_rename_text))
+        playlistToolbar.setToolbarTitle(
+            if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(
+                R.string.playlist_new_text
+            ) else getString(R.string.playlist_rename_text)
+        )
+        playlistToolbar.setActionText(
+            if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(
+                R.string.playlist_create_toolbar_text
+            ) else getString(R.string.playlist_rename_text)
+        )
         playlistToolbar.setActionButtonClickListener {
             if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) {
-                playlistViewModel.setCreatePlaylistOption(CreatePlaylistModel(etPlaylistName.text.toString(), shouldMoveOrCopy))
+                playlistViewModel.setCreatePlaylistOption(
+                    CreatePlaylistModel(
+                        etPlaylistName.text.toString(),
+                        shouldMoveOrCopy
+                    )
+                )
             } else {
-                playlistViewModel.setRenamePlaylistOption(RenamePlaylistModel(playlistModel?.id, etPlaylistName.text.toString()))
+                playlistViewModel.setRenamePlaylistOption(
+                    RenamePlaylistModel(
+                        playlistModel?.id,
+                        etPlaylistName.text.toString()
+                    )
+                )
             }
             activity?.onBackPressedDispatcher?.onBackPressed()
         }
@@ -61,7 +79,11 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
 
     companion object {
         @JvmStatic
-        fun newInstance(playlistOptions: PlaylistOptions, playlistModel: PlaylistModel? = null, shouldMoveOrCopy: Boolean = false) =
+        fun newInstance(
+            playlistOptions: PlaylistOptions,
+            playlistModel: PlaylistModel? = null,
+            shouldMoveOrCopy: Boolean = false
+        ) =
             NewPlaylistFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable(PLAYLIST_OPTION, playlistOptions)

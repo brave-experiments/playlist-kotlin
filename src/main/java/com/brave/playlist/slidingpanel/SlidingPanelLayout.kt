@@ -37,9 +37,6 @@ class BottomPanelLayout @JvmOverloads constructor(
      * Minimum velocity that will be detected as a fling
      */
     var minFlingVelocity = DEFAULT_MIN_FLING_VELOCITY
-        set(value) {
-            field = value
-        }
 
     /**
      * The fade color used for the panel covered by the slider. 0 = no fading.
@@ -673,6 +670,7 @@ class BottomPanelLayout @JvmOverloads constructor(
                         computePanelTopPosition(0.0f) + if (mIsSlidingUp) +mPanelHeight else -mPanelHeight
                     computeSlideOffset(newTop)
                 }
+
                 else -> 0f
             }
         }
@@ -738,6 +736,7 @@ class BottomPanelLayout @JvmOverloads constructor(
                     return false
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (ady > dragSlop && adx > ady) {
                     mDragHelper!!.cancel()
@@ -745,6 +744,7 @@ class BottomPanelLayout @JvmOverloads constructor(
                     return false
                 }
             }
+
             MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
                 // If the dragView is still dragging when we get here, we need to call processTouchEvent
                 // so that the view is settled
@@ -1091,7 +1091,7 @@ class BottomPanelLayout @JvmOverloads constructor(
         return LayoutParams(context, attrs)
     }
 
-    public override fun onSaveInstanceState(): Parcelable? {
+    public override fun onSaveInstanceState(): Parcelable {
         val bundle = Bundle()
         bundle.putParcelable("superState", super.onSaveInstanceState())
         bundle.putSerializable(
@@ -1202,15 +1202,15 @@ class BottomPanelLayout @JvmOverloads constructor(
     class LayoutParams : MarginLayoutParams {
         var weight = 0f
 
-        constructor() : super(MATCH_PARENT, MATCH_PARENT) {}
-        constructor(width: Int, height: Int) : super(width, height) {}
+        constructor() : super(MATCH_PARENT, MATCH_PARENT)
+        constructor(width: Int, height: Int) : super(width, height)
         constructor(width: Int, height: Int, weight: Float) : super(width, height) {
             this.weight = weight
         }
 
-        constructor(source: ViewGroup.LayoutParams?) : super(source) {}
-        constructor(source: MarginLayoutParams?) : super(source) {}
-        constructor(source: LayoutParams?) : super(source) {}
+        constructor(source: ViewGroup.LayoutParams?) : super(source)
+        constructor(source: MarginLayoutParams?) : super(source)
+        constructor(source: LayoutParams?) : super(source)
         constructor(c: Context, attrs: AttributeSet?) : super(c, attrs) {
             val ta = c.obtainStyledAttributes(attrs, ATTRS)
             if (ta != null) {

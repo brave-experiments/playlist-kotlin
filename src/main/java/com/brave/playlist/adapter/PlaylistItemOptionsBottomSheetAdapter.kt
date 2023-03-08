@@ -7,9 +7,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
 import com.brave.playlist.listener.PlaylistItemOptionsListener
-import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistItemOptionModel
-import com.brave.playlist.model.PlaylistOptionsModel
 
 class PlaylistItemOptionsBottomSheetAdapter(
     itemList: MutableList<PlaylistItemOptionModel>,
@@ -19,7 +17,10 @@ class PlaylistItemOptionsBottomSheetAdapter(
         itemList
     ) {
 
-    class PlaylistItemOptionsViewHolder(view: View, private val playlistItemOptionsListener: PlaylistItemOptionsListener) :
+    class PlaylistItemOptionsViewHolder(
+        view: View,
+        private val playlistItemOptionsListener: PlaylistItemOptionsListener
+    ) :
         AbstractViewHolder<PlaylistItemOptionModel>(view) {
         private val optionView: View
         private val ivOptionIcon: AppCompatImageView
@@ -40,7 +41,10 @@ class PlaylistItemOptionsBottomSheetAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistItemOptionsViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): PlaylistItemOptionsViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_playlist_options_bottom_sheet, parent, false)
         return PlaylistItemOptionsViewHolder(view, playlistItemOptionsListener)

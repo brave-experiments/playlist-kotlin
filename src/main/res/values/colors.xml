@@ -9,10 +9,8 @@
     <color name="text_input_layout_activated">#FB542B</color>
     <color name="playlist_popup_window">#E9E9F4</color>
     <color name="media_stats_color">#84889C</color>
-    <color name="dialog_message">#C6C8D0</color>
     <color name="edit_toolbar">#353DAB</color>
     <color name="swipe_delete">#BD1531</color>
-    <color name="recently_played_playlist_name">#F0F2FF</color>
     <color name="remove_offline_option_bg">#353DAB</color>
     <color name="upload_option_bg">#339AF0</color>
     <color name="tooltip">#4C54D2</color>

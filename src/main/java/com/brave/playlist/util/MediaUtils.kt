@@ -5,18 +5,17 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
 import java.io.File
-import java.io.IOException
 import java.io.InputStream
-import java.lang.Exception
 
 
 object MediaUtils {
-    fun getMediaDuration(context : Context, mediaPath : String): Long? {
+    fun getMediaDuration(context: Context, mediaPath: String): Long? {
         val mediaMetadataRetriever = MediaMetadataRetriever()
         mediaMetadataRetriever.setDataSource(context, Uri.fromFile(File(mediaPath)))
-        val time = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        val time =
+            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
         mediaMetadataRetriever.release()
-       return time?.toLong()
+        return time?.toLong()
     }
 
     fun getFileSizeFromUri(context: Context, uri: Uri): Long {
@@ -32,7 +31,7 @@ object MediaUtils {
                 }
             }
         } catch (ex: Exception) {
-            Log.e("BravePlaylist", ex.message.toString());
+            Log.e("BravePlaylist", ex.message.toString())
         } finally {
             inputStream?.close()
         }

@@ -96,7 +96,8 @@ class MoveOrCopyToPlaylistBottomSheet :
                 }
             }
 
-            allPlaylistList.add(0,
+            allPlaylistList.add(
+                0,
                 PlaylistModel(
                     "new_playlist",
                     getString(R.string.playlist_new_text),
@@ -119,7 +120,8 @@ class MoveOrCopyToPlaylistBottomSheet :
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
         if (playlistModel.id == "new_playlist") {
-            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
+            PlaylistUtils.moveOrCopyModel =
+                MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
                 PlaylistOptions.NEW_PLAYLIST,
                 shouldMoveOrCopy = true
@@ -130,7 +132,11 @@ class MoveOrCopyToPlaylistBottomSheet :
                 .addToBackStack(AllPlaylistFragment::class.simpleName)
                 .commit()
         } else {
-            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(moveOrCopyModel.playlistOptions, playlistModel.id, moveOrCopyModel.items)
+            PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
+                moveOrCopyModel.playlistOptions,
+                playlistModel.id,
+                moveOrCopyModel.items
+            )
             playlistViewModel.performMoveOrCopy(PlaylistUtils.moveOrCopyModel)
         }
         dismiss()

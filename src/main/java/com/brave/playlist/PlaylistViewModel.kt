@@ -3,8 +3,15 @@ package com.brave.playlist
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.brave.playlist.enums.PlaylistOptions
-import com.brave.playlist.model.*
+import com.brave.playlist.model.CreatePlaylistModel
+import com.brave.playlist.model.DownloadProgressModel
+import com.brave.playlist.model.MoveOrCopyModel
+import com.brave.playlist.model.PlaylistEventModel
+import com.brave.playlist.model.PlaylistItemModel
+import com.brave.playlist.model.PlaylistItemOptionModel
+import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.model.RenamePlaylistModel
 
 class PlaylistViewModel : ViewModel() {
     // Using Livedata for Playlist Data
@@ -78,13 +85,13 @@ class PlaylistViewModel : ViewModel() {
 
     private val mutableDownloadProgress = MutableLiveData<DownloadProgressModel>()
     val downloadProgress: LiveData<DownloadProgressModel> get() = mutableDownloadProgress
-    fun updateDownloadProgress (downloadProgressModel: DownloadProgressModel) {
+    fun updateDownloadProgress(downloadProgressModel: DownloadProgressModel) {
         mutableDownloadProgress.value = downloadProgressModel
     }
 
     private val mutablePlaylistEventUpdate = MutableLiveData<PlaylistEventModel>()
     val playlistEventUpdate: LiveData<PlaylistEventModel> get() = mutablePlaylistEventUpdate
-    fun updatePlaylistEvent (playlistEventModel: PlaylistEventModel) {
+    fun updatePlaylistEvent(playlistEventModel: PlaylistEventModel) {
         mutablePlaylistEventUpdate.value = playlistEventModel
     }
 

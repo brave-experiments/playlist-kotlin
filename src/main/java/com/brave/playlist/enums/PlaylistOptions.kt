@@ -34,5 +34,5 @@ enum class PlaylistOptions {
     DELETE_PLAYLIST_ITEMS,
 
     // Extra options
-     NEW_PLAYLIST
+    NEW_PLAYLIST
 }

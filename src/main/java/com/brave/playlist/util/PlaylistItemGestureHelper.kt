@@ -223,7 +223,10 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         super.onSelectedChanged(viewHolder, actionState)
 
 
-        if (viewHolder is AbstractRecyclerViewAdapter.AbstractViewHolder<*> && !viewHolder.isSelected(viewHolder.adapterPosition)) {
+        if (viewHolder is AbstractRecyclerViewAdapter.AbstractViewHolder<*> && !viewHolder.isSelected(
+                viewHolder.adapterPosition
+            )
+        ) {
             viewHolder.itemView.setBackgroundResource(R.color.playlist_background)
         }
     }
@@ -233,7 +236,10 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         viewHolder: RecyclerView.ViewHolder
     ) {
         super.clearView(recyclerView, viewHolder)
-        if (viewHolder is AbstractRecyclerViewAdapter.AbstractViewHolder<*> && !viewHolder.isSelected(viewHolder.adapterPosition))
+        if (viewHolder is AbstractRecyclerViewAdapter.AbstractViewHolder<*> && !viewHolder.isSelected(
+                viewHolder.adapterPosition
+            )
+        )
             viewHolder.itemView.background = null
     }
 

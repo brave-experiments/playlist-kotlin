@@ -38,6 +38,7 @@ class MovableImageButton :
                 dY = view.y - downRawY
                 true // Consumed
             }
+
             MotionEvent.ACTION_MOVE -> {
                 val viewWidth = view.width
                 val viewHeight = view.height
@@ -68,6 +69,7 @@ class MovableImageButton :
                     .start()
                 true // Consumed
             }
+
             MotionEvent.ACTION_UP -> {
                 val upRawX = motionEvent.rawX
                 val upRawY = motionEvent.rawY
@@ -78,6 +80,7 @@ class MovableImageButton :
                 else // A drag
                     true // Consumed
             }
+
             else -> super.onTouchEvent(motionEvent)
         }
     }

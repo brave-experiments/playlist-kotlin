@@ -97,7 +97,7 @@ class ViewDragHelper private constructor(
      * about the state of the parent view upon request. The callback also makes decisions
      * governing the range and draggability of child views.
      */
-    abstract class Callback() {
+    abstract class Callback {
         /**
          * Called when the drag state changes. See the `STATE_*` constants
          * for more information.
@@ -852,6 +852,7 @@ class ViewDragHelper private constructor(
                     mCallback.onEdgeTouched(edgesTouched and mTrackingEdges, pointerId)
                 }
             }
+
             MotionEventCompat.ACTION_POINTER_DOWN -> {
                 val pointerId = MotionEventCompat.getPointerId(ev, actionIndex)
                 val x = MotionEventCompat.getX(ev, actionIndex)
@@ -872,6 +873,7 @@ class ViewDragHelper private constructor(
                     }
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
 
                 // First to cross a touch slop over a draggable view wins. Also report edge drags.
@@ -905,10 +907,12 @@ class ViewDragHelper private constructor(
                 }
                 saveLastMotion(ev)
             }
+
             MotionEventCompat.ACTION_POINTER_UP -> {
                 val pointerId = MotionEventCompat.getPointerId(ev, actionIndex)
                 clearMotionHistory(pointerId)
             }
+
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 cancel()
             }
@@ -951,6 +955,7 @@ class ViewDragHelper private constructor(
                     mCallback.onEdgeTouched(edgesTouched and mTrackingEdges, pointerId)
                 }
             }
+
             MotionEventCompat.ACTION_POINTER_DOWN -> {
                 val pointerId = MotionEventCompat.getPointerId(ev, actionIndex)
                 val x = MotionEventCompat.getX(ev, actionIndex)
@@ -973,6 +978,7 @@ class ViewDragHelper private constructor(
                     tryCaptureViewForDrag(capturedView, pointerId)
                 }
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (viewDragState == STATE_DRAGGING) {
                     val index = MotionEventCompat.findPointerIndex(
@@ -1014,6 +1020,7 @@ class ViewDragHelper private constructor(
                     saveLastMotion(ev)
                 }
             }
+
             MotionEventCompat.ACTION_POINTER_UP -> {
                 val pointerId = MotionEventCompat.getPointerId(ev, actionIndex)
                 if (viewDragState == STATE_DRAGGING && pointerId == activePointerId) {
@@ -1045,12 +1052,14 @@ class ViewDragHelper private constructor(
                 }
                 clearMotionHistory(pointerId)
             }
+
             MotionEvent.ACTION_UP -> {
                 if (viewDragState == STATE_DRAGGING) {
                     releaseViewForPointerUp()
                 }
                 cancel()
             }
+
             MotionEvent.ACTION_CANCEL -> {
                 if (viewDragState == STATE_DRAGGING) {
                     dispatchViewReleased(0f, 0f)

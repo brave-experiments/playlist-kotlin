@@ -4,7 +4,8 @@ import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 
-data class PlaylistModel(val id: String, val name: String, val items: List<PlaylistItemModel>) : Parcelable {
+data class PlaylistModel(val id: String, val name: String, val items: List<PlaylistItemModel>) :
+    Parcelable {
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<PlaylistModel> {
@@ -25,7 +26,7 @@ data class PlaylistModel(val id: String, val name: String, val items: List<Playl
         parcel.writeString(id)
         parcel.writeString(name)
         if (Build.VERSION.SDK_INT >= 29) {
-            parcel.writeParcelableList(items,flags)
+            parcel.writeParcelableList(items, flags)
         } else {
             parcel.writeList(items)
         }

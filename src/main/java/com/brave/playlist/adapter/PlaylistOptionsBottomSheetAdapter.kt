@@ -17,7 +17,10 @@ class PlaylistOptionsBottomSheetAdapter(
         itemList
     ) {
 
-    class PlaylistOptionsViewHolder(view: View, private val playlistOptionsListener: PlaylistOptionsListener) :
+    class PlaylistOptionsViewHolder(
+        view: View,
+        private val playlistOptionsListener: PlaylistOptionsListener
+    ) :
         AbstractViewHolder<PlaylistOptionsModel>(view) {
         private val optionView: View
         private val ivOptionIcon: AppCompatImageView

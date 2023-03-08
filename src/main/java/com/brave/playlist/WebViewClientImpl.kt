@@ -6,7 +6,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.brave.playlist.listener.WebViewResponseListener
 
-class WebViewClientImpl(private val webViewResponseListener: WebViewResponseListener) : WebViewClient() {
+class WebViewClientImpl(private val webViewResponseListener: WebViewResponseListener) :
+    WebViewClient() {
     override fun onReceivedHttpError(
         view: WebView?,
         request: WebResourceRequest?,

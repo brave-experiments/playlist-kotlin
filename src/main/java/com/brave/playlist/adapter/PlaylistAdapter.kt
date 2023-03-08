@@ -11,7 +11,10 @@ import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.bumptech.glide.Glide
 
-class PlaylistAdapter(allPlaylists: MutableList<PlaylistModel>, private val playlistClickListener : PlaylistClickListener?) :
+class PlaylistAdapter(
+    allPlaylists: MutableList<PlaylistModel>,
+    private val playlistClickListener: PlaylistClickListener?
+) :
     AbstractRecyclerViewAdapter<PlaylistAdapter.AllPlaylistViewHolder, PlaylistModel>(allPlaylists) {
 
     inner class AllPlaylistViewHolder(view: View) :

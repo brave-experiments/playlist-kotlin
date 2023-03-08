@@ -15,7 +15,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.card.MaterialCardView
 
-class PlaylistItemOptionsBottomSheet(private val playlistItemOptionModel: MutableList<PlaylistItemOptionModel>, private val playlistItemOptionsListener: PlaylistItemOptionsListener) :
+class PlaylistItemOptionsBottomSheet(
+    private val playlistItemOptionModel: MutableList<PlaylistItemOptionModel>,
+    private val playlistItemOptionsListener: PlaylistItemOptionsListener
+) :
     BottomSheetDialogFragment(), PlaylistItemOptionsListener {
 
     override fun onCreateView(

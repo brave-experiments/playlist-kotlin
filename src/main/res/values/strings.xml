@@ -3,9 +3,7 @@
     <string name="playlist_feature_text">Playlist</string>
     <string name="playlist_create_toolbar_text">Create</string>
     <string name="playlist_create_your_first_text">Create your first playlist</string>
-    <string name="playlist_first_message_text">Make a playlist of your favorite audio and videos and play anytime, anywhere. Even offline.</string>
     <string name="playlist_create_text">Create a Playlist</string>
-    <string name="playlist_skip_text">Skip</string>
     <string name="playlist_play_later">Play Later</string>
     <string name="playlist_browse_and_add">Browse and add</string>
     <string name="playlist_browse_and_add_message">Add your favorite content. Look for the + button in the lower right part of your screen.</string>
@@ -13,8 +11,6 @@
     <string name="playlist_new_text">New playlist</string>
     <string name="playlist_name_text">Playlist name</string>
     <string name="playlist_untitled_text">Untitled playlist</string>
-    <string name="playlist_cancel">Cancel</string>
-    <string name="playlist_remove_data">Remove Data</string>
     <string name="playlist_number_selected">%d Selected</string>
     <string name="playlist_number_items">%d items</string>
     <string name="playlist_play_all">Play All</string>
@@ -33,7 +29,6 @@
     <string name="playlist_onboarding_text_3">Playlist button appears when there’s media to add. Long press it for options. You can even hide it.</string>
     <string name="playlist_open_playlist">Open Playlist</string>
     <string name="playlist_open_playlist_settings">Open Playlist Settings</string>
-    <string name="playlist_hide_playlist_button">Hide Playlist button</string>
     <string name="playlist_try_it">Try it!</string>
     <string name="playlist_edit_text">Edit</string>
     <string name="playlist_rename_text">Rename</string>

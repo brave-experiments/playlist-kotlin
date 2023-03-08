@@ -27,7 +27,10 @@ class PlayerNotificationAdapter(
         return playlistItems?.get(player.currentPeriodIndex)?.name ?: "Description"
     }
 
-    override fun getCurrentLargeIcon(player: Player, callback: PlayerNotificationManager.BitmapCallback): Bitmap? {
+    override fun getCurrentLargeIcon(
+        player: Player,
+        callback: PlayerNotificationManager.BitmapCallback
+    ): Bitmap? {
         return BitmapFactory.decodeResource(context.resources, R.drawable.ic_edit_playlist)
     }
 }

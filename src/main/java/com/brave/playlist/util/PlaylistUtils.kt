@@ -15,7 +15,8 @@ import java.util.Date
 
 
 object PlaylistUtils {
-    @JvmStatic lateinit var moveOrCopyModel: MoveOrCopyModel
+    @JvmStatic
+    lateinit var moveOrCopyModel: MoveOrCopyModel
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
@@ -25,15 +26,16 @@ object PlaylistUtils {
             )
             serviceChannel.lightColor = Color.BLUE
             serviceChannel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-            val service = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val service =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             service.createNotificationChannel(serviceChannel)
         }
     }
 
-    fun isMediaSourceExpired(mediaSrc : String): Boolean {
+    fun isMediaSourceExpired(mediaSrc: String): Boolean {
         val uri: Uri =
             Uri.parse(mediaSrc)
-        val expireMillis : Long? = uri.getQueryParameter("expire")?.toLong()?.times(1000L)
+        val expireMillis: Long? = uri.getQueryParameter("expire")?.toLong()?.times(1000L)
         return Date() > expireMillis?.let { Date(it) }
     }
 

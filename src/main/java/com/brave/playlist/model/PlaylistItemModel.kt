@@ -13,8 +13,8 @@ data class PlaylistItemModel(
     val thumbnailPath: String,
     val author: String,
     val duration: String,
-    val lastPlayedPosition : Int,
-    val isCached:Boolean = false,
+    val lastPlayedPosition: Int,
+    val isCached: Boolean = false,
     var isSelected: Boolean = false
 ) : Parcelable {
     companion object {
@@ -51,8 +51,8 @@ data class PlaylistItemModel(
         parcel.writeString(author)
         parcel.writeString(duration)
         parcel.writeInt(lastPlayedPosition)
-        parcel.writeInt(if(isCached) 1 else 0)
-        parcel.writeInt(if(isSelected) 1 else 0)
+        parcel.writeInt(if (isCached) 1 else 0)
+        parcel.writeInt(if (isSelected) 1 else 0)
     }
 
     override fun describeContents() = 0

@@ -6,7 +6,5 @@
     <color name="hint_color">#501E2029</color>
     <color name="playlist_popup_window">#17171F</color>
     <color name="media_stats_color">#84889C</color>
-    <color name="dialog_message">#C6C8D0</color>
-    <color name="recently_played_playlist_name">#F0F2FF</color>
     <color name="playlist_text_color">#FFFFFF</color>
 </resources>

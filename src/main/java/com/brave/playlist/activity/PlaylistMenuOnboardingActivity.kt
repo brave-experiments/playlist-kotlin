@@ -10,23 +10,33 @@ import com.brave.playlist.model.PlaylistOnboardingModel
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-
 class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboarding_activity) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val playlistOnboardingViewPager: ViewPager2 = findViewById(R.id.playlistOnboardingViewPager)
 
-        val adapter = PlaylistOnboardingFragmentStateAdapter(this, listOf(
-            PlaylistOnboardingModel(getString(R.string.playlist_onboarding_title_1), getString(R.string.playlist_onboarding_text_1), R.drawable.ic_playlist_onboarding_icon, R.drawable.ic_playlist_onboarding_graphic_bg),
-            PlaylistOnboardingModel(getString(R.string.playlist_onboarding_title_2), getString(R.string.playlist_onboarding_text_2), R.drawable.ic_playlist_buttononboard_img2, R.drawable.ic_playlist_buttononboard_img2_bg),
-            PlaylistOnboardingModel(getString(R.string.playlist_onboarding_title_3), getString(R.string.playlist_onboarding_text_3), R.drawable.ic_playlist_buttononboard_img3, R.drawable.ic_playlist_buttononboard_img2_bg)
-        ))
+        val adapter = PlaylistOnboardingFragmentStateAdapter(
+            this, listOf(
+                PlaylistOnboardingModel(
+                    getString(R.string.playlist_onboarding_title_1),
+                    getString(R.string.playlist_onboarding_text_1),
+                    R.drawable.ic_playlist_onboarding_icon,
+                    R.drawable.ic_playlist_onboarding_graphic_bg
+                ),
+                PlaylistOnboardingModel(
+                    getString(R.string.playlist_onboarding_title_3),
+                    getString(R.string.playlist_onboarding_text_3),
+                    R.drawable.ic_playlist_buttononboard_img3,
+                    R.drawable.ic_playlist_buttononboard_img2_bg
+                )
+            )
+        )
         playlistOnboardingViewPager.adapter = adapter
 
         val nextButton: AppCompatButton = findViewById(R.id.btNextOnboarding)
         nextButton.setOnClickListener {
-            if (playlistOnboardingViewPager.currentItem == 2) {
+            if (playlistOnboardingViewPager.currentItem == 1) {
                 finish()
             } else {
                 playlistOnboardingViewPager.currentItem =
@@ -38,7 +48,7 @@ class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboa
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                if (position == 2) {
+                if (position == 1) {
                     nextButton.text = getString(R.string.playlist_browse_for_media)
                 } else {
                     nextButton.text = getString(R.string.playlist_next)

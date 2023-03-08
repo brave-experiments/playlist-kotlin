@@ -27,8 +27,9 @@ class PlaylistItemAdapter(
     ) {
     private var editMode = false
     private var isBottomLayout = false
+
     init {
-        editMode =false
+        editMode = false
     }
 
     private var allViewHolderViews = HashMap<String, View>()
@@ -51,8 +52,9 @@ class PlaylistItemAdapter(
         if (downloadProgressModel.totalBytes != downloadProgressModel.receivedBytes) {
             ivMediaStatus?.visibility = View.GONE
             tvMediaDownloadProgress?.visibility = View.VISIBLE
-            tvMediaDownloadProgress?.text = view?.resources?.getString(R.string.playlist_percentage_text)
-                ?.let { String.format(it, downloadProgressModel.percentComplete.toString()) }
+            tvMediaDownloadProgress?.text =
+                view?.resources?.getString(R.string.playlist_percentage_text)
+                    ?.let { String.format(it, downloadProgressModel.percentComplete.toString()) }
         }
     }
 
@@ -146,9 +148,20 @@ class PlaylistItemAdapter(
                     val hours =
                         ((((duration / 1000) - milliseconds) / 1000 - seconds) / 60 - minutes) / 60
 
-                    val hourTime : String = if (hours > 0) itemView.context.resources.getString(R.string.playlist_time_text , hours.toString()) else ""
-                    val minuteTime : String = if (minutes > 0) itemView.context.resources.getString(R.string.playlist_time_text , minutes.toString()) else ""
-                    tvMediaDuration.text =  itemView.context.resources.getString(R.string.playlist_duration_text , hourTime, minuteTime, seconds.toString())
+                    val hourTime: String = if (hours > 0) itemView.context.resources.getString(
+                        R.string.playlist_time_text,
+                        hours.toString()
+                    ) else ""
+                    val minuteTime: String = if (minutes > 0) itemView.context.resources.getString(
+                        R.string.playlist_time_text,
+                        minutes.toString()
+                    ) else ""
+                    tvMediaDuration.text = itemView.context.resources.getString(
+                        R.string.playlist_duration_text,
+                        hourTime,
+                        minuteTime,
+                        seconds.toString()
+                    )
                 }
             }
             ivMediaOptions.visibility = if (!editMode) View.VISIBLE else View.GONE
@@ -196,7 +209,8 @@ class PlaylistItemAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaItemViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.playlist_item_layout, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.playlist_item_layout, parent, false)
         return MediaItemViewHolder(view)
     }
 

@@ -18,7 +18,7 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
 
     // Main toolbar
     private val layoutMainToolbar: ConstraintLayout
-    private val tvTitleToolbarPlaylist:AppCompatTextView
+    private val tvTitleToolbarPlaylist: AppCompatTextView
     private val ivOptionsToolbarPlayList: AppCompatImageView
     private val tvActionToolbarPlaylist: AppCompatTextView
 
@@ -76,9 +76,15 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
         ivOptionsToolbarPlayList = findViewById(R.id.ivOptionsToolbarPlaylist)
         tvActionToolbarPlaylist = findViewById(R.id.tvActionToolbarPlaylist)
         ivOptionsToolbarPlayList.setImageResource(optionButtonIcon)
-        ImageViewCompat.setImageTintList(ivOptionsToolbarPlayList, ColorStateList.valueOf(getColor(optionButtonTint)))
+        ImageViewCompat.setImageTintList(
+            ivOptionsToolbarPlayList,
+            ColorStateList.valueOf(getColor(optionButtonTint))
+        )
         ivBackToolbarPlaylist.setImageResource(backButtonIcon)
-        ImageViewCompat.setImageTintList(ivBackToolbarPlaylist, ColorStateList.valueOf(getColor(backButtonTint)))
+        ImageViewCompat.setImageTintList(
+            ivBackToolbarPlaylist,
+            ColorStateList.valueOf(getColor(backButtonTint))
+        )
         ivOptionsToolbarPlayList.visibility = if (showOptions) VISIBLE else GONE
         tvActionToolbarPlaylist.visibility = if (showCreateButton) VISIBLE else GONE
         ivBackToolbarPlaylist.setOnClickListener {
@@ -116,7 +122,7 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
 
     }
 
-    fun updateSelectedItems(count:Int) {
+    fun updateSelectedItems(count: Int) {
         tvItemSelected.text = context.getString(R.string.playlist_number_selected, count)
     }
 
@@ -159,7 +165,7 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
         tvTitleToolbarPlaylist.text = title
     }
 
-    fun setActionText(actionText : String) {
+    fun setActionText(actionText: String) {
         tvActionToolbarPlaylist.text = actionText
     }
 }
