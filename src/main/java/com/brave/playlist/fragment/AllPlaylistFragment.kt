@@ -68,10 +68,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
 
         tvRecentlyPlayed = view.findViewById(R.id.tvRecentlyPlayed)
         tvPlaylistHeader = view.findViewById(R.id.tvPlaylistHeader)
-    }
 
-    override fun onResume() {
-        super.onResume()
         playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->

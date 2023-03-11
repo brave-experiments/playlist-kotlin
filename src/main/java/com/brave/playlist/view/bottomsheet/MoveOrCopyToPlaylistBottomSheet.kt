@@ -19,6 +19,7 @@ import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.PlaylistUtils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -60,6 +61,8 @@ class MoveOrCopyToPlaylistBottomSheet :
             fromPlaylistId = moveOrCopyModel.items[0].playlistId
         }
 
+        playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
+
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             val allPlaylistList = mutableListOf<PlaylistModel>()
             val allPlaylistJsonArray = JSONArray(allPlaylistData)
@@ -99,7 +102,7 @@ class MoveOrCopyToPlaylistBottomSheet :
             allPlaylistList.add(
                 0,
                 PlaylistModel(
-                    "new_playlist",
+                    ConstantUtils.NEW_PLAYLIST,
                     getString(R.string.playlist_new_text),
                     arrayListOf()
                 )
@@ -119,7 +122,7 @@ class MoveOrCopyToPlaylistBottomSheet :
     }
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
-        if (playlistModel.id == "new_playlist") {
+        if (playlistModel.id == ConstantUtils.NEW_PLAYLIST) {
             PlaylistUtils.moveOrCopyModel =
                 MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
             val newPlaylistFragment = NewPlaylistFragment.newInstance(

@@ -13,6 +13,7 @@ import android.util.Rational
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.SeekBar
@@ -53,6 +54,7 @@ import com.google.android.material.card.MaterialCardView
 import org.json.JSONArray
 import org.json.JSONObject
 
+
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
     PlaylistItemClickListener, PlaylistItemOptionsListener {
     private lateinit var playlistViewModel: PlaylistViewModel
@@ -71,7 +73,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var styledPlayerView: StyledPlayerView
     private lateinit var hoverControlsLayout: LinearLayoutCompat
+    private lateinit var emptyView : View
     private lateinit var fullscreenImg: AppCompatImageView
+    private lateinit var backImg: AppCompatImageView
     private lateinit var videoSeekBar: SeekBar
     private lateinit var tvVideoTitle: AppCompatTextView
     private lateinit var tvVideoSource: AppCompatTextView
@@ -107,10 +111,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Toast.makeText(requireContext(), "landscape", Toast.LENGTH_SHORT).show()
             updateLandscapeView()
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Toast.makeText(requireContext(), "portrait", Toast.LENGTH_SHORT).show()
             updatePortraitView()
         }
     }
@@ -125,26 +127,42 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ).toInt()
         styledPlayerView.layoutParams = layoutParams
 
+        val hoverLayoutParams: FrameLayout.LayoutParams =
+            hoverControlsLayout.layoutParams as FrameLayout.LayoutParams
+        layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT
+        hoverControlsLayout.layoutParams = hoverLayoutParams
+
         mainLayout.mSlideState = BottomPanelLayout.PanelState.COLLAPSED
         if (!isCastInProgress) {
             styledPlayerView.useController = false
             layoutVideoControls.visibility = View.VISIBLE
         }
         playlistToolbar.visibility = View.VISIBLE
+        backImg.visibility = View.GONE
+        emptyView.visibility = View.GONE
         fullscreenImg.setImageResource(R.drawable.ic_fullscreen)
     }
 
     private fun updateLandscapeView() {
         val layoutParams: FrameLayout.LayoutParams =
             styledPlayerView.layoutParams as FrameLayout.LayoutParams
+        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
         layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
         styledPlayerView.layoutParams = layoutParams
+
+        val hoverLayoutParams: FrameLayout.LayoutParams =
+            hoverControlsLayout.layoutParams as FrameLayout.LayoutParams
+        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
+        hoverControlsLayout.layoutParams = hoverLayoutParams
+
         mainLayout.mSlideState = BottomPanelLayout.PanelState.HIDDEN
         styledPlayerView.useController = true
         styledPlayerView.controllerHideOnTouch = false
         styledPlayerView.showController()
         layoutVideoControls.visibility = View.GONE
-//        playlistToolbar.visibility = View.GONE
+        playlistToolbar.visibility = View.GONE
+        backImg.visibility = View.VISIBLE
+        emptyView.visibility = View.VISIBLE
         fullscreenImg.setImageResource(R.drawable.ic_close_fullscreen)
     }
 
@@ -184,6 +202,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         activity?.registerReceiver(broadcastReceiver, intentFilter)
     }
 
+    override fun onDestroy() {
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        super.onDestroy()
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -192,6 +215,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 it, ViewModelProvider.NewInstanceFactory()
             )
         }!![PlaylistViewModel::class.java]
+
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
         playlistModel?.id?.let { playlistViewModel.fetchPlaylistData(it) }
 
@@ -220,11 +245,19 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         fullscreenImg.setOnClickListener {
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             } else {
                 activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             }
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
+
+        backImg = view.findViewById(R.id.back_img)
+        backImg.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+
+        emptyView = view.findViewById(R.id.empty_view)
+
         videoSeekBar = view.findViewById(R.id.videoSeekBar)
         tvVideoTimeElapsed = view.findViewById(R.id.tvVideoTimeElapsed)
         tvVideoTimeRemaining = view.findViewById(R.id.tvVideoTimeRemaining)
@@ -339,13 +372,18 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 //                    } else {
 //                        requireActivity().onBackPressed()
 //                    }
-                    if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                    } else {
-                        this.remove()
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
-                    }
+
+
+//                    if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+//                        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+//                    } else {
+//                        this.remove()
+//                        requireActivity().onBackPressedDispatcher.onBackPressed()
+//                    }
+
+                    this.remove()
+                    requireActivity().onBackPressedDispatcher.onBackPressed()
                 }
             }
             )

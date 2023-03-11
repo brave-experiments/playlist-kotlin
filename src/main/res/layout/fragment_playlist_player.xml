@@ -39,19 +39,34 @@
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
                     app:show_buffering="always"
+                    app:resize_mode="fill"
                     app:use_controller="false" />
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/hover_controls_layout"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|end"
                     android:background="#4D000000"
-                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="12dp"
+                    android:padding="16dp"
                     android:visibility="gone">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/back_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:srcCompat="@drawable/ic_back_toolbar_playlist" />
+
+                    <View
+                        android:id="@+id/empty_view"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone"
+                        android:layout_weight="1" />
 
                     <androidx.mediarouter.app.MediaRouteButton
                         android:id="@+id/media_route_button"
@@ -106,6 +121,7 @@
                     android:drawablePadding="5dp"
                     android:textColor="@color/media_stats_color"
                     android:textSize="12sp"
+                    android:layout_marginTop="8dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -114,7 +130,6 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="@string/playlist_create_your_first_text"
                     android:textColor="@android:color/white"
                     android:textSize="16sp"
                     android:maxLines="2"

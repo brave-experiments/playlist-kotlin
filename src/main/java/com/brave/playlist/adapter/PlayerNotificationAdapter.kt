@@ -24,7 +24,7 @@ class PlayerNotificationAdapter(
     }
 
     override fun getCurrentContentText(player: Player): String {
-        return playlistItems?.get(player.currentPeriodIndex)?.name ?: "Description"
+        return playlistItems?.get(player.currentPeriodIndex)?.name ?: ""
     }
 
     override fun getCurrentLargeIcon(
