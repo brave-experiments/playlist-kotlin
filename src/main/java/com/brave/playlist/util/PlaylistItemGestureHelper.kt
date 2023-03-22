@@ -17,7 +17,6 @@ import com.brave.playlist.adapter.AbstractRecyclerViewAdapter
 import com.brave.playlist.listener.ItemInteractionListener
 import kotlin.math.min
 
-
 @SuppressLint("ClickableViewAccessibility")
 class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHolder<M>, M>(
     context: Context,
@@ -84,7 +83,6 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
                 swipePosition = -1
             buttonPositions.remove(viewHolder.adapterPosition)
             itemInteractionListener.onItemDelete(viewHolder.layoutPosition)
-//            adapter.removeAt(viewHolder.adapterPosition)
         } else if (direction == END)
             oldSwipePosition = swipePosition
     }
@@ -287,11 +285,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         return gestureDetector.onTouchEvent(e)
     }
 
-    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
 
-    }
-
-    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
-
-    }
+    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
 }

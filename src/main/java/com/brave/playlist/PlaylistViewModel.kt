@@ -15,16 +15,23 @@ import com.brave.playlist.model.RenamePlaylistModel
 
 class PlaylistViewModel : ViewModel() {
     // Using Livedata for Playlist Data
-    private val mutablePlaylistData = MutableLiveData<String>()
-    val playlistData: LiveData<String> get() = mutablePlaylistData
-    fun setPlaylistData(playlistData: String) {
-        mutablePlaylistData.value = playlistData
+    private val mutablePlaylistData = MutableLiveData<PlaylistModel>()
+    val playlistData: LiveData<PlaylistModel> get() = mutablePlaylistData
+    fun setPlaylistData(playlistModel: PlaylistModel) {
+        mutablePlaylistData.value = playlistModel
     }
 
+//    // Using Livedata for all Playlist Data
+//    private val mutableAllPlaylistData = MutableLiveData<String>()
+//    val allPlaylistData: LiveData<String> get() = mutableAllPlaylistData
+//    fun setAllPlaylistData(allPlaylistData: String) {
+//        mutableAllPlaylistData.value = allPlaylistData
+//    }
+
     // Using Livedata for all Playlist Data
-    private val mutableAllPlaylistData = MutableLiveData<String>()
-    val allPlaylistData: LiveData<String> get() = mutableAllPlaylistData
-    fun setAllPlaylistData(allPlaylistData: String) {
+    private val mutableAllPlaylistData = MutableLiveData<List<PlaylistModel>>()
+    val allPlaylistData: LiveData<List<PlaylistModel>> get() = mutableAllPlaylistData
+    fun setAllPlaylistData(allPlaylistData: List<PlaylistModel>) {
         mutableAllPlaylistData.value = allPlaylistData
     }
 

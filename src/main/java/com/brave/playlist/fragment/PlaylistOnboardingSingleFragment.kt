@@ -7,6 +7,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.Fragment
 import com.brave.playlist.R
 import com.brave.playlist.model.PlaylistOnboardingModel
+import com.brave.playlist.util.ConstantUtils.ONBOARDING_MODEL
 
 class PlaylistOnboardingSingleFragment : Fragment(R.layout.fragment_single_playlist_onboarding) {
 
@@ -15,7 +16,7 @@ class PlaylistOnboardingSingleFragment : Fragment(R.layout.fragment_single_playl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            playlistOnboardingModel = it.getParcelable(MODEL)
+            playlistOnboardingModel = it.getParcelable(ONBOARDING_MODEL)
         }
     }
 
@@ -36,14 +37,11 @@ class PlaylistOnboardingSingleFragment : Fragment(R.layout.fragment_single_playl
     }
 
     companion object {
-
-        private const val MODEL = "MODEL"
-
         @JvmStatic
         fun newInstance(model: PlaylistOnboardingModel) =
             PlaylistOnboardingSingleFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable(MODEL, model)
+                    putParcelable(ONBOARDING_MODEL, model)
                 }
             }
     }

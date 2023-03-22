@@ -35,8 +35,7 @@ class RecentlyPlayedPlaylistAdapter(
         }
 
         override fun onBind(position: Int, model: PlaylistModel) {
-//            ivPlaylistCover.setImageResource(model)
-            if (!model.items.isNullOrEmpty() && !model.items[0].thumbnailPath.isNullOrEmpty()) {
+            if (model.items.isNotEmpty() && model.items[0].thumbnailPath.isNotEmpty()) {
                 Glide.with(itemView.context)
                     .asBitmap()
                     .placeholder(R.drawable.ic_playlist_item_placeholder)

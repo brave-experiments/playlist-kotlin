@@ -27,7 +27,6 @@ class PlaylistItemOptionsBottomSheet(
         savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.bottom_sheet_playlist_options, container, false)
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

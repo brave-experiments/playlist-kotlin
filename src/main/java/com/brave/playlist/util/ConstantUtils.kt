@@ -12,4 +12,5 @@ object ConstantUtils {
     const val DEFAULT_PLAYLIST = "default"
     const val ALL_PLAYLIST = "all"
     const val SHOULD_MOVE_OR_COPY = "should_move_or_copy"
+    const val ONBOARDING_MODEL = "onboarding_model"
 }

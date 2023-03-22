@@ -35,6 +35,7 @@
     <string name="playlist_remove_all_offline_data">Remove all offline data</string>
     <string name="playlist_download_playlist_for_offline_use">Keep playlist for offline use</string>
     <string name="playlist_download_all_playlists_for_offline_use">Keep all playlists for offline use</string>
+    <string name="playlist_delete_playlist">Delete playlist</string>
     <string name="playlist_number_of_items">%s items</string>
     <string name="playlist_move_item">Move</string>
     <string name="playlist_copy_item">Copy</string>

@@ -19,7 +19,7 @@ object MediaUtils {
                 }
             }
         } catch (ex: Exception) {
-            Log.e("BravePlaylist", ex.message.toString())
+            Log.e(ConstantUtils.TAG, ex.message.toString())
         } finally {
             inputStream?.close()
         }

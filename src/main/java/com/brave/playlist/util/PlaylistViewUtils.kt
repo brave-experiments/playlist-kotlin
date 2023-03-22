@@ -99,7 +99,6 @@ object PlaylistViewUtils {
 
         TransitionManager.beginDelayedTransition(parent, transition)
         movableImageButton.visibility = View.VISIBLE
-//        PlaylistOnboardingPanel(activity as FragmentActivity, movableImageButton, parent)
     }
 
     @JvmStatic

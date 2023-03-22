@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/ic_playlist_onboarding_bg"
-    android:visibility="gone"
-    tools:context=".fragment.EmptyPlaylistFragment">
+    android:visibility="gone">
 
     <com.brave.playlist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"

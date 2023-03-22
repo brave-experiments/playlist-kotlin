@@ -188,16 +188,16 @@ object MenuUtils {
                 playlistModel = playlistModel
             )
         )
-//        if (!isDefaultPlaylist) {
-//            optionsList.add(
-//                PlaylistOptionsModel(
-//                    context.resources.getString(R.string.playlist_delete_playlist),
-//                    R.drawable.ic_playlist_delete,
-//                    PlaylistOptions.DELETE_PLAYLIST,
-//                    playlistModel = playlistModel
-//                )
-//            )
-//        }
+        if (!isDefaultPlaylist) {
+            optionsList.add(
+                PlaylistOptionsModel(
+                    context.resources.getString(R.string.playlist_delete_playlist),
+                    R.drawable.ic_playlist_delete,
+                    PlaylistOptions.DELETE_PLAYLIST,
+                    playlistModel = playlistModel
+                )
+            )
+        }
         PlaylistOptionsBottomSheet(
             optionsList, playlistOptionsListener
         ).show(fragmentManager, null)
