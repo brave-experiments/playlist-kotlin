@@ -10,9 +10,7 @@ abstract class AbstractRecyclerViewAdapter<VH : AbstractRecyclerViewAdapter.Abst
     RecyclerView.Adapter<VH>(), MutableList<M> {
 
     abstract class AbstractViewHolder<M>(view: View) : RecyclerView.ViewHolder(view) {
-
         abstract fun onBind(position: Int, model: M)
-
         open fun isSelected(position: Int): Boolean = false
     }
 

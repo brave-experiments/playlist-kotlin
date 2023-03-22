@@ -31,6 +31,13 @@
             android:textColor="@color/playlist_text_color"
             android:textSize="24sp" />
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            android:indeterminate="true"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvPlaylists"
             android:layout_width="match_parent"

@@ -15,7 +15,8 @@ data class PlaylistItemModel(
     val duration: String,
     val lastPlayedPosition: Int,
     val isCached: Boolean = false,
-    var isSelected: Boolean = false
+    var isSelected: Boolean = false,
+    var fileSize: Long = 0,
 ) : Parcelable {
     companion object {
         @JvmField
@@ -37,7 +38,8 @@ data class PlaylistItemModel(
         duration = parcel.readString().toString(),
         lastPlayedPosition = parcel.readInt(),
         isCached = parcel.readInt() == 1,
-        isSelected = parcel.readInt() == 1
+        isSelected = parcel.readInt() == 1,
+        fileSize = parcel.readLong(),
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -53,6 +55,7 @@ data class PlaylistItemModel(
         parcel.writeInt(lastPlayedPosition)
         parcel.writeInt(if (isCached) 1 else 0)
         parcel.writeInt(if (isSelected) 1 else 0)
+        parcel.writeLong(fileSize)
     }
 
     override fun describeContents() = 0

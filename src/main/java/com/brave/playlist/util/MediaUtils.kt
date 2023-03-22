@@ -1,23 +1,11 @@
 package com.brave.playlist.util
 
 import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.util.Log
-import java.io.File
 import java.io.InputStream
 
-
 object MediaUtils {
-    fun getMediaDuration(context: Context, mediaPath: String): Long? {
-        val mediaMetadataRetriever = MediaMetadataRetriever()
-        mediaMetadataRetriever.setDataSource(context, Uri.fromFile(File(mediaPath)))
-        val time =
-            mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-        mediaMetadataRetriever.release()
-        return time?.toLong()
-    }
-
     fun getFileSizeFromUri(context: Context, uri: Uri): Long {
         var fileSize = 0L
         var inputStream: InputStream? = null

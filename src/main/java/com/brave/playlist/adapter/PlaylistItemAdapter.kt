@@ -2,6 +2,7 @@ package com.brave.playlist.adapter
 
 import android.annotation.SuppressLint
 import android.graphics.Color
+import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -38,17 +39,6 @@ class PlaylistItemAdapter(
         val ivMediaStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaStatus)
         val tvMediaDownloadProgress: AppCompatTextView? =
             view?.findViewById(R.id.tvMediaDownloadProgress)
-//        if (downloadProgressModel.totalBytes == downloadProgressModel.receivedBytes) {
-//            tvMediaDownloadProgress?.visibility = View.GONE
-//            ivMediaStatus?.visibility = View.VISIBLE
-//            ivMediaStatus?.setImageResource(R.drawable.ic_downloaded)
-//        } else {
-//            ivMediaStatus?.visibility = View.GONE
-//            tvMediaDownloadProgress?.visibility = View.VISIBLE
-//            tvMediaDownloadProgress?.text = view?.resources?.getString(R.string.playlist_percentage_text)
-//                ?.let { String.format(it, downloadProgressModel.percentComplete.toString()) }
-//        }
-
         if (downloadProgressModel.totalBytes != downloadProgressModel.receivedBytes) {
             ivMediaStatus?.visibility = View.GONE
             tvMediaDownloadProgress?.visibility = View.VISIBLE
@@ -119,7 +109,7 @@ class PlaylistItemAdapter(
             ivMediaStatus.visibility = if (!editMode) View.VISIBLE else View.GONE
             tvMediaTitle.text = model.name
 
-            if (!model.thumbnailPath.isNullOrEmpty()) {
+            if (model.thumbnailPath.isNotEmpty()) {
                 Glide.with(itemView.context)
                     .asBitmap()
                     .placeholder(R.drawable.ic_playlist_item_placeholder)
@@ -130,15 +120,15 @@ class PlaylistItemAdapter(
                 ivMediaThumbnail.setImageResource(R.drawable.ic_playlist_item_placeholder)
             }
 
-//            if (model.isCached) {
-//                val fileSize = MediaUtils.getFileSizeFromUri(itemView.context, Uri.parse(model.mediaPath))
-//                tvMediaFileSize.text =
-//                    Formatter.formatShortFileSize(itemView.context, fileSize)
-//            }
+            if (model.isCached) {
+                val fileSize = model.fileSize
+                tvMediaFileSize.text =
+                    Formatter.formatShortFileSize(itemView.context, fileSize)
+            }
 
             tvMediaFileSize.visibility = if (model.isCached) View.VISIBLE else View.GONE
 
-            if (!model.duration.isNullOrEmpty()) {
+            if (model.duration.isNotEmpty()) {
                 val duration = model.duration.toLongOrNull()
                 if (duration != null) {
                     val milliseconds = (duration / 1000) % 1000
@@ -156,6 +146,7 @@ class PlaylistItemAdapter(
                         R.string.playlist_time_text,
                         minutes.toString()
                     ) else ""
+                    tvMediaDuration.visibility = View.VISIBLE
                     tvMediaDuration.text = itemView.context.resources.getString(
                         R.string.playlist_duration_text,
                         hourTime,

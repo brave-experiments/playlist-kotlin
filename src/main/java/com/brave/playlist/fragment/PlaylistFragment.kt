@@ -1,11 +1,14 @@
 package com.brave.playlist.fragment
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.text.format.Formatter
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -15,6 +18,7 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
@@ -34,6 +38,7 @@ import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.ConnectionUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
+import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistItemGestureHelper
 import com.brave.playlist.util.PlaylistPreferenceUtils
@@ -46,8 +51,15 @@ import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.util.LinkedList
 
 class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
@@ -55,6 +67,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     PlaylistItemClickListener {
 
     private var playlistModel: PlaylistModel? = null
+
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     private lateinit var playlistViewModel: PlaylistViewModel
     private lateinit var playlistItemAdapter: PlaylistItemAdapter
@@ -64,6 +78,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     private lateinit var tvPlaylistName: TextView
     private lateinit var layoutPlayMedia: LinearLayoutCompat
     private lateinit var ivPlaylistOptions: ImageView
+    private lateinit var progressBar: ProgressBar
     private lateinit var layoutShuffleMedia: LinearLayoutCompat
     private lateinit var ivPlaylistCover: AppCompatImageView
     private lateinit var tvPlaylistTotalSize: AppCompatTextView
@@ -139,6 +154,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         ivPlaylistOptions = view.findViewById(R.id.ivPlaylistOptions)
         ivPlaylistCover = view.findViewById(R.id.ivPlaylistCover)
         tvPlaylistTotalSize = view.findViewById(R.id.tvPlaylistTotalSize)
+        progressBar = view.findViewById(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE
+        rvPlaylist.visibility = View.GONE
 
         playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             Log.e("BravePlaylist", playlistData.toString())
@@ -172,39 +190,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
             view.findViewById<Button>(R.id.btBrowseForMedia).setOnClickListener {
                 requireActivity().finish()
-//                if (playlistModel != null) {
-//                    playlistViewModel.setDefaultPlaylist(playlistModel!!.id)
-//                }
             }
-
-//            Thread {
-//                playlistList.forEach {
-//                    try {
-//                        if (it.isCached) {
-//                            val fileSize = MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
-//                            totalFileSize += fileSize
-//                        }
-//                    } catch (ex: IOException) {
-//                        Log.e("BravePlaylist", ex.message.toString());
-//                    }
-//                }
-//                activity?.runOnUiThread {
-//                    if (totalFileSize > 0) {
-//                        tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
-//                    }
-//                }
-//            }.start()
-
-//            playlistList.forEach {
-//                if (it.isCached) {
-//                    val fileSize =
-//                        MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
-//                    totalFileSize += fileSize
-//                }
-//            }
-//            if (totalFileSize > 0) {
-//                tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
-//            }
 
             if (playlistList.size > 0) {
                 Glide.with(requireContext())
@@ -226,24 +212,16 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 tvPlaylistName.text =
                     if (playlistModel?.id.equals(DEFAULT_PLAYLIST)) resources.getString(R.string.playlist_play_later) else playlistModel?.name
 
-                playlistItemAdapter = PlaylistItemAdapter(playlistList, this, this)
-                val callback =
-                    PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
-                itemTouchHelper = ItemTouchHelper(callback)
-                itemTouchHelper.attachToRecyclerView(rvPlaylist)
-                rvPlaylist.adapter = playlistItemAdapter
-                playlistItemAdapter.setEditMode(false)
-                playlistToolbar.enableEditMode(false)
-                playlistView.visibility = View.VISIBLE
-                emptyView.visibility = View.GONE
-
-                playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
-                    playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
-                }
-
-                playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
-                    playlistItemAdapter.updatePlaylistItem(it)
-                }
+//                playlistItemAdapter = PlaylistItemAdapter(playlistList, this, this)
+//                val callback =
+//                    PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this)
+//                itemTouchHelper = ItemTouchHelper(callback)
+//                itemTouchHelper.attachToRecyclerView(rvPlaylist)
+//                rvPlaylist.adapter = playlistItemAdapter
+//                playlistItemAdapter.setEditMode(false)
+//                playlistToolbar.enableEditMode(false)
+//                playlistView.visibility = View.VISIBLE
+//                emptyView.visibility = View.GONE
 
                 requireActivity()
                     .onBackPressedDispatcher
@@ -261,6 +239,58 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                         }
                     }
                     )
+
+                scope.launch {
+                    playlistList.forEach {
+                        try {
+                            if (it.isCached) {
+                                val fileSize = MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
+                                it.fileSize = fileSize
+                                totalFileSize += fileSize
+                            }
+                        } catch (ex: IOException) {
+                            Log.e("BravePlaylist", ex.message.toString());
+                        }
+                    }
+
+
+//                    playlistList.forEach {
+//                        try {
+//                            if (it.isCached) {
+//                                val fileSize = MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
+//                                totalFileSize += fileSize
+//                            }
+//                        } catch (ex: IOException) {
+//                            Log.e("BravePlaylist", ex.message.toString());
+//                        }
+//                    }
+                    activity?.runOnUiThread {
+                        if (totalFileSize > 0) {
+                            tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
+                        }
+                        playlistItemAdapter = PlaylistItemAdapter(playlistList, this@PlaylistFragment, this@PlaylistFragment)
+                        val callback =
+                            PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this@PlaylistFragment)
+                        itemTouchHelper = ItemTouchHelper(callback)
+                        itemTouchHelper.attachToRecyclerView(rvPlaylist)
+                        rvPlaylist.adapter = playlistItemAdapter
+                        playlistItemAdapter.setEditMode(false)
+                        playlistToolbar.enableEditMode(false)
+                        playlistView.visibility = View.VISIBLE
+                        emptyView.visibility = View.GONE
+
+                        progressBar.visibility = View.GONE
+                        rvPlaylist.visibility = View.VISIBLE
+
+                        playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
+                            playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
+                        }
+
+                        playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
+                            playlistItemAdapter.updatePlaylistItem(it)
+                        }
+                    }
+                }
             } else {
                 ivPlaylistCover.setImageResource(R.drawable.ic_playlist_placeholder)
                 emptyView.visibility = View.VISIBLE

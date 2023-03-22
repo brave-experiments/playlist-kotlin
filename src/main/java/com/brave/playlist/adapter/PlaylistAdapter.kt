@@ -38,7 +38,7 @@ class PlaylistAdapter(
                 ivNewPlaylistThumbnail.visibility = View.VISIBLE
                 ivPlaylistThumbnail.visibility = View.GONE
             } else {
-                if (!model.items.isNullOrEmpty() && !model.items[0].thumbnailPath.isNullOrEmpty()) {
+                if (model.items.isNotEmpty() && model.items[0].thumbnailPath.isNotEmpty()) {
                     Glide.with(itemView.context)
                         .asBitmap()
                         .placeholder(R.drawable.ic_playlist_item_placeholder)

@@ -7,6 +7,7 @@ import android.content.*
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.*
 import android.util.Log
 import android.util.Rational
@@ -42,6 +43,7 @@ import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
+import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
@@ -51,12 +53,18 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.material.card.MaterialCardView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
     PlaylistItemClickListener, PlaylistItemOptionsListener {
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
     private lateinit var playlistViewModel: PlaylistViewModel
     private var isPIPModeEnabled: Boolean = true
     private var isCastInProgress: Boolean = false
@@ -94,6 +102,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var layoutPlayer: FrameLayout
     private lateinit var ivVideoOptions: AppCompatImageView
     private lateinit var tvPlaylistName: AppCompatTextView
+    private lateinit var progressBar: ProgressBar
 
     private lateinit var videoPlayerLoading: ProgressBar
 
@@ -289,6 +298,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         layoutPlayer = view.findViewById(R.id.player_layout)
         layoutVideoControls = view.findViewById(R.id.layoutVideoControls)
 
+        rvPlaylist = view.findViewById(R.id.rvPlaylists)
+        progressBar = view.findViewById(R.id.progressBar)
+        progressBar.visibility = View.VISIBLE
+        rvPlaylist.visibility = View.GONE
+
         val mediaRouteButton: MediaRouteButton =
             view.findViewById(R.id.media_route_button)
         CastButtonFactory.setUpMediaRouteButton(requireContext(), mediaRouteButton)
@@ -340,18 +354,35 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             activity?.startService(intent)
             activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
 
-            // Bottom Layout set up
-            rvPlaylist = view.findViewById(R.id.rvPlaylists)
-            playlistItemAdapter = PlaylistItemAdapter(playlistItems, this)
-            playlistItemAdapter.setBottomLayout()
-            rvPlaylist.adapter = playlistItemAdapter
+            scope.launch {
+                playlistItems.forEach {
+                    try {
+                        if (it.isCached) {
+                            val fileSize =
+                                MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
+                            it.fileSize = fileSize
+                        }
+                    } catch (ex: IOException) {
+                        Log.e("BravePlaylist", ex.message.toString());
+                    }
+                }
 
-            playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
-                playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
-            }
+                activity?.runOnUiThread {
+                    // Bottom Layout set up
+                    playlistItemAdapter = PlaylistItemAdapter(playlistItems, this@PlaylistPlayerFragment)
+                    playlistItemAdapter.setBottomLayout()
+                    rvPlaylist.adapter = playlistItemAdapter
 
-            playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
-                playlistItemAdapter.updatePlaylistItem(it)
+                    progressBar.visibility = View.GONE
+                    rvPlaylist.visibility = View.VISIBLE
+                    playlistViewModel.downloadProgress.observe(viewLifecycleOwner) {
+                        playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
+                    }
+
+                    playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
+                        playlistItemAdapter.updatePlaylistItem(it)
+                    }
+                }
             }
         }
 
