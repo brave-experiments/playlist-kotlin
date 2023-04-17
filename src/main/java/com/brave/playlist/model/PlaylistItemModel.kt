@@ -2,21 +2,26 @@ package com.brave.playlist.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
 
+@Entity
 data class PlaylistItemModel(
-    val id: String,
-    val playlistId: String,
-    val name: String,
-    val pageSource: String,
-    val mediaPath: String,
-    val mediaSrc: String,
-    val thumbnailPath: String,
-    val author: String,
-    val duration: String,
-    val lastPlayedPosition: Int,
-    val isCached: Boolean = false,
-    var isSelected: Boolean = false,
-    var fileSize: Long = 0,
+    @PrimaryKey val id: String,
+    @SerializedName("playlist_id") @ColumnInfo(name = "playlist_id")val playlistId: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("page_source")@ColumnInfo(name = "page_source")val pageSource: String,
+    @SerializedName("media_path")@ColumnInfo(name = "media_path")val mediaPath: String,
+    @SerializedName("media_src")@ColumnInfo(name = "media_src")val mediaSrc: String,
+    @SerializedName("thumbnail_path")@ColumnInfo(name = "thumbnail_path")val thumbnailPath: String,
+    @SerializedName("author")val author: String,
+    @SerializedName("duration")val duration: String,
+    @SerializedName("last_played_position")@ColumnInfo(name = "last_played_position") var lastPlayedPosition: Long,
+    @SerializedName("is_cached")@ColumnInfo(name = "is_cached")val isCached: Boolean = false,
+    @SerializedName("is_selected")@ColumnInfo(name = "is_selected")var isSelected: Boolean = false,
+    @SerializedName("file_size")@ColumnInfo(name = "file_size")var fileSize: Long = 0,
 ) : Parcelable {
     companion object {
         @JvmField
@@ -36,7 +41,7 @@ data class PlaylistItemModel(
         thumbnailPath = parcel.readString().toString(),
         author = parcel.readString().toString(),
         duration = parcel.readString().toString(),
-        lastPlayedPosition = parcel.readInt(),
+        lastPlayedPosition = parcel.readLong(),
         isCached = parcel.readInt() == 1,
         isSelected = parcel.readInt() == 1,
         fileSize = parcel.readLong(),
@@ -52,7 +57,7 @@ data class PlaylistItemModel(
         parcel.writeString(thumbnailPath)
         parcel.writeString(author)
         parcel.writeString(duration)
-        parcel.writeInt(lastPlayedPosition)
+        parcel.writeLong(lastPlayedPosition)
         parcel.writeInt(if (isCached) 1 else 0)
         parcel.writeInt(if (isSelected) 1 else 0)
         parcel.writeLong(fileSize)

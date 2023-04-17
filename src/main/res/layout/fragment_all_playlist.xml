@@ -28,6 +28,7 @@
         android:text="@string/playlist_playlists_text"
         android:textColor="@color/playlist_text_color"
         android:textSize="24sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/playlistToolbar" />
@@ -42,6 +43,7 @@
         android:text="@string/playlist_recently_played"
         android:textColor="@color/playlist_text_color"
         android:textSize="20sp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPlaylistHeader" />

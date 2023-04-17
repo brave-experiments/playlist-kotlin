@@ -3,8 +3,13 @@ package com.brave.playlist.model
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 
-data class PlaylistModel(val id: String, val name: String, val items: List<PlaylistItemModel>) :
+data class PlaylistModel(
+    @SerializedName("id") val id: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("items") val items: List<PlaylistItemModel>
+) :
     Parcelable {
     companion object {
         @JvmField

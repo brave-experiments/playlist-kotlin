@@ -35,8 +35,11 @@ object PlaylistUtils {
     fun isMediaSourceExpired(mediaSrc: String): Boolean {
         val uri: Uri =
             Uri.parse(mediaSrc)
-        val expireMillis: Long? = uri.getQueryParameter("expire")?.toLong()?.times(1000L)
-        return Date() > expireMillis?.let { Date(it) }
+        if (!uri.getQueryParameter("expire").isNullOrEmpty()) {
+            val expireMillis: Long? = uri.getQueryParameter("expire")?.toLong()?.times(1000L)
+            return Date() > expireMillis?.let { Date(it) }
+        }
+        return false
     }
 
     fun showSharingDialog(context: Context, text: String) {

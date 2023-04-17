@@ -11,6 +11,7 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.SeekBar
@@ -31,17 +32,22 @@ import com.brave.playlist.adapter.PlaylistItemAdapter
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
+import com.brave.playlist.local_database.PlaylistRepository
 import com.brave.playlist.model.*
 import com.brave.playlist.slidingpanel.BottomPanelLayout
 import com.brave.playlist.util.ConnectionUtils
 import com.brave.playlist.util.ConstantUtils
+import com.brave.playlist.util.ConstantUtils.CAST_ACTION
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
+import com.brave.playlist.util.ConstantUtils.SHOULD_SHOW_CONTROLS
 import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
+import com.brave.playlist.util.PlaylistPreferenceUtils
+import com.brave.playlist.util.PlaylistPreferenceUtils.rememberFilePlaybackPosition
 import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
@@ -54,13 +60,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.IOException
 
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
-    PlaylistItemClickListener, PlaylistItemOptionsListener {
+    PlaylistItemClickListener, PlaylistItemOptionsListener, BottomPanelLayout.PanelSlideListener {
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
     private lateinit var playlistViewModel: PlaylistViewModel
     private var isCastInProgress: Boolean = false
@@ -77,7 +81,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var styledPlayerView: StyledPlayerView
     private lateinit var hoverControlsLayout: LinearLayoutCompat
-    private lateinit var emptyView : View
+    private lateinit var emptyView: View
     private lateinit var fullscreenImg: AppCompatImageView
     private lateinit var backImg: AppCompatImageView
     private lateinit var videoSeekBar: SeekBar
@@ -95,7 +99,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var ivSeekBack15Seconds: AppCompatImageView
     private lateinit var layoutVideoControls: ConstraintLayout
     private lateinit var layoutBottom: MaterialCardView
-    private lateinit var layoutPlayer: FrameLayout
+    private lateinit var layoutPlayer: LinearLayoutCompat
     private lateinit var ivVideoOptions: AppCompatImageView
     private lateinit var tvPlaylistName: AppCompatTextView
     private lateinit var progressBar: ProgressBar
@@ -111,6 +115,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private lateinit var mainLayout: BottomPanelLayout
 
     private var playlistVideoService: PlaylistVideoService? = null
+
+    private val playlistRepository: PlaylistRepository by lazy {
+        PlaylistRepository(requireContext())
+    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -172,7 +180,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     private val connection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
-
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -202,7 +209,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             selectedPlaylistItemId = it.getString(SELECTED_PLAYLIST_ITEM_ID).toString()
         }
         val intentFilter = IntentFilter()
-        intentFilter.addAction("action")
+        intentFilter.addAction(CAST_ACTION)
         activity?.registerReceiver(broadcastReceiver, intentFilter)
     }
 
@@ -288,6 +295,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         videoPlayerLoading = view.findViewById(R.id.videoPlayerLoading)
 
         mainLayout = view.findViewById(R.id.sliding_layout)
+        mainLayout.addPanelSlideListener(this)
         layoutBottom = view.findViewById(R.id.bottom_layout)
         layoutPlayer = view.findViewById(R.id.player_layout)
         layoutVideoControls = view.findViewById(R.id.layoutVideoControls)
@@ -369,7 +377,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
                 activity?.runOnUiThread {
                     // Bottom Layout set up
-                    playlistItemAdapter = PlaylistItemAdapter(playlistItems, this@PlaylistPlayerFragment)
+                    playlistItemAdapter =
+                        PlaylistItemAdapter(playlistItems, this@PlaylistPlayerFragment)
                     playlistItemAdapter.setBottomLayout()
                     rvPlaylist.adapter = playlistItemAdapter
 
@@ -415,14 +424,23 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     override fun onDestroyView() {
         releasePlayer()
         activity?.unregisterReceiver(broadcastReceiver)
+        mainLayout.removePanelSlideListener(this)
         super.onDestroyView()
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
         playlistVideoService?.getCurrentPlayer()?.let {
-            it.playWhenReady = true
+            updateSeekBar()
+            duration = it.duration
+            updateTime(it.currentPosition)
+            tvVideoTitle.text = playlistItems[it.currentPeriodIndex].name
+            ivNextVideo.isEnabled = it.hasNextMediaItem()
+            ivNextVideo.alpha = if (it.hasNextMediaItem()) 1.0f else 0.4f
+            ivPrevVideo.isEnabled = it.hasPreviousMediaItem()
+            ivPrevVideo.alpha = if (it.hasPreviousMediaItem()) 1.0f else 0.4f
         }
+        videoPlayerLoading.visibility = View.GONE
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
@@ -443,6 +461,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         super.onIsPlayingChanged(isPlaying)
+        Log.e("PlaylistPlayerFragment", "onIsPlayingChanged")
         if (isPlaying && !isUserTrackingTouch)
             styledPlayerView.postDelayed(this::setCurrentPlayerPosition, updatePositionDelayMs)
         setPlayAndPause()
@@ -507,15 +526,24 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private fun initializePlayer() {
         playlistVideoService?.setPlayerView(styledPlayerView)
         styledPlayerView.player = playlistVideoService?.getCurrentPlayer()
-        playlistVideoService?.getCurrentPlayer()?.let {
-            it.addListener(this)
-            it.shuffleModeEnabled = isShuffleOn
-            it.seekTo(
-                currentMediaIndex,
-                playlistItems[it.currentMediaItemIndex].lastPlayedPosition.toLong()
-            )
-            it.repeatMode = repeatMode
-            it.setPlaybackSpeed(playbackSpeed)
+        playlistVideoService?.getCurrentPlayer()?.let { currentPlayer ->
+            currentPlayer.addListener(this)
+            currentPlayer.shuffleModeEnabled = isShuffleOn
+            val currentPlaylistItemId = playlistItems[currentPlayer.currentMediaItemIndex].id
+            scope.launch {
+                playlistRepository.getPlaylistItemById(currentPlaylistItemId)?.lastPlayedPosition?.let { lastPosition ->
+                    val handler = Handler(currentPlayer.applicationLooper)
+                    val runnableCode = Runnable {
+                        currentPlayer.seekTo(
+                            currentMediaIndex,
+                            if (PlaylistPreferenceUtils.defaultPrefs(requireContext()).rememberFilePlaybackPosition) lastPosition else 0
+                        )
+                    }
+                    handler.post(runnableCode)
+                }
+            }
+            currentPlayer.repeatMode = repeatMode
+            currentPlayer.setPlaybackSpeed(playbackSpeed)
         }
     }
 
@@ -714,19 +742,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         )
     }
 
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
-        if (isInPictureInPictureMode) {
-            styledPlayerView.useController = true
-            layoutVideoControls.visibility = View.GONE
-            playlistToolbar.visibility = View.GONE
-        } else {
-            styledPlayerView.useController = false
-            layoutVideoControls.visibility = View.VISIBLE
-            playlistToolbar.visibility = View.VISIBLE
-        }
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-    }
-
     override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
         if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
@@ -752,8 +767,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
-            if (action.equals("action")) {
-                val shouldShowControls = intent.getBooleanExtra("should_show_controls", true)
+            if (action.equals(CAST_ACTION)) {
+                val shouldShowControls = intent.getBooleanExtra(SHOULD_SHOW_CONTROLS, true)
+                Log.e("NTP", "should_show_controls : ")
                 isCastInProgress = !shouldShowControls
                 layoutVideoControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
             }
@@ -762,6 +778,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     companion object {
         private const val SEEK_VALUE_MS = 15000
+
         @JvmStatic
         fun newInstance(selectedPlaylistItemId: String, playlistModel: PlaylistModel) =
             PlaylistPlayerFragment().apply {
@@ -770,5 +787,28 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                     putString(SELECTED_PLAYLIST_ITEM_ID, selectedPlaylistItemId)
                 }
             }
+    }
+
+    private fun enableControls(enable: Boolean, vg: ViewGroup) {
+        for (i in 0 until vg.childCount) {
+            val child = vg.getChildAt(i)
+            child.isEnabled = enable
+            if (child is ViewGroup) {
+                enableControls(enable, child)
+            }
+        }
+    }
+
+    override fun onPanelSlide(panel: View?, slideOffset: Float) {
+        // Do nothing here
+    }
+
+    override fun onPanelStateChanged(
+        panel: View?,
+        previousState: BottomPanelLayout.PanelState?,
+        newState: BottomPanelLayout.PanelState?
+    ) {
+        val shouldEnableControls = newState != BottomPanelLayout.PanelState.EXPANDED
+        enableControls(shouldEnableControls , layoutPlayer)
     }
 }

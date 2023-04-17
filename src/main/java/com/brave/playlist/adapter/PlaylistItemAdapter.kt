@@ -3,6 +3,7 @@ package com.brave.playlist.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.text.format.Formatter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -61,6 +62,20 @@ class PlaylistItemAdapter(
             tvMediaDownloadProgress?.visibility = View.GONE
             ivMediaStatus?.visibility = View.VISIBLE
             ivMediaStatus?.setImageResource(R.drawable.ic_offline)
+        }
+    }
+
+    fun updatePlayingStatus(playlistItemId : String) {
+        Log.e("NTP", "updatePlayingStatus : playlistItemId : $playlistItemId")
+        val currentPlayingItemView = allViewHolderViews[playlistItemId]
+        val ivMediaPlayingStatusCurrent: AppCompatImageView? = currentPlayingItemView?.findViewById(R.id.ivMediaPlayingStatus)
+        ivMediaPlayingStatusCurrent?.visibility = View.VISIBLE
+        allViewHolderViews.keys.forEach {
+            if (it != playlistItemId) {
+                val view = allViewHolderViews[it]
+                val ivMediaPlayingStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaPlayingStatus)
+                ivMediaPlayingStatus?.visibility = View.GONE
+            }
         }
     }
 

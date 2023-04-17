@@ -2,6 +2,7 @@ package com.brave.playlist.fragment
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -58,21 +59,30 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
         )
         playlistToolbar.setActionButtonClickListener {
             if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) {
-                playlistViewModel.setCreatePlaylistOption(
-                    CreatePlaylistModel(
-                        etPlaylistName.text.toString(),
-                        shouldMoveOrCopy
+                if (!etPlaylistName.text.isNullOrEmpty()) {
+                    playlistViewModel.setCreatePlaylistOption(
+                        CreatePlaylistModel(
+                            etPlaylistName.text.toString(),
+                            shouldMoveOrCopy
+                        )
                     )
-                )
+                    activity?.onBackPressedDispatcher?.onBackPressed()
+                } else {
+                    Toast.makeText(requireContext(), R.string.playlist_emply_playlist_name, Toast.LENGTH_SHORT).show()
+                }
             } else {
-                playlistViewModel.setRenamePlaylistOption(
-                    RenamePlaylistModel(
-                        playlistModel?.id,
-                        etPlaylistName.text.toString()
+                if (!etPlaylistName.text.isNullOrEmpty()) {
+                    playlistViewModel.setRenamePlaylistOption(
+                        RenamePlaylistModel(
+                            playlistModel?.id,
+                            etPlaylistName.text.toString()
+                        )
                     )
-                )
+                    activity?.onBackPressedDispatcher?.onBackPressed()
+                } else {
+                    Toast.makeText(requireContext(), R.string.playlist_emply_playlist_name, Toast.LENGTH_SHORT).show()
+                }
             }
-            activity?.onBackPressedDispatcher?.onBackPressed()
         }
         etPlaylistName.requestFocus()
     }

@@ -1,6 +1,7 @@
 package com.brave.playlist.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
@@ -21,8 +22,9 @@ import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils
-import com.brave.playlist.util.PlaylistPreferenceUtils.get
+import com.brave.playlist.util.PlaylistPreferenceUtils.recentlyPlayedPlaylist
 import com.brave.playlist.view.PlaylistToolbar
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import java.util.LinkedList
@@ -70,18 +72,9 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
 
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             val allPlaylistList = mutableListOf<PlaylistModel>()
-//            val allPlaylistJsonArray = JSONArray(allPlaylistData)
 
-            var recentPlaylistIds = LinkedList<String>()
-            val recentPlaylist = LinkedList<PlaylistModel>()
-            val recentPlaylistJson =
-                PlaylistPreferenceUtils.defaultPrefs(requireContext())[PlaylistPreferenceUtils.RECENTLY_PLAYED_PLAYLIST, ""]
-            if (recentPlaylistJson.isNotEmpty()) {
-                recentPlaylistIds = GsonBuilder().create().fromJson(
-                    recentPlaylistJson,
-                    TypeToken.getParameterized(LinkedList::class.java, String::class.java).type
-                )
-            }
+//            val allPlaylistJson : String = GsonBuilder().serializeNulls().create().toJson(allPlaylistData, TypeToken.getParameterized(List::class.java, PlaylistModel::class.java).type)
+//            Log.e("BravePlaylist", allPlaylistJson)
 
             var defaultPlaylistModel: PlaylistModel? = null
             for (allPlaylistModel in allPlaylistData) {
@@ -101,15 +94,33 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
             }
             defaultPlaylistModel?.let { allPlaylistList.add(0, it) }
 
-            if (recentPlaylistIds.size > 0) {
-                recentPlaylistIds.forEach ids@{
-                    allPlaylistList.forEach models@{ model ->
-                        if (model.id == it && model.items.isNotEmpty()) {
-                            recentPlaylist.add(model)
-                            return@models
+            val recentPlaylistJson =
+                PlaylistPreferenceUtils.defaultPrefs(requireContext()).recentlyPlayedPlaylist
+            if (!recentPlaylistJson.isNullOrEmpty()) {
+                val recentPlaylist = LinkedList<PlaylistModel>()
+                val recentPlaylistIds: LinkedList<String> = GsonBuilder().create().fromJson(
+                    recentPlaylistJson,
+                    TypeToken.getParameterized(LinkedList::class.java, String::class.java).type
+                )
+                if (recentPlaylistIds.size > 0) {
+                    recentPlaylistIds.forEach ids@{
+                        allPlaylistList.forEach models@{ model ->
+                            if (model.id == it && model.items.isNotEmpty()) {
+                                recentPlaylist.add(model)
+                                return@models
+                            }
                         }
                     }
                 }
+                rvRecentlyPlayed.layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+                rvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(recentPlaylist, this)
+                rvRecentlyPlayed.visibility =
+                    if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+                tvRecentlyPlayed.visibility =
+                    if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
+                tvPlaylistHeader.visibility =
+                    if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
             }
 
             playlistToolbar.setOptionsButtonClickListener {
@@ -120,16 +131,6 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                     this
                 )
             }
-
-            rvRecentlyPlayed.layoutManager =
-                LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-            rvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(recentPlaylist, this)
-            rvRecentlyPlayed.visibility =
-                if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
-            tvRecentlyPlayed.visibility =
-                if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
-            tvPlaylistHeader.visibility =
-                if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
 
             rvPlaylist.layoutManager = LinearLayoutManager(requireContext())
             rvPlaylist.adapter = PlaylistAdapter(allPlaylistList, this)

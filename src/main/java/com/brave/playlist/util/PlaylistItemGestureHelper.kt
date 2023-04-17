@@ -1,6 +1,5 @@
 package com.brave.playlist.util
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
@@ -10,14 +9,17 @@ import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.recyclerview.widget.ItemTouchHelper.*
+import androidx.recyclerview.widget.ItemTouchHelper.DOWN
+import androidx.recyclerview.widget.ItemTouchHelper.END
+import androidx.recyclerview.widget.ItemTouchHelper.START
+import androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback
+import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.R
 import com.brave.playlist.adapter.AbstractRecyclerViewAdapter
 import com.brave.playlist.listener.ItemInteractionListener
 import kotlin.math.min
 
-@SuppressLint("ClickableViewAccessibility")
 class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHolder<M>, M>(
     context: Context,
     private val recyclerView: RecyclerView,
@@ -69,19 +71,19 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        val fromPosition = viewHolder.adapterPosition
-        val toPosition = target.adapterPosition
+        val fromPosition = viewHolder.bindingAdapterPosition
+        val toPosition = target.bindingAdapterPosition
         adapter.swap(fromPosition, toPosition)
         return true
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         if (direction == START) {
-            if (viewHolder.adapterPosition == oldSwipePosition)
+            if (viewHolder.bindingAdapterPosition == oldSwipePosition)
                 oldSwipePosition = -1
-            if (viewHolder.adapterPosition == swipePosition)
+            if (viewHolder.bindingAdapterPosition == swipePosition)
                 swipePosition = -1
-            buttonPositions.remove(viewHolder.adapterPosition)
+            buttonPositions.remove(viewHolder.bindingAdapterPosition)
             itemInteractionListener.onItemDelete(viewHolder.layoutPosition)
         } else if (direction == END)
             oldSwipePosition = swipePosition
@@ -101,7 +103,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
             onSwipeLeft(viewHolder, dX, c)
         else if (dX > 0) {
             newDX = min(onSwipeRight(viewHolder, dX, c), dX)
-            swipePosition = viewHolder.adapterPosition
+            swipePosition = viewHolder.bindingAdapterPosition
         } else {
             swipePosition = -1
             resetButtons(c)
@@ -146,19 +148,19 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
         else
             removeOfflineIcon.setBounds(0, 0, 0, 0)
 
-        if (!buttonPositions.containsKey(viewHolder.adapterPosition))
-            buttonPositions[viewHolder.adapterPosition] =
-                instantiateOptions(viewHolder.adapterPosition)
+        if (!buttonPositions.containsKey(viewHolder.bindingAdapterPosition))
+            buttonPositions[viewHolder.bindingAdapterPosition] =
+                instantiateOptions(viewHolder.bindingAdapterPosition)
 
 
-        buttonPositions[viewHolder.adapterPosition]!![0].viewRect = Rect(
+        buttonPositions[viewHolder.bindingAdapterPosition]!![0].viewRect = Rect(
             itemView.left,
             itemView.top,
             min(rightBound, offlineIconRight + offlineIconMargin),
             itemView.bottom
         )
 
-        removeOfflineIconBg.bounds = buttonPositions[viewHolder.adapterPosition]!![0].viewRect!!
+        removeOfflineIconBg.bounds = buttonPositions[viewHolder.bindingAdapterPosition]!![0].viewRect!!
 
         removeOfflineIconBg.draw(c)
         removeOfflineIcon.draw(c)
@@ -175,13 +177,13 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
             shareIcon.setBounds(0, 0, 0, 0)
 
         if (rightBound >= offlineIconRight + offlineIconMargin) {
-            buttonPositions[viewHolder.adapterPosition]!![1].viewRect = Rect(
+            buttonPositions[viewHolder.bindingAdapterPosition]!![1].viewRect = Rect(
                 offlineIconRight + offlineIconMargin,
                 itemView.top,
                 min(rightBound, shareIconRight + shareIconMargin),
                 itemView.bottom
             )
-            shareIconBg.bounds = buttonPositions[viewHolder.adapterPosition]!![1].viewRect!!
+            shareIconBg.bounds = buttonPositions[viewHolder.bindingAdapterPosition]!![1].viewRect!!
         } else
             shareIconBg.setBounds(0, 0, 0, 0)
 
@@ -222,7 +224,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
 
         if (viewHolder is AbstractRecyclerViewAdapter.AbstractViewHolder<*> && !viewHolder.isSelected(
-                viewHolder.adapterPosition
+                viewHolder.bindingAdapterPosition
             )
         ) {
             viewHolder.itemView.setBackgroundResource(R.color.playlist_background)
@@ -235,7 +237,7 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
     ) {
         super.clearView(recyclerView, viewHolder)
         if (viewHolder is AbstractRecyclerViewAdapter.AbstractViewHolder<*> && !viewHolder.isSelected(
-                viewHolder.adapterPosition
+                viewHolder.bindingAdapterPosition
             )
         )
             viewHolder.itemView.background = null

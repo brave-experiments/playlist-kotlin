@@ -18,9 +18,7 @@ import com.brave.playlist.interpolator.BraveBounceInterpolator
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.model.SnackBarActionModel
-import com.brave.playlist.util.PlaylistPreferenceUtils.SHOULD_SHOW_PLAYLIST_ONBOARDING
-import com.brave.playlist.util.PlaylistPreferenceUtils.get
-import com.brave.playlist.util.PlaylistPreferenceUtils.set
+import com.brave.playlist.util.PlaylistPreferenceUtils.shouldShowOnboarding
 import com.brave.playlist.view.MovableImageButton
 import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.google.android.material.snackbar.Snackbar
@@ -52,13 +50,13 @@ object PlaylistViewUtils {
         movableImageButton.visibility = View.GONE
         movableImageButton.setOnClickListener {
             val shouldShowOnboarding: Boolean =
-                PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING, true]
+                PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding
             if (shouldShowOnboarding) {
                 val playlistActivityIntent =
                     Intent(activity, PlaylistMenuOnboardingActivity::class.java)
                 playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 activity.startActivity(playlistActivityIntent)
-                PlaylistPreferenceUtils.defaultPrefs(activity)[SHOULD_SHOW_PLAYLIST_ONBOARDING] =
+                PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding =
                     false
             } else {
                 PlaylistOptionsBottomSheet(

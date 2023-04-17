@@ -3,11 +3,15 @@ package com.brave.playlist.util
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
+import com.brave.playlist.local_database.PlaylistRepository
 
 object PlaylistPreferenceUtils {
-    const val RECENTLY_PLAYED_PLAYLIST = "recently_played_playlist"
+    private const val RECENTLY_PLAYED_PLAYLIST = "recently_played_playlist"
     const val SHOULD_SHOW_PLAYLIST_ONBOARDING = "should_show_playlist_onboarding"
     const val ADD_MEDIA_COUNT = "add_media_count"
+    private const val REMEMBER_FILE_PLAYBACK_POSITION = "remember_file_playback_position"
+    private const val REMEMBER_LIST_PLAYBACK_POSITION = "remember_list_playback_position"
+    private const val CONTINUOUS_LISTENING = "continuous_listening"
 
     fun defaultPrefs(context: Context): SharedPreferences =
         PreferenceManager.getDefaultSharedPreferences(context)
@@ -18,33 +22,72 @@ object PlaylistPreferenceUtils {
         editor.apply()
     }
 
-    operator fun SharedPreferences.set(key: String, value: Any?) = when (value) {
-        is String? -> edit { it.putString(key, value) }
-        is Int -> edit { it.putInt(key, value) }
-        is Boolean -> edit { it.putBoolean(key, value) }
-        is Float -> edit { it.putFloat(key, value) }
-        is Long -> edit { it.putLong(key, value) }
-        else -> throw UnsupportedOperationException("Not yet implemented")
+    var SharedPreferences.recentlyPlayedPlaylist
+        get() = getString(RECENTLY_PLAYED_PLAYLIST, "")
+        set(value) {
+            edit {
+                it.putString(RECENTLY_PLAYED_PLAYLIST, value)
+            }
+        }
+
+    var SharedPreferences.addMediaCount
+        get() = getInt(ADD_MEDIA_COUNT, -1)
+        set(value) {
+            edit {
+                it.putInt(ADD_MEDIA_COUNT, value)
+            }
+        }
+
+    var SharedPreferences.shouldShowOnboarding
+        get() = getBoolean(SHOULD_SHOW_PLAYLIST_ONBOARDING, true)
+        set(value) {
+            edit {
+                it.putBoolean(SHOULD_SHOW_PLAYLIST_ONBOARDING, value)
+            }
+        }
+
+    fun SharedPreferences.getLatestPlaylistItem(key : String) : String? = getString(key, "")
+
+    fun SharedPreferences.setLatestPlaylistItem(key :String, value: String) {
+        edit {
+            it.putString(key, value)
+        }
     }
 
-    inline operator fun <reified T : Any> SharedPreferences.get(
-        key: String,
-        defaultValue: T? = null
-    ): T = when (T::class) {
-        String::class -> getString(key, defaultValue as? String ?: "") as T
-        Int::class -> getInt(key, defaultValue as? Int ?: -1) as T
-        Boolean::class -> getBoolean(key, defaultValue as? Boolean ?: false) as T
-        Float::class -> getFloat(key, defaultValue as? Float ?: -1f) as T
-        Long::class -> getLong(key, defaultValue as? Long ?: -1) as T
-        else -> throw UnsupportedOperationException("Not yet implemented")
-    }
+    var SharedPreferences.rememberFilePlaybackPosition
+        get() = getBoolean(REMEMBER_FILE_PLAYBACK_POSITION, true)
+        set(value) {
+            edit {
+                it.putBoolean(REMEMBER_FILE_PLAYBACK_POSITION, value)
+            }
+        }
+
+    var SharedPreferences.rememberListPlaybackPosition
+        get() = getBoolean(REMEMBER_LIST_PLAYBACK_POSITION, false)
+        set(value) {
+            edit {
+                it.putBoolean(REMEMBER_LIST_PLAYBACK_POSITION, value)
+            }
+        }
+
+    var SharedPreferences.continuousListening
+        get() = getBoolean(CONTINUOUS_LISTENING, true)
+        set(value) {
+            edit {
+                it.putBoolean(CONTINUOUS_LISTENING, value)
+            }
+        }
 
     @JvmStatic
     fun resetPlaylistPrefs(context: Context) {
         defaultPrefs(context).apply {
-            this[RECENTLY_PLAYED_PLAYLIST] = ""
-            this[SHOULD_SHOW_PLAYLIST_ONBOARDING] = true
-            this[ADD_MEDIA_COUNT] = -1
+            recentlyPlayedPlaylist = ""
+            shouldShowOnboarding = true
+            addMediaCount = -1
+            rememberFilePlaybackPosition = true
+            rememberListPlaybackPosition = false
+            continuousListening = true
+            PlaylistRepository(context).deleteAllPlaylistItemModel()
         }
     }
 }

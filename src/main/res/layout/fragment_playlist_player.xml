@@ -6,7 +6,8 @@
     android:background="@drawable/ic_media_player_bg"
     android:fitsSystemWindows="true"
     android:clipToPadding="false"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:keepScreenOn="true">
 
     <com.brave.playlist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
@@ -25,12 +26,12 @@
         app:scrollableView="@+id/rvPlaylists">
 
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/player_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <FrameLayout
-                android:id="@+id/player_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
