@@ -20,12 +20,12 @@
     <string name="playlist_add_to_playlist">Add to Playlist</string>
     <string name="playlist_playlists_text">Playlists</string>
     <string name="playlist_add_media">Add media</string>
-    <string name="playlist_onboarding_title_1">Add videos to Brave Playlist and watch later, even offline</string>
-    <string name="playlist_onboarding_text_1">Make playlists of your favorite audio and videos, and play anytime, anywhere.</string>
-    <string name="playlist_onboarding_title_2">Out of cell range? Need to calm a crying toddler?</string>
-    <string name="playlist_onboarding_text_2">Whether you\'re on the subway, a flight, or a long car trip. Playlist has you covered.</string>
-    <string name="playlist_onboarding_title_3">Or tap the Playlist button when it appears</string>
-    <string name="playlist_onboarding_text_3">Playlist button appears when there’s media to add. Long press it for options. You can even hide it.</string>
+    <string name="playlist_onboarding_title_1">Add videos to Brave Playlist. Playback anytime. Even offline.</string>
+    <string name="playlist_onboarding_text_1">Make playlists of your favorite content. Save mobile data. And playback ad-free.</string>
+    <string name="playlist_onboarding_title_2">Just tap the button to add videos to a playlist</string>
+    <string name="playlist_onboarding_text_2">Stay in flow: Add videos while you browse, watch later.</string>
+    <string name="playlist_onboarding_title_3">Playback is better in Playlist</string>
+    <string name="playlist_onboarding_text_3">Play in the background. Control from the lockscreen. And more…</string>
     <string name="playlist_open_playlist">Open Playlist</string>
     <string name="playlist_open_playlist_settings">Open Playlist Settings</string>
     <string name="playlist_try_it">Try it!</string>
@@ -50,5 +50,6 @@
     <string name="playlist_please_select_items">Please select items first</string>
     <string name="playlist_offline_message">Playlist item is not cached.\nPlease cache the item for offline mode.</string>
     <string name="playlist_item_expired_message">Content expired. Try again in a few seconds.</string>
-    <string name="playlist_emply_playlist_name">Please enter valid playlist name</string>
+    <string name="playlist_empty_playlist_name">Please enter valid playlist name</string>
+<!--    Last Updated String-->
 </resources>
