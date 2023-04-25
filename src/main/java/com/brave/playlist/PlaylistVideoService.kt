@@ -104,10 +104,29 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         return super.onUnbind(intent)
     }
 
+
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel(applicationContext)
         currentItemIndex = C.INDEX_UNSET
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(32 * 1024, 64 * 1024, 1024, 1024)
+            .build()
+        val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+            .build()
+        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
+            .setReleaseTimeoutMs(5000).setAudioAttributes(audioAttributes, true).build()
+//        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
+//            .setReleaseTimeoutMs(5000).build()
+        localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+        localPlayer?.addListener(this)
+        castContext = CastContext.getSharedInstance()
+        castPlayer = castContext?.let { CastPlayer(it) }
+        castPlayer?.addListener(this)
+        castPlayer?.setSessionAvailabilityListener(this)
     }
 
     private fun release() {
@@ -133,26 +152,6 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        release()
-
-        val loadControl = DefaultLoadControl.Builder()
-            .setBufferDurationsMs(32 * 1024, 64 * 1024, 1024, 1024)
-            .build()
-        val audioAttributes: AudioAttributes = AudioAttributes.Builder()
-            .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-            .build()
-        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
-            .setReleaseTimeoutMs(5000).setAudioAttributes(audioAttributes, true).build()
-//        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
-//            .setReleaseTimeoutMs(5000).build()
-        localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-        localPlayer?.addListener(this)
-        castContext = CastContext.getSharedInstance()
-        castPlayer = castContext?.let { CastPlayer(it) }
-        castPlayer?.addListener(this)
-        castPlayer?.setSessionAvailabilityListener(this)
-
         intent?.let {
             playlistName = it.getStringExtra(PLAYLIST_NAME)
             playlistItemsModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
@@ -172,13 +171,13 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                     .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
             val mediaUri = if (mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc
             val mediaItem = MediaItem.Builder()
-                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-//                .setUri(Uri.parse(mediaUri))
+//                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+                .setUri(Uri.parse(mediaUri))
                 .setMediaMetadata(movieMetadata)
                 .setMimeType(MimeTypes.VIDEO_MP4).build()
             val castMediaItem = MediaItem.Builder()
-                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-//                .setUri(mediaModel.mediaSrc)
+//                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+                .setUri(mediaModel.mediaSrc)
                 .setMediaMetadata(movieMetadata)
                 .setMimeType(MimeTypes.VIDEO_MP4).build()
             mediaQueue.add(mediaItem)

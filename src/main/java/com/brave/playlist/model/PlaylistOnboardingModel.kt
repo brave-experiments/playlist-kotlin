@@ -6,8 +6,7 @@ import android.os.Parcelable
 data class PlaylistOnboardingModel(
     val title: String,
     val message: String,
-    val illustration: Int,
-    val illustrationBg: Int = 0
+    val illustration: Int
 ) : Parcelable {
     companion object {
         @JvmField
@@ -20,15 +19,13 @@ data class PlaylistOnboardingModel(
     private constructor(parcel: Parcel) : this(
         title = parcel.readString().toString(),
         message = parcel.readString().toString(),
-        illustration = parcel.readInt(),
-        illustrationBg = parcel.readInt()
+        illustration = parcel.readInt()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(title)
         parcel.writeString(message)
         parcel.writeInt(illustration)
-        parcel.writeInt(illustrationBg)
     }
 
     override fun describeContents() = 0

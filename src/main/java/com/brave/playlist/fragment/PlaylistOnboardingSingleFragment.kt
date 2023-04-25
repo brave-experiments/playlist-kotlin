@@ -31,8 +31,6 @@ class PlaylistOnboardingSingleFragment : Fragment(R.layout.fragment_single_playl
             tvOnboardingTitle.text = it.title
             tvOnboardingMessage.text = it.message
             ivOnboardingIllustration.setImageResource(it.illustration)
-            if (it.illustrationBg != 0)
-                ivOnboardingIllustration.setBackgroundResource(it.illustrationBg)
         }
     }
 

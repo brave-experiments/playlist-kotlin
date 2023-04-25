@@ -6,17 +6,25 @@ import android.view.View.MeasureSpec
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistOnboardingFragmentStateAdapter
 import com.brave.playlist.extension.addScrimBackground
-import com.brave.playlist.model.PlaylistOnboardingModel
+import com.brave.playlist.extension.afterMeasured
+import com.brave.playlist.extension.showOnboardingGradientBg
+import com.brave.playlist.listener.PlaylistOnboardingActionClickListener
+import com.brave.playlist.util.PlaylistViewUtils
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
 
-class PlaylistOnboardingPanel(fragmentActivity: FragmentActivity, anchorView: View, parent: View) {
+class PlaylistOnboardingPanel(
+    fragmentActivity: FragmentActivity,
+    anchorView: View,
+    playlistOnboardingActionClickListener: PlaylistOnboardingActionClickListener
+) {
 
     init {
         val view = View.inflate(fragmentActivity, R.layout.panel_playlist_onboarding, null)
@@ -24,37 +32,23 @@ class PlaylistOnboardingPanel(fragmentActivity: FragmentActivity, anchorView: Vi
         val height = LinearLayout.LayoutParams.WRAP_CONTENT
         val popupWindow = PopupWindow(view, width, height, true)
 
+        val onboardingLayout = view.findViewById<LinearLayoutCompat>(R.id.onboardingLayout)
+        onboardingLayout.afterMeasured {
+            showOnboardingGradientBg()
+        }
+
         val playlistOnboardingViewPager: ViewPager2 =
             view.findViewById(R.id.playlistOnboardingViewPager)
 
         val adapter = PlaylistOnboardingFragmentStateAdapter(
-            fragmentActivity, listOf(
-                PlaylistOnboardingModel(
-                    fragmentActivity.getString(R.string.playlist_onboarding_title_1),
-                    fragmentActivity.getString(R.string.playlist_onboarding_text_1),
-                    R.drawable.ic_playlist_onboarding_icon,
-                    R.drawable.ic_playlist_onboarding_graphic_bg
-                ),
-                PlaylistOnboardingModel(
-                    fragmentActivity.getString(R.string.playlist_onboarding_title_2),
-                    fragmentActivity.getString(R.string.playlist_onboarding_text_2),
-                    R.drawable.ic_playlist_buttononboard_img2,
-                    R.drawable.ic_playlist_buttononboard_img2_bg
-                ),
-                PlaylistOnboardingModel(
-                    fragmentActivity.getString(R.string.playlist_onboarding_title_3),
-                    fragmentActivity.getString(R.string.playlist_onboarding_text_3),
-                    R.drawable.ic_playlist_buttononboard_img3,
-                    R.drawable.ic_playlist_buttononboard_img2_bg
-                )
-            )
+            fragmentActivity, PlaylistViewUtils.getOnboardingItemList(context = view.context)
         )
         playlistOnboardingViewPager.adapter = adapter
 
         val nextButton: AppCompatButton = view.findViewById(R.id.btNextOnboarding)
         nextButton.setOnClickListener {
             if (playlistOnboardingViewPager.currentItem == 2) {
-                PlaylistButtonTooltip(anchorView, parent)
+                playlistOnboardingActionClickListener.onOnboardingActionClick()
                 popupWindow.dismiss()
             } else {
                 playlistOnboardingViewPager.currentItem =
@@ -67,9 +61,10 @@ class PlaylistOnboardingPanel(fragmentActivity: FragmentActivity, anchorView: Vi
 
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                if (position == 2) {
-                    nextButton.text = fragmentActivity.getString(R.string.playlist_try_it)
-                }
+                nextButton.text =
+                    if (position == 2) fragmentActivity.getString(R.string.playlist_try_it) else fragmentActivity.getString(
+                        R.string.playlist_next
+                    )
                 adapter.notifyItemChanged(position)
             }
         })
@@ -86,11 +81,13 @@ class PlaylistOnboardingPanel(fragmentActivity: FragmentActivity, anchorView: Vi
 
         popupWindow.animationStyle = R.style.OnboardingWindowAnimation
 
-        val y = anchorView.bottom - view.measuredHeight - 40
-        val x = anchorView.right - view.measuredWidth - 20
+        val y = anchorView.top - view.measuredHeight
+        val x = anchorView.left - view.measuredWidth - 20
 
-        popupWindow.showAtLocation(parent, Gravity.NO_GRAVITY, x, y)
-
+        popupWindow.isTouchable = true
+        popupWindow.isFocusable = true
+        popupWindow.isOutsideTouchable = true
+        popupWindow.showAtLocation(anchorView, Gravity.TOP, x, y)
         popupWindow.addScrimBackground()
     }
 }
