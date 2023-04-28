@@ -30,6 +30,7 @@ import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistItemAdapter
 import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.extension.dpToPx
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
 import com.brave.playlist.local_database.PlaylistRepository
@@ -134,7 +135,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             styledPlayerView.layoutParams as FrameLayout.LayoutParams
         layoutParams.height = TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP,
-            300F,
+            if (context?.resources?.getBoolean(R.bool.isTablet) == true) 650f else 300f,
             resources.displayMetrics
         ).toInt()
         styledPlayerView.layoutParams = layoutParams
@@ -145,6 +146,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         hoverControlsLayout.layoutParams = hoverLayoutParams
 
         mainLayout.mSlideState = BottomPanelLayout.PanelState.COLLAPSED
+        mainLayout.panelHeight = if (context?.resources?.getBoolean(R.bool.isTablet) == true) 150.dpToPx.toInt() else 70.dpToPx.toInt()
         if (!isCastInProgress) {
             styledPlayerView.useController = false
             layoutVideoControls.visibility = View.VISIBLE
@@ -203,6 +205,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.e("NTP", "Player Oncreate")
 
         arguments?.let {
             playlistModel = it.getParcelable(PLAYLIST_MODEL)
@@ -359,6 +363,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 }
 
             // Playlist Video service
+            Log.e("NTP", "Player startService")
             activity?.startService(intent)
             activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
 

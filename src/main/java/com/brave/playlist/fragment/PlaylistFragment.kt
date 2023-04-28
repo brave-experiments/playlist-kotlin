@@ -1,19 +1,15 @@
 package com.brave.playlist.fragment
 
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Bundle
-import android.os.IBinder
 import android.text.TextUtils
 import android.text.format.Formatter
 import android.util.Log
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -89,7 +85,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     private lateinit var emptyView: View
     private lateinit var playlistView: View
 
-    private var playlistVideoService: PlaylistVideoService? = null
+//    private var playlistVideoService: PlaylistVideoService? = null
 
     private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -103,17 +99,17 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         }
     }
 
-    private val connection = object : ServiceConnection {
-        override fun onServiceDisconnected(name: ComponentName?) {
-        }
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            if (service is PlaylistVideoService.PlaylistVideoServiceBinder) {
-                playlistVideoService = service.getServiceInstance()
-
-            }
-        }
-    }
+//    private val connection = object : ServiceConnection {
+//        override fun onServiceDisconnected(name: ComponentName?) {
+//        }
+//
+//        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+//            if (service is PlaylistVideoService.PlaylistVideoServiceBinder) {
+//                playlistVideoService = service.getServiceInstance()
+//
+//            }
+//        }
+//    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -127,9 +123,11 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         intentFilter.addAction(CURRENT_PLAYING_ITEM_ACTION)
         activity?.registerReceiver(broadcastReceiver, intentFilter)
 
-        val intent = Intent(requireContext(), PlaylistVideoService::class.java)
         // Bind Playlist Video service
-        activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+//        if (isPlaylistServiceRunning(requireContext(), PlaylistVideoService::class.java)) {
+//            val intent = Intent(requireContext(), PlaylistVideoService::class.java)
+//            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+//        }
 
         emptyView = view.findViewById(R.id.empty_view)
         playlistView = view.findViewById(R.id.playlist_view)
@@ -292,13 +290,13 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                             playlistItemAdapter.updatePlaylistItem(it)
                         }
 
-                        rvPlaylist.afterMeasured {
-                            playlistVideoService?.getCurrentPlayingItem()?.id?.let {
-                                playlistItemAdapter.updatePlayingStatus(
-                                    it
-                                )
-                            }
-                        }
+//                        rvPlaylist.afterMeasured {
+//                            playlistVideoService?.getCurrentPlayingItem()?.id?.let {
+//                                playlistItemAdapter.updatePlayingStatus(
+//                                    it
+//                                )
+//                            }
+//                        }
                     }
                 }
             } else {
@@ -316,20 +314,11 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         }
     }
 
-    private inline fun <T: View> T.afterMeasured(crossinline f: T.() -> Unit) {
-        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                if (measuredWidth > 0 && measuredHeight > 0) {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    f()
-                }
-            }
-        })
-    }
-
     override fun onDestroyView() {
         activity?.unregisterReceiver(broadcastReceiver)
-        activity?.unbindService(connection)
+//        if (isPlaylistServiceRunning(requireContext(), PlaylistVideoService::class.java)) {
+//            activity?.unbindService(connection)
+//        }
         super.onDestroyView()
     }
 

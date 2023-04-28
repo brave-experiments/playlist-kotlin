@@ -30,4 +30,5 @@
         </attr>
 <!--        <attr name="umanoScrollInterpolator" format="reference" />-->
     </declare-styleable>
+    <bool name="isTablet">false</bool>
 </resources>

@@ -22,7 +22,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="bottom"
-        app:panelHeight="68dp"
+        app:panelHeight="70dp"
         app:scrollableView="@+id/rvPlaylists">
 
         <androidx.appcompat.widget.LinearLayoutCompat

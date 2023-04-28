@@ -97,14 +97,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     override fun onBind(intent: Intent?): IBinder {
+        Log.e("NTP", "onBind")
+
         return PlaylistVideoServiceBinder()
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
         return super.onUnbind(intent)
     }
-
-
 
     override fun onCreate() {
         super.onCreate()
@@ -152,6 +152,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.e("NTP", "onStartCommand")
         intent?.let {
             playlistName = it.getStringExtra(PLAYLIST_NAME)
             playlistItemsModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
@@ -188,7 +189,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         scope.launch {
             lastSavedPositionTimer()
         }
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -317,12 +318,12 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             playerNotificationManager?.setPlayer(currentPlayer)
             playerNotificationManager?.setMediaSessionToken(mediaSession.sessionToken)
             playerView?.controllerShowTimeoutMs = StyledPlayerControlView.DEFAULT_SHOW_TIMEOUT_MS
-            val audioAttributes: AudioAttributes = AudioAttributes.Builder()
-                .setUsage(C.USAGE_MEDIA)
-                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-                .build()
-
-            localPlayer?.setAudioAttributes(audioAttributes, true)
+//            val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+//                .setUsage(C.USAGE_MEDIA)
+//                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+//                .build()
+//
+//            localPlayer?.setAudioAttributes(audioAttributes, true)
         }
 
         // Player state management.
