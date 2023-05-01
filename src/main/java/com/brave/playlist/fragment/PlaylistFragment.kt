@@ -29,6 +29,7 @@ import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistItemAdapter
 import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.extension.afterMeasured
 import com.brave.playlist.listener.ItemInteractionListener
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
@@ -63,7 +64,8 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.LinkedList
 
-class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
+class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
+    StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
     PlaylistItemClickListener {
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -161,6 +163,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         }
         playlistToolbar.setDeleteClickListener {
             if (playlistItemAdapter.getSelectedItems().size > 0) {
+                for (selectedItem in playlistItemAdapter.getSelectedItems()) {
+                    stopVideoPlayerOnDelete(selectedItem)
+                }
                 playlistViewModel.setDeletePlaylistItems(
                     PlaylistModel(
                         playlistModel.id,
@@ -210,9 +215,16 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                     .error(R.drawable.ic_playlist_placeholder)
                     .into(ivPlaylistCover)
                 layoutPlayMedia.setOnClickListener {
-                    if (PlaylistPreferenceUtils.defaultPrefs(requireContext()).rememberListPlaybackPosition && !TextUtils.isEmpty(PlaylistPreferenceUtils.defaultPrefs(requireContext()).getLatestPlaylistItem(playlistModel.id))) {
+                    if (PlaylistPreferenceUtils.defaultPrefs(requireContext()).rememberListPlaybackPosition && !TextUtils.isEmpty(
+                            PlaylistPreferenceUtils.defaultPrefs(requireContext())
+                                .getLatestPlaylistItem(playlistModel.id)
+                        )
+                    ) {
                         playlistModel.items.forEach { playlistToOpen ->
-                            if (playlistToOpen.id == PlaylistPreferenceUtils.defaultPrefs(requireContext()).getLatestPlaylistItem(playlistModel.id)) {
+                            if (playlistToOpen.id == PlaylistPreferenceUtils.defaultPrefs(
+                                    requireContext()
+                                ).getLatestPlaylistItem(playlistModel.id)
+                            ) {
                                 openPlaylistPlayer(playlistToOpen)
                                 return@forEach
                             }
@@ -223,11 +235,16 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 }
 
                 layoutShuffleMedia.setOnClickListener {
-                    openPlaylistPlayer(playlistModel.items[(0 until playlistModel.items.size).shuffled().last()])
+                    openPlaylistPlayer(
+                        playlistModel.items[(0 until playlistModel.items.size).shuffled().last()]
+                    )
                 }
 
                 tvTotalMediaCount.text =
-                    getString(R.string.playlist_number_of_items, playlistModel.items.size.toString())
+                    getString(
+                        R.string.playlist_number_of_items,
+                        playlistModel.items.size.toString()
+                    )
 
                 tvPlaylistName.text =
                     if (playlistModel.id == DEFAULT_PLAYLIST) resources.getString(R.string.playlist_play_later) else playlistModel.name
@@ -254,7 +271,10 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                     playlistModel.items.forEach {
                         try {
                             if (it.isCached) {
-                                val fileSize = MediaUtils.getFileSizeFromUri(view.context, Uri.parse(it.mediaPath))
+                                val fileSize = MediaUtils.getFileSizeFromUri(
+                                    view.context,
+                                    Uri.parse(it.mediaPath)
+                                )
                                 it.fileSize = fileSize
                                 totalFileSize += fileSize
                             }
@@ -265,11 +285,21 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
                     activity?.runOnUiThread {
                         if (totalFileSize > 0) {
-                            tvPlaylistTotalSize.text = Formatter.formatShortFileSize(view.context, totalFileSize)
+                            tvPlaylistTotalSize.text =
+                                Formatter.formatShortFileSize(view.context, totalFileSize)
                         }
-                        playlistItemAdapter = PlaylistItemAdapter(playlistModel.items.toMutableList(), this@PlaylistFragment, this@PlaylistFragment)
+                        playlistItemAdapter = PlaylistItemAdapter(
+                            playlistModel.items.toMutableList(),
+                            this@PlaylistFragment,
+                            this@PlaylistFragment
+                        )
                         val callback =
-                            PlaylistItemGestureHelper(view.context, rvPlaylist, playlistItemAdapter, this@PlaylistFragment)
+                            PlaylistItemGestureHelper(
+                                view.context,
+                                rvPlaylist,
+                                playlistItemAdapter,
+                                this@PlaylistFragment
+                            )
                         itemTouchHelper = ItemTouchHelper(callback)
                         itemTouchHelper.attachToRecyclerView(rvPlaylist)
                         rvPlaylist.adapter = playlistItemAdapter
@@ -290,13 +320,19 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                             playlistItemAdapter.updatePlaylistItem(it)
                         }
 
-//                        rvPlaylist.afterMeasured {
+                        rvPlaylist.afterMeasured {
+                            PlaylistVideoService.CURRENTLY_PLAYED_ITEM_ID?.let {
+                                playlistItemAdapter.updatePlayingStatus(
+                                    it
+                                )
+                            }
+
 //                            playlistVideoService?.getCurrentPlayingItem()?.id?.let {
 //                                playlistItemAdapter.updatePlayingStatus(
 //                                    it
 //                                )
 //                            }
-//                        }
+                        }
                     }
                 }
             } else {
@@ -323,23 +359,27 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     }
 
     override fun onItemDelete(position: Int) {
+        val selectedPlaylistItem = playlistItemAdapter.getPlaylistItems()[position]
+        stopVideoPlayerOnDelete(selectedPlaylistItem)
         playlistViewModel.setDeletePlaylistItems(
             PlaylistModel(
                 playlistModel.id,
                 playlistModel.name,
                 arrayListOf(
-                    playlistItemAdapter.getPlaylistItems()[position]
+                    selectedPlaylistItem
                 )
             )
         )
     }
 
     override fun onRemoveFromOffline(position: Int) {
+        val selectedPlaylistItem = playlistItemAdapter.getPlaylistItems()[position]
+        stopVideoPlayerOnDelete(selectedPlaylistItem)
         val playlistOptionsModel = PlaylistItemOptionModel(
             requireContext().resources.getString(R.string.playlist_delete_item_offline_data),
             R.drawable.ic_remove_offline_data_playlist,
             PlaylistOptions.DELETE_ITEMS_OFFLINE_DATA,
-            playlistItemModel = playlistItemAdapter.getPlaylistItems()[position],
+            playlistItemModel = selectedPlaylistItem,
             playlistId = playlistModel.id
         )
         playlistViewModel.setPlaylistItemOption(playlistOptionsModel)
@@ -385,7 +425,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             return
         }
 
-//        if (!PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+        if (!PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
             var recentPlaylistIds = LinkedList<String>()
             val recentPlaylistJson =
                 PlaylistPreferenceUtils.defaultPrefs(requireContext()).recentlyPlayedPlaylist
@@ -412,21 +452,21 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 .replace(android.R.id.content, playlistPlayerFragment)
                 .addToBackStack(PlaylistFragment::class.simpleName)
                 .commit()
-//        } else {
-//            Toast.makeText(
-//                requireContext(),
-//                getString(R.string.playlist_item_expired_message),
-//                Toast.LENGTH_SHORT
-//            ).show()
-//            val playlistItemOptionModel = PlaylistItemOptionModel(
-//                requireContext().resources.getString(R.string.playlist_open_in_private_tab),
-//                R.drawable.ic_private_tab,
-//                PlaylistOptions.RECOVER_PLAYLIST_ITEM,
-//                playlistItemModel = selectedPlaylistItemModel,
-//                playlistId = selectedPlaylistItemModel.playlistId
-//            )
-//            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
-//        }
+        } else {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.playlist_item_expired_message),
+                Toast.LENGTH_SHORT
+            ).show()
+            val playlistItemOptionModel = PlaylistItemOptionModel(
+                requireContext().resources.getString(R.string.playlist_open_in_private_tab),
+                R.drawable.ic_private_tab,
+                PlaylistOptions.RECOVER_PLAYLIST_ITEM,
+                playlistItemModel = selectedPlaylistItemModel,
+                playlistId = selectedPlaylistItemModel.playlistId
+            )
+            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        }
     }
 
     override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
@@ -436,6 +476,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 playlistToolbar.enableEditMode(true)
                 ivPlaylistOptions.visibility = View.GONE
             }
+
             PlaylistOptions.MOVE_PLAYLIST_ITEMS, PlaylistOptions.COPY_PLAYLIST_ITEMS -> {
                 PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
                     playlistOptionsModel.optionType,
@@ -446,8 +487,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 playlistToolbar.enableEditMode(false)
                 ivPlaylistOptions.visibility = View.VISIBLE
             }
+
             PlaylistOptions.RENAME_PLAYLIST -> {
-                val newPlaylistFragment =NewPlaylistFragment.newInstance(
+                val newPlaylistFragment = NewPlaylistFragment.newInstance(
                     PlaylistOptions.RENAME_PLAYLIST,
                     playlistModel
                 )
@@ -457,7 +499,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                     .addToBackStack(PlaylistFragment::class.simpleName)
                     .commit()
             }
+
             PlaylistOptions.DELETE_PLAYLIST -> {
+                activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
                 activity?.onBackPressedDispatcher?.onBackPressed()
             }
 
@@ -482,8 +526,16 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
                 PlaylistUtils.moveOrCopyModel =
                     MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
+            } else if (playlistItemOptionModel.optionType == PlaylistOptions.DELETE_ITEMS_OFFLINE_DATA || playlistItemOptionModel.optionType == PlaylistOptions.DELETE_PLAYLIST_ITEM) {
+                playlistItemOptionModel.playlistItemModel?.let { stopVideoPlayerOnDelete(it) }
             }
             playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        }
+    }
+
+    private fun stopVideoPlayerOnDelete(selectedPlaylistItem: PlaylistItemModel) {
+        if (PlaylistVideoService.CURRENTLY_PLAYED_ITEM_ID == selectedPlaylistItem.id) {
+            activity?.stopService(Intent(requireContext(), PlaylistVideoService::class.java))
         }
     }
 }

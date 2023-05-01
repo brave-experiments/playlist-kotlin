@@ -81,6 +81,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     companion object {
         const val PLAYLIST_CHANNEL_ID = "brave_playlist_channel"
         const val NOTIFICATION_ID = 1001
+        var CURRENTLY_PLAYED_ITEM_ID : String? = null
     }
 
     private fun lastSavedPositionTimer() {
@@ -130,6 +131,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     private fun release() {
+        CURRENTLY_PLAYED_ITEM_ID = null
+        Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())
         currentItemIndex = C.INDEX_UNSET
         mediaQueue.clear()
         castMediaQueue.clear()
@@ -288,6 +291,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             intent.putExtra(CURRENT_PLAYING_ITEM_ID, currentPlayingItemId)
             sendBroadcast(intent)
         }
+        CURRENTLY_PLAYED_ITEM_ID = currentPlayingItemId
+        Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())
     }
 
     // Internal methods.
@@ -388,6 +393,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         if (this.currentItemIndex != currentItemIndex) {
             val oldIndex = this.currentItemIndex
             this.currentItemIndex = currentItemIndex
+            CURRENTLY_PLAYED_ITEM_ID = getCurrentPlayingItem()?.id
+            Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())
         }
     }
 }

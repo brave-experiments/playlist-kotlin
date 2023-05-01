@@ -15,7 +15,6 @@ import com.brave.playlist.view.bottomsheet.PlaylistItemOptionsBottomSheet
 import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 
 object MenuUtils {
-
     @JvmStatic
     fun showPlaylistItemMenu(
         context: Context,
