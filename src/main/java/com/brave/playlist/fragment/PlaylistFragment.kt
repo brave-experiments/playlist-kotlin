@@ -199,6 +199,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
         playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             var totalFileSize = 0L
+            Log.e("NTP", playlistData.toString())
             playlistModel = playlistData
 
 //            val playlistJson : String = GsonBuilder().serializeNulls().create().toJson(playlistData, TypeToken.get(PlaylistModel::class.java).type)

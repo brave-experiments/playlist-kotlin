@@ -71,6 +71,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
         playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
+            Log.e("NTP", allPlaylistData.toString())
             val allPlaylistList = mutableListOf<PlaylistModel>()
 
 //            val allPlaylistJson : String = GsonBuilder().serializeNulls().create().toJson(allPlaylistData, TypeToken.getParameterized(List::class.java, PlaylistModel::class.java).type)

@@ -19,4 +19,5 @@
     <color name="playlist_progress_bar_tint_bg">#20F0F2FF</color>
     <color name="playlist_behavior">#C2C4CF</color>
     <color name="playlist_transparent_bg">#80000000</color>
+    <color name="day_night_icon_color">#495057</color>
 </resources>
