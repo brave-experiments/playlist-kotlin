@@ -326,6 +326,15 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                                 playlistItemAdapter.updatePlayingStatus(
                                     it
                                 )
+                                if (!arguments?.getString("playlist_item_id").isNullOrEmpty()) {
+                                    playlistModel.items.forEach { it ->
+                                        if (it.id == arguments?.getString("playlist_item_id")) {
+                                            openPlaylistPlayer(it)
+                                            arguments?.putString("playlist_item_id", "")
+                                            return@forEach
+                                        }
+                                    }
+                                }
                             }
 
 //                            playlistVideoService?.getCurrentPlayingItem()?.id?.let {

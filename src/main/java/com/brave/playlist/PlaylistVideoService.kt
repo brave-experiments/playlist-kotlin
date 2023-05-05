@@ -174,14 +174,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             }
 
             override fun createCurrentContentIntent(player: Player): PendingIntent? {
-//                return PendingIntent.getActivity(
-//                    applicationContext,
-//                    0,
-//                    playlistItemsModel?.get(player.currentMediaItemIndex)
-//                        ?.let { PlaylistUtils.playlistNotificationIntent(applicationContext, it) },
-//                    PendingIntent.FLAG_IMMUTABLE
-//                )
-                return null
+                return PendingIntent.getActivity(
+                    applicationContext,
+                    0,
+                    playlistItemsModel?.get(player.currentMediaItemIndex)
+                        ?.let { PlaylistUtils.playlistNotificationIntent(applicationContext, it) },
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+//                return null
             }
 
             override fun getCurrentContentText(player: Player): CharSequence {
