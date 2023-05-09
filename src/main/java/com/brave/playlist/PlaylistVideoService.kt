@@ -124,8 +124,6 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             .build()
         localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
             .setReleaseTimeoutMs(5000).setAudioAttributes(audioAttributes, true).build()
-//        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
-//            .setReleaseTimeoutMs(5000).build()
         localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         localPlayer?.addListener(this)
         castContext = CastContext.getSharedInstance()
@@ -179,7 +177,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                     0,
                     playlistItemsModel?.get(player.currentMediaItemIndex)
                         ?.let { PlaylistUtils.playlistNotificationIntent(applicationContext, it) },
-                    PendingIntent.FLAG_IMMUTABLE
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
 //                return null
             }
@@ -207,7 +205,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                     })
                 return null
             }
-        }).build()
+        }).setSmallIconResourceId(com.google.android.exoplayer2.ui.R.drawable.exo_icon_pause)
+            .build()
 
         playlistItemsModel?.forEach { mediaModel ->
             val movieMetadata: MediaMetadata =

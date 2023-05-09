@@ -1,5 +1,6 @@
 package com.brave.playlist.util
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
@@ -15,6 +16,7 @@ import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.activity.PlaylistMenuOnboardingActivity
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
+import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import java.util.Date
 
 
@@ -65,18 +67,14 @@ object PlaylistUtils {
     }
 
     fun playlistNotificationIntent(context: Context, playlistItemModel: PlaylistItemModel): Intent? {
-        val packageManager = context.packageManager
-//        val intent = packageManager.getLaunchIntentForPackage(context.packageName)
         return try {
             val intent = Intent(context,Class.forName("org.chromium.chrome.browser.playlist.PlaylistHostActivity"))
-            intent.action = "playlist"
-            intent.putExtra("playlist_item_id", playlistItemModel.id)
-            intent.putExtra("playlist_id", playlistItemModel.playlistId)
-            intent.putExtra("name", playlistItemModel.name)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-//            val componentName = intent.component
-//            Intent.makeRestartActivityTask(componentName)
+            intent.action = ConstantUtils.PLAYLIST_ACTION
+            intent.putExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID, playlistItemModel.id)
+            intent.putExtra(ConstantUtils.CURRENT_PLAYLIST_ID, playlistItemModel.playlistId)
+            intent.putExtra(ConstantUtils.PLAYLIST_NAME, playlistItemModel.name)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         } catch(ex: ClassNotFoundException) {
             Log.e(ConstantUtils.TAG, "playlistNotificationIntent"+ex.message)
             null
@@ -88,5 +86,17 @@ object PlaylistUtils {
         val playlistActivityIntent = Intent(context, PlaylistMenuOnboardingActivity::class.java)
         playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         context.startActivity(playlistActivityIntent)
+    }
+
+    fun openBraveActivityWithUrl(activity: Activity, url: String) {
+        try{
+            val intent = Intent(activity,Class.forName("org.chromium.chrome.browser.ChromeTabbedActivity"))
+            intent.putExtra(ConstantUtils.OPEN_URL, url)
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            activity.finish()
+            activity.startActivity(intent)
+        } catch(ex: ClassNotFoundException) {
+            Log.e(ConstantUtils.TAG, "openBraveActivityWithUrl : "+ex.message)
+        }
     }
 }

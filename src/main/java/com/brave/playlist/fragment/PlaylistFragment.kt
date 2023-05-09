@@ -326,11 +326,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                                 playlistItemAdapter.updatePlayingStatus(
                                     it
                                 )
-                                if (!arguments?.getString("playlist_item_id").isNullOrEmpty()) {
-                                    playlistModel.items.forEach { it ->
-                                        if (it.id == arguments?.getString("playlist_item_id")) {
-                                            openPlaylistPlayer(it)
-                                            arguments?.putString("playlist_item_id", "")
+                                if (!arguments?.getString(CURRENT_PLAYING_ITEM_ID).isNullOrEmpty() && playlistModel.items.isNotEmpty()) {
+                                    playlistModel.items.forEach { item ->
+                                        if (item.id == arguments?.getString(CURRENT_PLAYING_ITEM_ID)) {
+                                            Log.e(ConstantUtils.TAG, item.id + " : "+item.name )
+                                            openPlaylistPlayer(item)
+                                            arguments?.putString(CURRENT_PLAYING_ITEM_ID, "")
                                             return@forEach
                                         }
                                     }
@@ -362,9 +363,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
     override fun onDestroyView() {
         activity?.unregisterReceiver(broadcastReceiver)
-//        if (isPlaylistServiceRunning(requireContext(), PlaylistVideoService::class.java)) {
-//            activity?.unbindService(connection)
-//        }
         super.onDestroyView()
     }
 
