@@ -35,7 +35,7 @@ object PlaylistViewUtils {
         val movableImageButton = MovableImageButton(activity)
         movableImageButton.id = R.id.playlist_button_id
         movableImageButton.setBackgroundResource(R.drawable.ic_playlist_floating_button_bg)
-        movableImageButton.setImageResource(R.drawable.ic_add_media_to_playlist)
+        movableImageButton.setImageResource(R.drawable.ic_playlist_button)
         val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT

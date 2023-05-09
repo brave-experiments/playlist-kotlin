@@ -52,10 +52,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:visibility="gone"
-        app:layout_constraintLeft_toLeftOf="@id/thumbnailView"
-        app:layout_constraintRight_toRightOf="@id/thumbnailView"
+        app:layout_constraintEnd_toEndOf="@id/thumbnailView"
         app:layout_constraintTop_toTopOf="@id/thumbnailView"
-        app:layout_constraintBottom_toBottomOf="@id/thumbnailView"
         app:srcCompat="@drawable/ic_playing_sound" />
 
     <androidx.appcompat.widget.AppCompatTextView

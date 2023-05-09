@@ -66,15 +66,21 @@ class PlaylistItemAdapter(
     }
 
     fun updatePlayingStatus(playlistItemId : String) {
-        Log.e("NTP", "updatePlayingStatus : playlistItemId : $playlistItemId")
+        if (getEditMode()) {
+            return
+        }
         val currentPlayingItemView = allViewHolderViews[playlistItemId]
         val ivMediaPlayingStatusCurrent: AppCompatImageView? = currentPlayingItemView?.findViewById(R.id.ivMediaPlayingStatus)
         ivMediaPlayingStatusCurrent?.visibility = View.VISIBLE
+        val mediaTitleCurrent : AppCompatTextView? = currentPlayingItemView?.findViewById(R.id.tvMediaTitle)
+        mediaTitleCurrent?.setTextColor(currentPlayingItemView.context.getColor(R.color.brave_theme_color))
         allViewHolderViews.keys.forEach {
             if (it != playlistItemId) {
                 val view = allViewHolderViews[it]
                 val ivMediaPlayingStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaPlayingStatus)
                 ivMediaPlayingStatus?.visibility = View.GONE
+                val mediaTitle : AppCompatTextView? = view?.findViewById(R.id.tvMediaTitle)
+                mediaTitle?.setTextColor(view.context.getColor(R.color.playlist_text_color))
             }
         }
     }

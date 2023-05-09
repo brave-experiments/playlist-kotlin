@@ -55,10 +55,13 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
 
     init {
         deleteIcon = AppCompatResources.getDrawable(context, R.drawable.ic_playlist_delete)
+        deleteIcon?.setTint(context.getColor(R.color.playlist_progress_bar_tint))
         shareIcon =
             AppCompatResources.getDrawable(context, R.drawable.ic_share)
+        shareIcon?.setTint(context.getColor(R.color.playlist_progress_bar_tint))
         removeOfflineIcon =
             AppCompatResources.getDrawable(context, R.drawable.ic_remove_offline_data_playlist)
+        removeOfflineIcon?.setTint(context.getColor(R.color.playlist_progress_bar_tint))
         deleteIconBg = ColorDrawable(context.getColor(R.color.swipe_delete))
         shareIconBg = ColorDrawable(context.getColor(R.color.upload_option_bg))
         removeOfflineIconBg = ColorDrawable(context.getColor(R.color.remove_offline_option_bg))

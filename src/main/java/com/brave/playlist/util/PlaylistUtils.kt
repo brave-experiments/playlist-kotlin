@@ -16,7 +16,6 @@ import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.activity.PlaylistMenuOnboardingActivity
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
-import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import java.util.Date
 
 
