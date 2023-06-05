@@ -1,5 +1,8 @@
 package com.brave.playlist.enums
 
+import androidx.annotation.Keep
+
+@Keep
 enum class PlaylistOptions {
     //Playlist button options
     ADD_MEDIA,

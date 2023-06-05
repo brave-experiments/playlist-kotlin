@@ -68,6 +68,7 @@ object PlaylistUtils {
     fun playlistNotificationIntent(context: Context, playlistItemModel: PlaylistItemModel): Intent? {
         return try {
             val intent = Intent(context,Class.forName("org.chromium.chrome.browser.playlist.PlaylistHostActivity"))
+//            val intent = Intent(context,PlaylistMenuOnboardingActivity::class.java)
             intent.action = ConstantUtils.PLAYLIST_ACTION
             intent.putExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID, playlistItemModel.id)
             intent.putExtra(ConstantUtils.CURRENT_PLAYLIST_ID, playlistItemModel.playlistId)

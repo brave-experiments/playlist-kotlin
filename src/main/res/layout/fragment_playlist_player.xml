@@ -35,13 +35,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.google.android.exoplayer2.ui.StyledPlayerView
-                    android:id="@+id/styledPlayerView"
+                <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+                    android:id="@+id/aspect_ratio_frame_layout"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
-                    app:show_buffering="always"
-                    app:resize_mode="fill"
-                    app:use_controller="false" />
+                    android:layout_gravity="center_horizontal"
+                    app:resize_mode="fit">
+
+                    <com.google.android.exoplayer2.ui.StyledPlayerView
+                        android:id="@+id/styledPlayerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:show_buffering="always"
+                        app:use_controller="false" />
+                </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
+
+<!--                <com.google.android.exoplayer2.ui.StyledPlayerView-->
+<!--                    android:id="@+id/styledPlayerView"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="300dp"-->
+<!--                    app:show_buffering="always"-->
+<!--                    app:use_controller="false" />-->
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/hover_controls_layout"

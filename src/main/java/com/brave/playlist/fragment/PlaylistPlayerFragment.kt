@@ -21,6 +21,10 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.mediarouter.app.MediaRouteButton
@@ -30,6 +34,7 @@ import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistItemAdapter
 import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.extension.afterMeasured
 import com.brave.playlist.extension.dpToPx
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.PlaylistItemOptionsListener
@@ -45,6 +50,7 @@ import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
 import com.brave.playlist.util.ConstantUtils.SHOULD_SHOW_CONTROLS
+import com.brave.playlist.util.ConstantUtils.TAG
 import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils
@@ -54,6 +60,7 @@ import com.brave.playlist.view.PlaylistToolbar
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.material.card.MaterialCardView
@@ -81,6 +88,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     private lateinit var playlistToolbar: PlaylistToolbar
     private lateinit var styledPlayerView: StyledPlayerView
+    private lateinit var aspectRatioFrameLayout : AspectRatioFrameLayout
     private lateinit var hoverControlsLayout: LinearLayoutCompat
     private lateinit var emptyView: View
     private lateinit var fullscreenImg: AppCompatImageView
@@ -131,14 +139,19 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     private fun updatePortraitView() {
+        view?.afterMeasured {
+            view?.fitsSystemWindows = true
+        }
         val layoutParams: FrameLayout.LayoutParams =
-            styledPlayerView.layoutParams as FrameLayout.LayoutParams
-        layoutParams.height = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            if (context?.resources?.getBoolean(R.bool.isTablet) == true) 650f else 300f,
-            resources.displayMetrics
-        ).toInt()
-        styledPlayerView.layoutParams = layoutParams
+            aspectRatioFrameLayout.layoutParams as FrameLayout.LayoutParams
+        styledPlayerView.afterMeasured {
+            layoutParams.height = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                if (context?.resources?.getBoolean(R.bool.isTablet) == true) 650f else 300f,
+                resources.displayMetrics
+            ).toInt()
+            aspectRatioFrameLayout.layoutParams = layoutParams
+        }
 
         val hoverLayoutParams: FrameLayout.LayoutParams =
             hoverControlsLayout.layoutParams as FrameLayout.LayoutParams
@@ -152,17 +165,23 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             layoutVideoControls.visibility = View.VISIBLE
         }
         playlistToolbar.visibility = View.VISIBLE
+        val windowInsetsController =
+            WindowCompat.getInsetsController(requireActivity().window, requireActivity().window.decorView)
+        windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
         backImg.visibility = View.GONE
         emptyView.visibility = View.GONE
         fullscreenImg.setImageResource(R.drawable.ic_fullscreen)
     }
 
     private fun updateLandscapeView() {
+        view?.afterMeasured {
+            view?.fitsSystemWindows = false
+        }
         val layoutParams: FrameLayout.LayoutParams =
-            styledPlayerView.layoutParams as FrameLayout.LayoutParams
+            aspectRatioFrameLayout.layoutParams as FrameLayout.LayoutParams
         layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
         layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
-        styledPlayerView.layoutParams = layoutParams
+        aspectRatioFrameLayout.layoutParams = layoutParams
 
         val hoverLayoutParams: FrameLayout.LayoutParams =
             hoverControlsLayout.layoutParams as FrameLayout.LayoutParams
@@ -171,10 +190,15 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
         mainLayout.mSlideState = BottomPanelLayout.PanelState.HIDDEN
         styledPlayerView.useController = true
-        styledPlayerView.controllerHideOnTouch = false
+        styledPlayerView.controllerHideOnTouch = true
         styledPlayerView.showController()
         layoutVideoControls.visibility = View.GONE
         playlistToolbar.visibility = View.GONE
+        val windowInsetsController =
+            WindowCompat.getInsetsController(requireActivity().window, requireActivity().window.decorView)
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
         backImg.visibility = View.VISIBLE
         emptyView.visibility = View.VISIBLE
         fullscreenImg.setImageResource(R.drawable.ic_close_fullscreen)
@@ -214,6 +238,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         }
         val intentFilter = IntentFilter()
         intentFilter.addAction(CAST_ACTION)
+        intentFilter.addAction(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)
         activity?.registerReceiver(broadcastReceiver, intentFilter)
     }
 
@@ -244,6 +269,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.playlist_play_later) else playlistModel?.name
         tvPlaylistName.text =
             if (playlistModel?.id == DEFAULT_PLAYLIST) getString(R.string.playlist_play_later) else playlistModel?.name
+
+        aspectRatioFrameLayout = view.findViewById(R.id.aspect_ratio_frame_layout)
+        aspectRatioFrameLayout.setAspectRatio(16f / 9f)
 
         styledPlayerView = view.findViewById(R.id.styledPlayerView)
         styledPlayerView.setOnTouchListener { v, event ->
@@ -418,10 +446,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     private fun showHoveringControls() {
-        hoverControlsLayout.visibility = View.VISIBLE
+        val newVisibility = if (hoverControlsLayout.isVisible) View.GONE else View.VISIBLE
+        hoverControlsLayout.visibility = newVisibility
         Looper.myLooper()?.let {
             Handler(it).postDelayed({
-                hoverControlsLayout.visibility = View.GONE
+                if (hoverControlsLayout.isVisible) hoverControlsLayout.visibility = View.GONE
             }, 5000)
         }
     }
@@ -435,11 +464,14 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
+        Log.e(TAG, "onMediaItemTransition : ")
         playlistVideoService?.getCurrentPlayer()?.let {
             updateSeekBar()
             duration = it.duration
             updateTime(it.currentPosition)
             tvVideoTitle.text = playlistItems[it.currentPeriodIndex].name
+            Log.e(TAG, "onMediaItemTransition : it.nextMediaItemIndex() : "+ it.nextMediaItemIndex)
+            Log.e(TAG, "onMediaItemTransition : it.hasNextMediaItem() : "+ it.hasNextMediaItem())
             ivNextVideo.isEnabled = it.hasNextMediaItem()
             ivNextVideo.alpha = if (it.hasNextMediaItem()) 1.0f else 0.4f
             ivPrevVideo.isEnabled = it.hasPreviousMediaItem()
@@ -455,6 +487,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 duration = it.duration
                 updateTime(it.currentPosition)
                 tvVideoTitle.text = playlistItems[it.currentPeriodIndex].name
+                Log.e(TAG, "onMediaItemTransition : it.nextMediaItemIndex() : "+ it.nextMediaItemIndex)
                 ivNextVideo.isEnabled = it.hasNextMediaItem()
                 ivNextVideo.alpha = if (it.hasNextMediaItem()) 1.0f else 0.4f
                 ivPrevVideo.isEnabled = it.hasPreviousMediaItem()
@@ -575,6 +608,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         ivNextVideo.setOnClickListener {
             playlistVideoService?.getCurrentPlayer()?.let {
                 if (it.hasNextMediaItem()) {
+                    Log.e(TAG, "onMediaItemTransition : it.nextMediaItemIndex() : "+ it.nextMediaItemIndex)
                     if (!playlistItems[it.nextMediaItemIndex].isCached && !ConnectionUtils.isDeviceOnline(
                             requireContext()
                         )
@@ -777,6 +811,11 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 Log.e("NTP", "should_show_controls : ")
                 isCastInProgress = !shouldShowControls
                 layoutVideoControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
+            } else if (action.equals(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)) {
+                val currentPlayingItemId = intent.getStringExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID)
+                if (!currentPlayingItemId.isNullOrEmpty()) {
+                    playlistItemAdapter.updatePlayingStatus(currentPlayingItemId)
+                }
             }
         }
     }

@@ -2,7 +2,6 @@ package com.brave.playlist.util
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -12,25 +11,28 @@ import androidx.fragment.app.FragmentActivity
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.brave.playlist.R
-import com.brave.playlist.activity.PlaylistMenuOnboardingActivity
 import com.brave.playlist.enums.PlaylistOptions
 import com.brave.playlist.extension.allowMoving
 import com.brave.playlist.interpolator.BraveBounceInterpolator
+import com.brave.playlist.listener.PlaylistOnboardingActionClickListener
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistOnboardingModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.model.SnackBarActionModel
 import com.brave.playlist.util.PlaylistPreferenceUtils.shouldShowOnboarding
 import com.brave.playlist.view.MovableImageButton
+import com.brave.playlist.view.PlaylistOnboardingPanel
 import com.brave.playlist.view.bottomsheet.PlaylistOptionsBottomSheet
 import com.google.android.material.snackbar.Snackbar
+
 
 object PlaylistViewUtils {
     @JvmStatic
     fun showPlaylistButton(
         activity: Activity,
         parent: ViewGroup,
-        playlistOptionsListener: PlaylistOptionsListener
+        playlistOptionsListener: PlaylistOptionsListener,
+        playlistOnboardingActionClickListener: PlaylistOnboardingActionClickListener
     ) {
         val movableImageButton = MovableImageButton(activity)
         movableImageButton.id = R.id.playlist_button_id
@@ -54,12 +56,17 @@ object PlaylistViewUtils {
             val shouldShowOnboarding: Boolean =
                 PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding
             if (shouldShowOnboarding) {
-                val playlistActivityIntent =
-                    Intent(activity, PlaylistMenuOnboardingActivity::class.java)
-                playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                activity.startActivity(playlistActivityIntent)
-                PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding =
-                    false
+//                val playlistActivityIntent =
+//                    Intent(activity, PlaylistMenuOnboardingActivity::class.java)
+//                playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+//                activity.startActivity(playlistActivityIntent)
+//                PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding =
+//                    false
+                PlaylistOnboardingPanel(
+                    (activity as FragmentActivity),
+                    it, playlistOnboardingActionClickListener
+                )
+                PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding = false
             } else {
                 PlaylistOptionsBottomSheet(
                     mutableListOf(

@@ -1,6 +1,7 @@
 package com.brave.playlist.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -20,6 +21,8 @@ import com.google.android.material.tabs.TabLayoutMediator
 class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboarding_activity) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Log.e("NTP", intent.getStringExtra(ConstantUtils.PLAYLIST_NAME).toString())
 
         val onboardingLayout = findViewById<ScrollView>(R.id.onboardingLayout)
         onboardingLayout.afterMeasured {

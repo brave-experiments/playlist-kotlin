@@ -1,13 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application android:usesCleartextTraffic="true">
         <activity
             android:name=".activity.PlaylistMenuOnboardingActivity"
             android:exported="false"
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
-        <service android:name=".PlaylistVideoService"
-            android:exported="false"/>
+
+        <service
+            android:name=".PlaylistVideoService"
+            android:exported="false" />
+        <service
+            android:name=".PlaylistDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false" />
     </application>
 </manifest>

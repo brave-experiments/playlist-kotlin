@@ -21,6 +21,7 @@ import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ID
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SHOULD_SHOW_CONTROLS
+import com.brave.playlist.util.ConstantUtils.TAG
 import com.brave.playlist.util.PlaylistPreferenceUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils.continuousListening
 import com.brave.playlist.util.PlaylistPreferenceUtils.rememberFilePlaybackPosition
@@ -36,12 +37,14 @@ import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.MediaMetadata
+import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.Timeline
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.cast.CastPlayer
 import com.google.android.exoplayer2.ext.cast.SessionAvailabilityListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.ui.StyledPlayerControlView
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -76,6 +79,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private val runnableCode: Runnable = object : Runnable {
         override fun run() {
             if (currentPlayer?.isPlaying == true) {
+                Log.e(TAG, "runnableCode")
                 val currentPosition = currentPlayer?.currentPosition
                 currentPosition?.let { saveLastPosition(currentItemIndex, it) }
             }
@@ -103,7 +107,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     override fun onBind(intent: Intent?): IBinder {
-        Log.e("NTP", "onBind")
+        Log.e(TAG, "onBind")
         return PlaylistVideoServiceBinder()
     }
 
@@ -120,9 +124,17 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             .build()
         val audioAttributes: AudioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+            .setContentType(C.CONTENT_TYPE_MOVIE)
             .build()
-        localPlayer = ExoPlayer.Builder(applicationContext).setLoadControl(loadControl)
+        localPlayer = ExoPlayer.Builder(applicationContext)
+            .setMediaSourceFactory(
+                DefaultMediaSourceFactory(
+                    PlaylistDownloadUtils.getDataSourceFactory(
+                        applicationContext
+                    )
+                )
+            )
+            .setLoadControl(loadControl)
             .setReleaseTimeoutMs(5000).setAudioAttributes(audioAttributes, true).build()
         localPlayer?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         localPlayer?.addListener(this)
@@ -156,7 +168,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.e("NTP", "onStartCommand")
+        Log.e(TAG, "onStartCommand")
         intent?.let {
             playlistName = it.getStringExtra(PLAYLIST_NAME)
             playlistItemsModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
@@ -175,15 +187,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                 return PendingIntent.getActivity(
                     applicationContext,
                     0,
-                    playlistItemsModel?.get(player.currentMediaItemIndex)
+                    getMediaItemFromPosition(player.currentMediaItemIndex)
                         ?.let { PlaylistUtils.playlistNotificationIntent(applicationContext, it) },
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
-//                return null
             }
 
             override fun getCurrentContentText(player: Player): CharSequence {
-                return playlistItemsModel?.get(player.currentMediaItemIndex)?.name ?: ""
+                return getMediaItemFromPosition(player.currentMediaItemIndex)?.name ?: ""
             }
 
             override fun getCurrentLargeIcon(
@@ -192,7 +203,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             ): Bitmap? {
                 Glide.with(applicationContext)
                     .asBitmap()
-                    .load(playlistItemsModel?.get(player.currentMediaItemIndex)?.thumbnailPath)
+                    .load(getMediaItemFromPosition(player.currentMediaItemIndex)?.thumbnailPath)
                     .into(object : CustomTarget<Bitmap?>() {
                         override fun onResourceReady(
                             resource: Bitmap,
@@ -208,25 +219,33 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         }).setSmallIconResourceId(com.google.android.exoplayer2.ui.R.drawable.exo_icon_pause)
             .build()
 
+//        Log.e(TAG,DownloadUtils.getDownloadManager(applicationContext)?.downloadIndex?.getDownloads(
+//            Download.STATE_DOWNLOADING, Download.STATE_FAILED, Download.STATE_QUEUED)?.download?.request?.toMediaItem()?.mediaMetadata.toString())
+
+        Log.e(TAG, "playlistItemsModel?.size : "+playlistItemsModel?.size.toString())
+        Log.e(TAG, "playlistItemsModel : "+playlistItemsModel.toString())
+        mediaQueue.clear()
+        castMediaQueue.clear()
         playlistItemsModel?.forEach { mediaModel ->
             val movieMetadata: MediaMetadata =
                 MediaMetadata.Builder().setTitle(mediaModel.name).setArtist(mediaModel.author)
                     .setArtworkUri(Uri.parse(mediaModel.thumbnailPath)).build()
-            val mediaUri = if (mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc
-            val mediaItem = MediaItem.Builder()
-//                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
-                .setUri(Uri.parse(mediaUri))
+            val onlineMediaItem = MediaItem.Builder()
+                .setUri(Uri.parse(if (mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc))
                 .setMediaMetadata(movieMetadata)
-                .setMimeType(MimeTypes.VIDEO_MP4).build()
+                .build()
+            val mediaItem : MediaItem = PlaylistDownloadUtils.getMediaItemFromDownloadRequest(applicationContext, mediaModel)?: onlineMediaItem
             val castMediaItem = MediaItem.Builder()
 //                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
                 .setUri(mediaModel.mediaSrc)
                 .setMediaMetadata(movieMetadata)
-                .setMimeType(MimeTypes.VIDEO_MP4).build()
+//                .setMimeType(MimeTypes.VIDEO_MP4)
+                .build()
             mediaQueue.add(mediaItem)
             castMediaQueue.add(castMediaItem)
         }
 
+        Log.e(TAG, "onStartCommand : setCurrentPlayer")
         setCurrentPlayer(if (castPlayer?.isCastSessionAvailable == true) castPlayer else localPlayer)
         scope.launch {
             lastSavedPositionTimer()
@@ -245,7 +264,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     }
 
     fun getCurrentPlayingItem() = currentPlayer?.currentMediaItemIndex?.let {
-        playlistItemsModel?.get(
+        getMediaItemFromPosition(
             it
         )
     }
@@ -253,16 +272,46 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     // Player.Listener implementation.
     override fun onPlaybackStateChanged(playbackState: @Player.State Int) {
         if (playbackState == Player.STATE_ENDED) {
+            Log.e(TAG, "onPlaybackStateChanged")
             saveLastPosition(currentItemIndex, 0)
         }
         updateCurrentItemIndex()
     }
 
+    override fun onPlayerError(error: PlaybackException) {
+        super.onPlayerError(error)
+        when(error.errorCode) {
+            PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED -> {
+                val currentPlaylistItemModel = getCurrentPlayingItem()
+                val movieMetadata: MediaMetadata =
+                    MediaMetadata.Builder().setTitle(currentPlaylistItemModel?.name).setArtist(currentPlaylistItemModel?.author)
+                        .setArtworkUri(Uri.parse(currentPlaylistItemModel?.thumbnailPath)).build()
+                val mediaItem = MediaItem.Builder()
+//                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+                    .setUri(Uri.parse(currentPlaylistItemModel?.mediaSrc))
+                    .setMediaMetadata(movieMetadata)
+                    .setMimeType(MimeTypes.APPLICATION_M3U8)
+                    .build()
+                mediaQueue[currentPlayer?.currentMediaItemIndex!!] = mediaItem
+                Log.e(TAG, "onPlayerError : setCurrentPlayer")
+//                currentPlayer?.clearMediaItems()
+//                currentPlayer = null // Reset current player
+                setCurrentPlayer(if (castPlayer?.isCastSessionAvailable == true) castPlayer else localPlayer)
+            }
+            else -> {
+                if (currentPlayer?.hasNextMediaItem() == true) {
+                    currentPlayer?.nextMediaItemIndex?.let { setCurrentItem(it) }
+                }
+            }
+        }
+        Log.e(TAG, "onPlayerError : "+ error.message.toString())
+    }
+
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         super.onMediaItemTransition(mediaItem, reason)
         Log.e(
-            "NTP",
-            PlaylistVideoService::class.java.name + "onMediaItemTransition : Reason : " + reason
+            TAG,
+            PlaylistVideoService::class.java.name + " : onMediaItemTransition : Reason : " + reason
         )
         if (reason != Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
             currentPlayer?.playWhenReady =
@@ -276,17 +325,20 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         reason: @Player.DiscontinuityReason Int
     ) {
         updateCurrentItemIndex()
-        val playbackState = currentPlayer!!.playbackState
+        val playbackState = currentPlayer?.playbackState
         if (playbackState == PlaybackState.STATE_PLAYING) {
+            Log.e(TAG, "onPositionDiscontinuity")
+            val size = playlistItemsModel?.size ?: 0
             val previousItemIndex =
-                if (currentItemIndex < playlistItemsModel?.size!!) currentItemIndex - 1 else currentItemIndex
+                if (currentItemIndex in 1 until size) currentItemIndex - 1 else currentItemIndex
             saveLastPosition(previousItemIndex, 0)
+            sendCurrentPlayingItemBroadcast()
         }
     }
 
     private fun saveLastPosition(itemIndex: Int, currentPosition: Long) {
         scope.launch {
-            playlistItemsModel?.get(itemIndex)
+            getMediaItemFromPosition(itemIndex)
                 ?.let {
                     it.lastPlayedPosition = currentPosition
                     if (PlaylistPreferenceUtils.defaultPrefs(applicationContext).rememberFilePlaybackPosition) {
@@ -307,11 +359,13 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     // CastPlayer.SessionAvailabilityListener implementation.
     override fun onCastSessionAvailable() {
+        Log.e(TAG, "onCastSessionUnavailable : setCurrentPlayer")
         setCurrentPlayer(castPlayer)
         sendCastStatusBroadcast(shouldShowControls = false)
     }
 
     override fun onCastSessionUnavailable() {
+        Log.e(TAG, "onCastSessionUnavailable : setCurrentPlayer")
         setCurrentPlayer(localPlayer)
         sendCastStatusBroadcast(shouldShowControls = true)
     }
@@ -326,7 +380,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private fun sendCurrentPlayingItemBroadcast() {
         Log.e("NTP", "sendCurrentPlayingItemBroadcast")
         val currentPlayingItemId = currentPlayer?.currentMediaItemIndex?.let {
-            playlistItemsModel?.get(
+            getMediaItemFromPosition(
                 it
             )?.id
         }
@@ -340,18 +394,25 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())
     }
 
+    private fun getMediaItemFromPosition(position: Int) : PlaylistItemModel? {
+//        if ((playlistItemsModel?.size ?: 0) >= position) {
+//            return null
+//        }
+        return playlistItemsModel?.get(position)
+    }
+
     // Internal methods.
     private fun updateCurrentItemIndex() {
-        val playbackState = currentPlayer!!.playbackState
+        val playbackState = currentPlayer?.playbackState
         maybeSetCurrentItemAndNotify(
-            if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) currentPlayer!!.currentMediaItemIndex else C.INDEX_UNSET
+            if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) currentPlayer?.currentMediaItemIndex?:C.INDEX_UNSET else C.INDEX_UNSET
         )
     }
 
     private fun setCurrentPlayer(currentPlayer: Player?) {
-        if (this.currentPlayer === currentPlayer) {
-            return
-        }
+//        if (this.currentPlayer === currentPlayer) {
+//            return
+//        }
         playerView?.player = currentPlayer
         playerView?.controllerHideOnTouch = currentPlayer === localPlayer
         if (currentPlayer === castPlayer) {
@@ -361,7 +422,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             playerView?.showController()
         } else { // currentPlayer == localPlayer
             playerView?.useController = false
-            val mediaSession = MediaSessionCompat(applicationContext, "Player")
+            val mediaSession = MediaSessionCompat(applicationContext, TAG)
             mediaSessionConnector = MediaSessionConnector(mediaSession)
             mediaSessionConnector?.setPlayer(currentPlayer)
             mediaSession.isActive = true
@@ -398,12 +459,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         }
         this.currentPlayer = currentPlayer
 
+        Log.e(TAG, "before currentPlayer?.mediaItemCount : "+ currentPlayer?.mediaItemCount)
         // Media queue management.
         if (currentPlayer === castPlayer) {
             currentPlayer?.setMediaItems(castMediaQueue, currentItemIndex, playbackPositionMs)
         } else {
             currentPlayer?.setMediaItems(mediaQueue, currentItemIndex, playbackPositionMs)
         }
+        Log.e(TAG, "after currentPlayer?.mediaItemCount : "+ currentPlayer?.mediaItemCount)
         currentPlayer?.playWhenReady = playWhenReady
         currentPlayer?.prepare()
         currentPlayer?.play()
@@ -421,7 +484,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             }
         } else {
             playlistItemsModel?.get(currentItemIndex)?.lastPlayedPosition
-                ?.let { currentPlayer!!.seekTo(itemIndex, it) }
+                ?.let { currentPlayer?.seekTo(itemIndex, it) }
         }
         currentPlayer?.playWhenReady = true
     }
@@ -431,7 +494,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             val oldIndex = this.currentItemIndex
             this.currentItemIndex = currentItemIndex
             CURRENTLY_PLAYED_ITEM_ID = getCurrentPlayingItem()?.id
-            Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())
+            Log.e(TAG,"CURRENTLY_PLAYED_ITEM_ID: "+ CURRENTLY_PLAYED_ITEM_ID.toString())
         }
     }
 }

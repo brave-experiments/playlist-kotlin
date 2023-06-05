@@ -24,6 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.brave.playlist.PlaylistDownloadUtils
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
@@ -41,10 +42,10 @@ import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.ConnectionUtils
-import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ACTION
 import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ID
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
+import com.brave.playlist.util.ConstantUtils.TAG
 import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistItemGestureHelper
@@ -87,8 +88,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     private lateinit var emptyView: View
     private lateinit var playlistView: View
 
-//    private var playlistVideoService: PlaylistVideoService? = null
-
     private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
@@ -101,18 +100,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         }
     }
 
-//    private val connection = object : ServiceConnection {
-//        override fun onServiceDisconnected(name: ComponentName?) {
-//        }
-//
-//        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-//            if (service is PlaylistVideoService.PlaylistVideoServiceBinder) {
-//                playlistVideoService = service.getServiceInstance()
-//
-//            }
-//        }
-//    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         playlistViewModel = activity?.let {
@@ -124,12 +111,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         val intentFilter = IntentFilter()
         intentFilter.addAction(CURRENT_PLAYING_ITEM_ACTION)
         activity?.registerReceiver(broadcastReceiver, intentFilter)
-
-        // Bind Playlist Video service
-//        if (isPlaylistServiceRunning(requireContext(), PlaylistVideoService::class.java)) {
-//            val intent = Intent(requireContext(), PlaylistVideoService::class.java)
-//            activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-//        }
 
         emptyView = view.findViewById(R.id.empty_view)
         playlistView = view.findViewById(R.id.playlist_view)
@@ -198,15 +179,16 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         rvPlaylist.visibility = View.GONE
 
         playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
+            Log.e(TAG, playlistData.toString())
             var totalFileSize = 0L
-            Log.e("NTP", playlistData.toString())
             playlistModel = playlistData
-
-//            val playlistJson : String = GsonBuilder().serializeNulls().create().toJson(playlistData, TypeToken.get(PlaylistModel::class.java).type)
-//            Log.e("BravePlaylist", playlistJson)
 
             view.findViewById<Button>(R.id.btBrowseForMedia).setOnClickListener {
                 requireActivity().finish()
+            }
+
+            playlistData.items.forEach {playlistItemModel ->
+                PlaylistDownloadUtils.startDownloadRequest(requireContext(), playlistItemModel)
             }
 
             if (playlistModel.items.isNotEmpty()) {
@@ -280,7 +262,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                                 totalFileSize += fileSize
                             }
                         } catch (ex: IOException) {
-                            Log.e(ConstantUtils.TAG, ex.message.toString())
+                            Log.e(TAG, ex.message.toString())
                         }
                     }
 
@@ -329,7 +311,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                                 if (!arguments?.getString(CURRENT_PLAYING_ITEM_ID).isNullOrEmpty() && playlistModel.items.isNotEmpty()) {
                                     playlistModel.items.forEach { item ->
                                         if (item.id == arguments?.getString(CURRENT_PLAYING_ITEM_ID)) {
-                                            Log.e(ConstantUtils.TAG, item.id + " : "+item.name )
+                                            Log.e(TAG, item.id + " : "+item.name )
                                             openPlaylistPlayer(item)
                                             arguments?.putString(CURRENT_PLAYING_ITEM_ID, "")
                                             return@forEach
@@ -433,7 +415,21 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             return
         }
 
-        if (!PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+        if (!selectedPlaylistItemModel.isCached && PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.playlist_item_expired_message),
+                Toast.LENGTH_SHORT
+            ).show()
+            val playlistItemOptionModel = PlaylistItemOptionModel(
+                requireContext().resources.getString(R.string.playlist_open_in_private_tab),
+                R.drawable.ic_private_tab,
+                PlaylistOptions.RECOVER_PLAYLIST_ITEM,
+                playlistItemModel = selectedPlaylistItemModel,
+                playlistId = selectedPlaylistItemModel.playlistId
+            )
+            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
+        } else {
             var recentPlaylistIds = LinkedList<String>()
             val recentPlaylistJson =
                 PlaylistPreferenceUtils.defaultPrefs(requireContext()).recentlyPlayedPlaylist
@@ -460,20 +456,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 .replace(android.R.id.content, playlistPlayerFragment)
                 .addToBackStack(PlaylistFragment::class.simpleName)
                 .commit()
-        } else {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.playlist_item_expired_message),
-                Toast.LENGTH_SHORT
-            ).show()
-            val playlistItemOptionModel = PlaylistItemOptionModel(
-                requireContext().resources.getString(R.string.playlist_open_in_private_tab),
-                R.drawable.ic_private_tab,
-                PlaylistOptions.RECOVER_PLAYLIST_ITEM,
-                playlistItemModel = selectedPlaylistItemModel,
-                playlistId = selectedPlaylistItemModel.playlistId
-            )
-            playlistViewModel.setPlaylistItemOption(playlistItemOptionModel)
         }
     }
 
