@@ -179,6 +179,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         rvPlaylist.visibility = View.GONE
 
         playlistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
+//            playlistData.items.toMutableList().reversed() // To have latest item on top
             Log.e(TAG, playlistData.toString())
             var totalFileSize = 0L
             playlistModel = playlistData
@@ -299,7 +300,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                             playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
                         }
 
-                        playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
+                        playlistViewModel.playlistItemEventUpdate.observe(viewLifecycleOwner) {
                             playlistItemAdapter.updatePlaylistItem(it)
                         }
 

@@ -421,7 +421,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                         playlistItemAdapter.updatePlaylistItemDownloadProgress(it)
                     }
 
-                    playlistViewModel.playlistEventUpdate.observe(viewLifecycleOwner) {
+                    playlistViewModel.playlistItemEventUpdate.observe(viewLifecycleOwner) {
                         playlistItemAdapter.updatePlaylistItem(it)
                     }
                 }

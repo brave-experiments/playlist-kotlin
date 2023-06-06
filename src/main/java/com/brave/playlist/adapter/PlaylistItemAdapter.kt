@@ -3,7 +3,6 @@ package com.brave.playlist.adapter
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.text.format.Formatter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -11,11 +10,11 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
-import com.brave.playlist.enums.PlaylistEventEnum
+import com.brave.playlist.enums.PlaylistItemEventEnum
 import com.brave.playlist.listener.PlaylistItemClickListener
 import com.brave.playlist.listener.StartDragListener
 import com.brave.playlist.model.DownloadProgressModel
-import com.brave.playlist.model.PlaylistEventModel
+import com.brave.playlist.model.PlaylistItemEventModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.bumptech.glide.Glide
 
@@ -49,37 +48,53 @@ class PlaylistItemAdapter(
         }
     }
 
-    fun updatePlaylistItem(playlistEventModel: PlaylistEventModel) {
-        val view = allViewHolderViews[playlistEventModel.playlistId]
+    fun updatePlaylistItem(playlistItemEventModel: PlaylistItemEventModel) {
+        val view = allViewHolderViews[playlistItemEventModel.playlistItemModel.id]
         val ivMediaStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaStatus)
         val tvMediaDownloadProgress: AppCompatTextView? =
             view?.findViewById(R.id.tvMediaDownloadProgress)
-        if (playlistEventModel.playlistEventEnum == PlaylistEventEnum.kItemCached) {
+        if (playlistItemEventModel.playlistItemEventEnum == PlaylistItemEventEnum.kItemCached) {
             tvMediaDownloadProgress?.visibility = View.GONE
             ivMediaStatus?.visibility = View.VISIBLE
             ivMediaStatus?.setImageResource(R.drawable.ic_downloaded)
-        } else if (playlistEventModel.playlistEventEnum == PlaylistEventEnum.kItemLocalDataRemoved) {
+        } else if (playlistItemEventModel.playlistItemEventEnum == PlaylistItemEventEnum.kItemLocalDataRemoved) {
             tvMediaDownloadProgress?.visibility = View.GONE
             ivMediaStatus?.visibility = View.VISIBLE
             ivMediaStatus?.setImageResource(R.drawable.ic_offline)
         }
+        var index: Int? = null
+        for (i in 0 until itemList.size) {
+            if (itemList[i].id == playlistItemEventModel.playlistItemModel.id) {
+                index = i
+                break
+            }
+        }
+
+        index?.let {
+            playlistItemEventModel.playlistItemModel.fileSize = itemList[it].fileSize
+            itemList[it] = playlistItemEventModel.playlistItemModel
+            notifyItemChanged(it)
+        }
     }
 
-    fun updatePlayingStatus(playlistItemId : String) {
+    fun updatePlayingStatus(playlistItemId: String) {
         if (getEditMode()) {
             return
         }
         val currentPlayingItemView = allViewHolderViews[playlistItemId]
-        val ivMediaPlayingStatusCurrent: AppCompatImageView? = currentPlayingItemView?.findViewById(R.id.ivMediaPlayingStatus)
+        val ivMediaPlayingStatusCurrent: AppCompatImageView? =
+            currentPlayingItemView?.findViewById(R.id.ivMediaPlayingStatus)
         ivMediaPlayingStatusCurrent?.visibility = View.VISIBLE
-        val mediaTitleCurrent : AppCompatTextView? = currentPlayingItemView?.findViewById(R.id.tvMediaTitle)
+        val mediaTitleCurrent: AppCompatTextView? =
+            currentPlayingItemView?.findViewById(R.id.tvMediaTitle)
         mediaTitleCurrent?.setTextColor(currentPlayingItemView.context.getColor(R.color.brave_theme_color))
         allViewHolderViews.keys.forEach {
             if (it != playlistItemId) {
                 val view = allViewHolderViews[it]
-                val ivMediaPlayingStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaPlayingStatus)
+                val ivMediaPlayingStatus: AppCompatImageView? =
+                    view?.findViewById(R.id.ivMediaPlayingStatus)
                 ivMediaPlayingStatus?.visibility = View.GONE
-                val mediaTitle : AppCompatTextView? = view?.findViewById(R.id.tvMediaTitle)
+                val mediaTitle: AppCompatTextView? = view?.findViewById(R.id.tvMediaTitle)
                 mediaTitle?.setTextColor(view.context.getColor(R.color.playlist_text_color))
             }
         }

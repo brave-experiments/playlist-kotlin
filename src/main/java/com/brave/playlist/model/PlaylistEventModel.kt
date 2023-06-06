@@ -2,4 +2,4 @@ package com.brave.playlist.model
 
 import com.brave.playlist.enums.PlaylistEventEnum
 
-data class PlaylistEventModel(val playlistEventEnum: PlaylistEventEnum, val playlistId: String)
+data class PlaylistEventModel(val playlistEventEnum: PlaylistEventEnum, val playlistModel: PlaylistModel)

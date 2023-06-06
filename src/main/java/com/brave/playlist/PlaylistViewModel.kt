@@ -7,6 +7,7 @@ import com.brave.playlist.model.CreatePlaylistModel
 import com.brave.playlist.model.DownloadProgressModel
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistEventModel
+import com.brave.playlist.model.PlaylistItemEventModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
@@ -100,6 +101,12 @@ class PlaylistViewModel : ViewModel() {
     val playlistEventUpdate: LiveData<PlaylistEventModel> get() = mutablePlaylistEventUpdate
     fun updatePlaylistEvent(playlistEventModel: PlaylistEventModel) {
         mutablePlaylistEventUpdate.value = playlistEventModel
+    }
+
+    private val mutablePlaylistItemEventUpdate = MutableLiveData<PlaylistItemEventModel>()
+    val playlistItemEventUpdate: LiveData<PlaylistItemEventModel> get() = mutablePlaylistItemEventUpdate
+    fun updatePlaylistItemEvent(playlistItemEventModel: PlaylistItemEventModel) {
+        mutablePlaylistItemEventUpdate.value = playlistItemEventModel
     }
 
     private val mutableFetchPlaylistData = MutableLiveData<String>()

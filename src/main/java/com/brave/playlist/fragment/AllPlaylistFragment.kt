@@ -20,6 +20,7 @@ import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
+import com.brave.playlist.util.ConstantUtils.TAG
 import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils.recentlyPlayedPlaylist
@@ -27,6 +28,7 @@ import com.brave.playlist.view.PlaylistToolbar
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import java.util.Collections
 import java.util.LinkedList
 
 class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOptionsListener,
@@ -71,7 +73,8 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
         playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
         playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
-            Log.e("NTP", allPlaylistData.toString())
+            Log.e(TAG, allPlaylistData.toString())
+//            allPlaylistData.toMutableList().reverse() // To have latest item on top
             val allPlaylistList = mutableListOf<PlaylistModel>()
 
 //            val allPlaylistJson : String = GsonBuilder().serializeNulls().create().toJson(allPlaylistData, TypeToken.getParameterized(List::class.java, PlaylistModel::class.java).type)
