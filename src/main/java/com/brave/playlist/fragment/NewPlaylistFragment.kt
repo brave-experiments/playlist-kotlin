@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.fragment
 
 import android.os.Bundle
@@ -8,7 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.enums.PlaylistOptionsEnum
 import com.brave.playlist.model.CreatePlaylistModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.RenamePlaylistModel
@@ -22,14 +29,14 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
     private lateinit var etPlaylistName: AppCompatEditText
     private lateinit var playlistToolbar: PlaylistToolbar
     private var playlistModel: PlaylistModel? = null
-    private var playlistOptions: PlaylistOptions = PlaylistOptions.NEW_PLAYLIST
+    private var playlistOptionsEnum: PlaylistOptionsEnum = PlaylistOptionsEnum.NEW_PLAYLIST
     private var shouldMoveOrCopy: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             playlistModel = it.getParcelable(PLAYLIST_MODEL)
-            playlistOptions = it.getSerializable(PLAYLIST_OPTION) as PlaylistOptions
+            playlistOptionsEnum = it.getSerializable(PLAYLIST_OPTION) as PlaylistOptionsEnum
             shouldMoveOrCopy = it.getBoolean(SHOULD_MOVE_OR_COPY)
         }
     }
@@ -48,17 +55,17 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
         }
         playlistToolbar = view.findViewById(R.id.playlistToolbar)
         playlistToolbar.setToolbarTitle(
-            if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(
+            if (playlistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) getString(
                 R.string.playlist_new_text
             ) else getString(R.string.playlist_rename_text)
         )
         playlistToolbar.setActionText(
-            if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) getString(
+            if (playlistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) getString(
                 R.string.playlist_create_toolbar_text
             ) else getString(R.string.playlist_rename_text)
         )
         playlistToolbar.setActionButtonClickListener {
-            if (playlistOptions == PlaylistOptions.NEW_PLAYLIST) {
+            if (playlistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) {
                 if (!etPlaylistName.text.isNullOrEmpty()) {
                     playlistViewModel.setCreatePlaylistOption(
                         CreatePlaylistModel(
@@ -90,13 +97,13 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
     companion object {
         @JvmStatic
         fun newInstance(
-            playlistOptions: PlaylistOptions,
+            playlistOptionsEnum: PlaylistOptionsEnum,
             playlistModel: PlaylistModel? = null,
             shouldMoveOrCopy: Boolean = false
         ) =
             NewPlaylistFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(PLAYLIST_OPTION, playlistOptions)
+                    putSerializable(PLAYLIST_OPTION, playlistOptionsEnum)
                     putParcelable(PLAYLIST_MODEL, playlistModel)
                     putBoolean(SHOULD_MOVE_OR_COPY, shouldMoveOrCopy)
                 }

@@ -1,9 +1,16 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.model
 
-import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.enums.PlaylistOptionsEnum
 
 data class AllPlaylistsOptionsModel(
     val optionTitle: String,
     val optionIcon: Int,
-    val optionType: PlaylistOptions
+    val optionType: PlaylistOptionsEnum
 )

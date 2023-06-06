@@ -1,5 +1,11 @@
-package com.brave.playlist.fragment
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 
+package com.brave.playlist.fragment
 
 import android.annotation.SuppressLint
 import android.content.*
@@ -32,8 +38,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.adapter.PlaylistItemAdapter
-import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.adapter.recyclerview.PlaylistItemAdapter
+import com.brave.playlist.enums.PlaylistOptionsEnum
 import com.brave.playlist.extension.afterMeasured
 import com.brave.playlist.extension.dpToPx
 import com.brave.playlist.listener.PlaylistItemClickListener
@@ -69,7 +75,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
-
 
 class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Player.Listener,
     PlaylistItemClickListener, PlaylistItemOptionsListener, BottomPanelLayout.PanelSlideListener {
@@ -782,7 +787,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     }
 
     override fun onOptionClicked(playlistItemOptionModel: PlaylistItemOptionModel) {
-        if (playlistItemOptionModel.optionType == PlaylistOptions.SHARE_PLAYLIST_ITEM) {
+        if (playlistItemOptionModel.optionType == PlaylistOptionsEnum.SHARE_PLAYLIST_ITEM) {
             playlistItemOptionModel.playlistItemModel?.pageSource?.let {
                 PlaylistUtils.showSharingDialog(
                     requireContext(),
@@ -790,10 +795,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 )
             }
         } else {
-            if (playlistItemOptionModel.optionType == PlaylistOptions.DELETE_PLAYLIST_ITEM) {
+            if (playlistItemOptionModel.optionType == PlaylistOptionsEnum.DELETE_PLAYLIST_ITEM) {
                 playlistVideoService?.getCurrentPlayer()?.stop()
                 activity?.onBackPressedDispatcher?.onBackPressed()
-            } else if (playlistItemOptionModel.optionType == PlaylistOptions.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptions.COPY_PLAYLIST_ITEM) {
+            } else if (playlistItemOptionModel.optionType == PlaylistOptionsEnum.MOVE_PLAYLIST_ITEM || playlistItemOptionModel.optionType == PlaylistOptionsEnum.COPY_PLAYLIST_ITEM) {
                 val moveOrCopyItems = ArrayList<PlaylistItemModel>()
                 playlistItemOptionModel.playlistItemModel?.let { moveOrCopyItems.add(it) }
                 PlaylistUtils.moveOrCopyModel =

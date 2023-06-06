@@ -1,4 +1,11 @@
-package com.brave.playlist.adapter
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+package com.brave.playlist.adapter.recyclerview
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -53,11 +60,11 @@ class PlaylistItemAdapter(
         val ivMediaStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaStatus)
         val tvMediaDownloadProgress: AppCompatTextView? =
             view?.findViewById(R.id.tvMediaDownloadProgress)
-        if (playlistItemEventModel.playlistItemEventEnum == PlaylistItemEventEnum.kItemCached) {
+        if (playlistItemEventModel.playlistItemEventEnum == PlaylistItemEventEnum.ITEM_CACHED) {
             tvMediaDownloadProgress?.visibility = View.GONE
             ivMediaStatus?.visibility = View.VISIBLE
             ivMediaStatus?.setImageResource(R.drawable.ic_downloaded)
-        } else if (playlistItemEventModel.playlistItemEventEnum == PlaylistItemEventEnum.kItemLocalDataRemoved) {
+        } else if (playlistItemEventModel.playlistItemEventEnum == PlaylistItemEventEnum.ITEM_LOCAL_DATA_REMOVED) {
             tvMediaDownloadProgress?.visibility = View.GONE
             ivMediaStatus?.visibility = View.VISIBLE
             ivMediaStatus?.setImageResource(R.drawable.ic_offline)

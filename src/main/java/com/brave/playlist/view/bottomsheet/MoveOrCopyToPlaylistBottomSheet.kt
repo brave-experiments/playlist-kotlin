@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.view.bottomsheet
 
 import android.os.Bundle
@@ -9,8 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.adapter.PlaylistAdapter
-import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.adapter.recyclerview.PlaylistAdapter
+import com.brave.playlist.enums.PlaylistOptionsEnum
 import com.brave.playlist.extension.setTopCornersRounded
 import com.brave.playlist.fragment.AllPlaylistFragment
 import com.brave.playlist.fragment.NewPlaylistFragment
@@ -90,9 +97,9 @@ class MoveOrCopyToPlaylistBottomSheet :
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
         if (playlistModel.id == ConstantUtils.NEW_PLAYLIST) {
             PlaylistUtils.moveOrCopyModel =
-                MoveOrCopyModel(moveOrCopyModel.playlistOptions, "", moveOrCopyModel.items)
+                MoveOrCopyModel(moveOrCopyModel.playlistOptionsEnum, "", moveOrCopyModel.items)
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
-                PlaylistOptions.NEW_PLAYLIST,
+                PlaylistOptionsEnum.NEW_PLAYLIST,
                 shouldMoveOrCopy = true
             )
             parentFragmentManager
@@ -102,7 +109,7 @@ class MoveOrCopyToPlaylistBottomSheet :
                 .commit()
         } else {
             PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
-                moveOrCopyModel.playlistOptions,
+                moveOrCopyModel.playlistOptionsEnum,
                 playlistModel.id,
                 moveOrCopyModel.items
             )

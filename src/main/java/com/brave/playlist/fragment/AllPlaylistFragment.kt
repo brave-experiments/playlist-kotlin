@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.fragment
 
 import android.os.Bundle
@@ -11,9 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistViewModel
 import com.brave.playlist.R
-import com.brave.playlist.adapter.PlaylistAdapter
-import com.brave.playlist.adapter.RecentlyPlayedPlaylistAdapter
-import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.adapter.recyclerview.PlaylistAdapter
+import com.brave.playlist.adapter.recyclerview.RecentlyPlayedPlaylistAdapter
+import com.brave.playlist.enums.PlaylistOptionsEnum
 import com.brave.playlist.listener.PlaylistClickListener
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistModel
@@ -25,10 +32,8 @@ import com.brave.playlist.util.MenuUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils.recentlyPlayedPlaylist
 import com.brave.playlist.view.PlaylistToolbar
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import java.util.Collections
 import java.util.LinkedList
 
 class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOptionsListener,
@@ -56,7 +61,7 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
         btAddNewPlaylist = view.findViewById(R.id.btAddNewPlaylist)
         btAddNewPlaylist.setOnClickListener {
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
-                PlaylistOptions.NEW_PLAYLIST
+                PlaylistOptionsEnum.NEW_PLAYLIST
             )
             parentFragmentManager
                 .beginTransaction()

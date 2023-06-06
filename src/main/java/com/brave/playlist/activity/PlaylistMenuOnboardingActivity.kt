@@ -1,17 +1,21 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.activity
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.ScrollView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.brave.playlist.R
 import com.brave.playlist.adapter.PlaylistOnboardingFragmentStateAdapter
 import com.brave.playlist.extension.afterMeasured
 import com.brave.playlist.extension.showOnboardingGradientBg
-import com.brave.playlist.model.PlaylistOnboardingModel
 import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.util.PlaylistViewUtils
@@ -21,9 +25,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboarding_activity) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Log.e("NTP", intent.getStringExtra(ConstantUtils.PLAYLIST_NAME).toString())
-
         val onboardingLayout = findViewById<ScrollView>(R.id.onboardingLayout)
         onboardingLayout.afterMeasured {
             showOnboardingGradientBg()

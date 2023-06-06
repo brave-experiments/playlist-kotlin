@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.view.bottomsheet
 
 import android.os.Bundle
@@ -7,7 +14,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.R
-import com.brave.playlist.adapter.PlaylistOptionsBottomSheetAdapter
+import com.brave.playlist.adapter.bottomsheet.PlaylistOptionsBottomSheetAdapter
 import com.brave.playlist.extension.setTopCornersRounded
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistOptionsModel

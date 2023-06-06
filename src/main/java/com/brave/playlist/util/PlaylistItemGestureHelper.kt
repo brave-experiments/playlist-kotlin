@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.util
 
 import android.content.Context
@@ -16,7 +23,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.SimpleCallback
 import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.R
-import com.brave.playlist.adapter.AbstractRecyclerViewAdapter
+import com.brave.playlist.adapter.recyclerview.AbstractRecyclerViewAdapter
 import com.brave.playlist.listener.ItemInteractionListener
 import kotlin.math.min
 

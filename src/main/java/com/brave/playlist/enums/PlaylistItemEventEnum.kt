@@ -1,16 +1,23 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.enums
 
 enum class PlaylistItemEventEnum {
-    kNone,
-    kItemAdded,             // a new playlist item added but not ready state
-    kItemThumbnailReady,    // Thumbnail ready to use for playlist
-    kItemThumbnailFailed,   // Failed to fetch thumbnail
-    kItemCached,            // The item is cached in local storage
-    kItemDeleted,           // An item deleted
-    kItemUpdated,           // An item's properties have been changed
-    kItemMoved,             // An item moved
-    kItemAborted,           // Aborted during the creation process
-    kItemLocalDataRemoved,  // Local data removed
+    NONE,
+    ITEM_ADDED,             // a new playlist item added but not ready state
+    ITEM_THUMBNAIL_READY,    // Thumbnail ready to use for playlist
+    ITEM_THUMBNAIL_FAILED,   // Failed to fetch thumbnail
+    ITEM_CACHED,            // The item is cached in local storage
+    ITEM_DELETED,           // An item deleted
+    ITEM_UPDATED,           // An item's properties have been changed
+    ITEM_MOVED,             // An item moved
+    ITEM_ABORTED,           // Aborted during the creation process
+    ITEM_LOCAL_DATA_REMOVED,  // Local data removed
 
-    kUpdated,
+    UPDATED,
 }

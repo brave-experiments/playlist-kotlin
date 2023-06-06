@@ -1,4 +1,11 @@
-package com.brave.playlist.adapter
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+package com.brave.playlist.adapter.bottomsheet
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,6 +13,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.brave.playlist.R
+import com.brave.playlist.adapter.recyclerview.AbstractRecyclerViewAdapter
 import com.brave.playlist.listener.PlaylistOptionsListener
 import com.brave.playlist.model.PlaylistOptionsModel
 

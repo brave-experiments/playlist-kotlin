@@ -1,8 +1,15 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.enums
 
 enum class PlaylistEventEnum {
-    kNone,
-    kListCreated,  // A list is created
-    kListRemoved,  // A list is removed
-    kAllDeleted,   // All playlist are deleted
+    NONE,
+    LIST_CREATED,  // A list is created
+    LIST_REMOVED,  // A list is removed
+    ALL_DELETED,   // All playlist are deleted
 }

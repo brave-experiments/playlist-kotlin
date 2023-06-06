@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.brave.playlist.util
 
 import android.app.Activity
@@ -11,7 +18,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.brave.playlist.R
-import com.brave.playlist.enums.PlaylistOptions
+import com.brave.playlist.enums.PlaylistOptionsEnum
 import com.brave.playlist.extension.allowMoving
 import com.brave.playlist.interpolator.BraveBounceInterpolator
 import com.brave.playlist.listener.PlaylistOnboardingActionClickListener
@@ -73,17 +80,17 @@ object PlaylistViewUtils {
                         PlaylistOptionsModel(
                             activity.getString(R.string.playlist_add_media),
                             R.drawable.ic_add_media_to_playlist,
-                            PlaylistOptions.ADD_MEDIA
+                            PlaylistOptionsEnum.ADD_MEDIA
                         ),
                         PlaylistOptionsModel(
                             activity.getString(R.string.playlist_open_playlist),
                             R.drawable.ic_open_playlist,
-                            PlaylistOptions.OPEN_PLAYLIST
+                            PlaylistOptionsEnum.OPEN_PLAYLIST
                         ),
                         PlaylistOptionsModel(
                             activity.getString(R.string.playlist_open_playlist_settings),
                             R.drawable.ic_playlist_settings,
-                            PlaylistOptions.PLAYLIST_SETTINGS
+                            PlaylistOptionsEnum.PLAYLIST_SETTINGS
                         ),
 //                        PlaylistOptionsModel(
 //                            activity.getString(R.string.hide_playlist_button),
