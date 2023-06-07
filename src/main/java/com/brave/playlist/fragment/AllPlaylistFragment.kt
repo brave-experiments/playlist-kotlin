@@ -45,7 +45,6 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
     private lateinit var rvRecentlyPlayed: RecyclerView
     private lateinit var rvPlaylist: RecyclerView
     private lateinit var tvRecentlyPlayed: TextView
-    private lateinit var tvPlaylistHeader: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,7 +72,6 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
         rvPlaylist = view.findViewById(R.id.rvPlaylists)
 
         tvRecentlyPlayed = view.findViewById(R.id.tvRecentlyPlayed)
-        tvPlaylistHeader = view.findViewById(R.id.tvPlaylistHeader)
 
         playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
@@ -127,8 +125,6 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                 rvRecentlyPlayed.visibility =
                     if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
                 tvRecentlyPlayed.visibility =
-                    if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
-                tvPlaylistHeader.visibility =
                     if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
             }
 
