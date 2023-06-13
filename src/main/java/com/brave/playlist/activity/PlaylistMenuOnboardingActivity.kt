@@ -33,7 +33,7 @@ class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboa
         val playlistOnboardingViewPager: ViewPager2 = findViewById(R.id.playlistOnboardingViewPager)
 
         val adapter = PlaylistOnboardingFragmentStateAdapter(
-            this, PlaylistViewUtils.getOnboardingItemList(this)
+            this, PlaylistUtils.getOnboardingItemList(this)
         )
         playlistOnboardingViewPager.adapter = adapter
 

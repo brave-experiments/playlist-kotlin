@@ -25,52 +25,48 @@ import com.brave.playlist.util.ConstantUtils.SHOULD_MOVE_OR_COPY
 import com.brave.playlist.view.PlaylistToolbar
 
 class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
-    private lateinit var playlistViewModel: PlaylistViewModel
-    private lateinit var etPlaylistName: AppCompatEditText
-    private lateinit var playlistToolbar: PlaylistToolbar
-    private var playlistModel: PlaylistModel? = null
-    private var playlistOptionsEnum: PlaylistOptionsEnum = PlaylistOptionsEnum.NEW_PLAYLIST
-    private var shouldMoveOrCopy: Boolean = false
+    private lateinit var mPlaylistViewModel: PlaylistViewModel
+    private lateinit var mEtPlaylistName: AppCompatEditText
+    private lateinit var mPlaylistToolbar: PlaylistToolbar
+    private var mPlaylistModel: PlaylistModel? = null
+    private var mPlaylistOptionsEnum: PlaylistOptionsEnum = PlaylistOptionsEnum.NEW_PLAYLIST
+    private var mShouldMoveOrCopy: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            playlistModel = it.getParcelable(PLAYLIST_MODEL)
-            playlistOptionsEnum = it.getSerializable(PLAYLIST_OPTION) as PlaylistOptionsEnum
-            shouldMoveOrCopy = it.getBoolean(SHOULD_MOVE_OR_COPY)
+            mPlaylistModel = it.getParcelable(PLAYLIST_MODEL)
+            mPlaylistOptionsEnum = it.getSerializable(PLAYLIST_OPTION) as PlaylistOptionsEnum
+            mShouldMoveOrCopy = it.getBoolean(SHOULD_MOVE_OR_COPY)
         }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        playlistViewModel = activity?.let {
-            ViewModelProvider(
-                it, ViewModelProvider.NewInstanceFactory()
-            )
-        }!![PlaylistViewModel::class.java]
+        mPlaylistViewModel = ViewModelProvider(requireActivity())[PlaylistViewModel::class.java]
 
-        etPlaylistName = view.findViewById(R.id.etPlaylistName)
-        if (playlistModel != null) {
-            etPlaylistName.setText(playlistModel!!.name)
+        mEtPlaylistName = view.findViewById(R.id.etPlaylistName)
+        if (mPlaylistModel != null) {
+            mEtPlaylistName.setText(mPlaylistModel!!.name)
         }
-        playlistToolbar = view.findViewById(R.id.playlistToolbar)
-        playlistToolbar.setToolbarTitle(
-            if (playlistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) getString(
+        mPlaylistToolbar = view.findViewById(R.id.playlistToolbar)
+        mPlaylistToolbar.setToolbarTitle(
+            if (mPlaylistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) getString(
                 R.string.playlist_new_text
             ) else getString(R.string.playlist_rename_text)
         )
-        playlistToolbar.setActionText(
-            if (playlistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) getString(
+        mPlaylistToolbar.setActionText(
+            if (mPlaylistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) getString(
                 R.string.playlist_create_toolbar_text
             ) else getString(R.string.playlist_rename_text)
         )
-        playlistToolbar.setActionButtonClickListener {
-            if (playlistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) {
-                if (!etPlaylistName.text.isNullOrEmpty()) {
-                    playlistViewModel.setCreatePlaylistOption(
+        mPlaylistToolbar.setActionButtonClickListener {
+            if (mPlaylistOptionsEnum == PlaylistOptionsEnum.NEW_PLAYLIST) {
+                if (!mEtPlaylistName.text.isNullOrEmpty()) {
+                    mPlaylistViewModel.setCreatePlaylistOption(
                         CreatePlaylistModel(
-                            etPlaylistName.text.toString(),
-                            shouldMoveOrCopy
+                            mEtPlaylistName.text.toString(),
+                            mShouldMoveOrCopy
                         )
                     )
                     activity?.onBackPressedDispatcher?.onBackPressed()
@@ -78,11 +74,11 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
                     Toast.makeText(requireContext(), R.string.playlist_empty_playlist_name, Toast.LENGTH_SHORT).show()
                 }
             } else {
-                if (!etPlaylistName.text.isNullOrEmpty()) {
-                    playlistViewModel.setRenamePlaylistOption(
+                if (!mEtPlaylistName.text.isNullOrEmpty()) {
+                    mPlaylistViewModel.setRenamePlaylistOption(
                         RenamePlaylistModel(
-                            playlistModel?.id,
-                            etPlaylistName.text.toString()
+                            mPlaylistModel?.id,
+                            mEtPlaylistName.text.toString()
                         )
                     )
                     activity?.onBackPressedDispatcher?.onBackPressed()
@@ -91,7 +87,7 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
                 }
             }
         }
-        etPlaylistName.requestFocus()
+        mEtPlaylistName.requestFocus()
     }
 
     companion object {

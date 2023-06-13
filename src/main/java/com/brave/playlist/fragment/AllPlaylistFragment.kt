@@ -38,27 +38,23 @@ import java.util.LinkedList
 
 class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOptionsListener,
     PlaylistClickListener {
-    private lateinit var playlistViewModel: PlaylistViewModel
+    private lateinit var mPlaylistViewModel: PlaylistViewModel
 
-    private lateinit var playlistToolbar: PlaylistToolbar
-    private lateinit var btAddNewPlaylist: AppCompatButton
-    private lateinit var rvRecentlyPlayed: RecyclerView
-    private lateinit var rvPlaylist: RecyclerView
-    private lateinit var tvRecentlyPlayed: TextView
+    private lateinit var mPlaylistToolbar: PlaylistToolbar
+    private lateinit var mBtAddNewPlaylist: AppCompatButton
+    private lateinit var mRvRecentlyPlayed: RecyclerView
+    private lateinit var mRvPlaylist: RecyclerView
+    private lateinit var mTvRecentlyPlayed: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        playlistViewModel = activity?.let {
-            ViewModelProvider(
-                it, ViewModelProvider.NewInstanceFactory()
-            )
-        }!![PlaylistViewModel::class.java]
+        mPlaylistViewModel = ViewModelProvider(requireActivity())[PlaylistViewModel::class.java]
 
-        playlistToolbar = view.findViewById(R.id.playlistToolbar)
+        mPlaylistToolbar = view.findViewById(R.id.playlistToolbar)
 
-        btAddNewPlaylist = view.findViewById(R.id.btAddNewPlaylist)
-        btAddNewPlaylist.setOnClickListener {
+        mBtAddNewPlaylist = view.findViewById(R.id.btAddNewPlaylist)
+        mBtAddNewPlaylist.setOnClickListener {
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
                 PlaylistOptionsEnum.NEW_PLAYLIST
             )
@@ -68,20 +64,16 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                 .addToBackStack(AllPlaylistFragment::class.simpleName)
                 .commit()
         }
-        rvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed)
-        rvPlaylist = view.findViewById(R.id.rvPlaylists)
+        mRvRecentlyPlayed = view.findViewById(R.id.rvRecentlyPlayed)
+        mRvPlaylist = view.findViewById(R.id.rvPlaylists)
 
-        tvRecentlyPlayed = view.findViewById(R.id.tvRecentlyPlayed)
+        mTvRecentlyPlayed = view.findViewById(R.id.tvRecentlyPlayed)
 
-        playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
+        mPlaylistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
-        playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
+        mPlaylistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             Log.e(TAG, allPlaylistData.toString())
-//            allPlaylistData.toMutableList().reverse() // To have latest item on top
             val allPlaylistList = mutableListOf<PlaylistModel>()
-
-//            val allPlaylistJson : String = GsonBuilder().serializeNulls().create().toJson(allPlaylistData, TypeToken.getParameterized(List::class.java, PlaylistModel::class.java).type)
-//            Log.e("BravePlaylist", allPlaylistJson)
 
             var defaultPlaylistModel: PlaylistModel? = null
             for (allPlaylistModel in allPlaylistData) {
@@ -119,16 +111,16 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                         }
                     }
                 }
-                rvRecentlyPlayed.layoutManager =
+                mRvRecentlyPlayed.layoutManager =
                     LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-                rvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(recentPlaylist, this)
-                rvRecentlyPlayed.visibility =
+                mRvRecentlyPlayed.adapter = RecentlyPlayedPlaylistAdapter(recentPlaylist, this)
+                mRvRecentlyPlayed.visibility =
                     if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
-                tvRecentlyPlayed.visibility =
+                mTvRecentlyPlayed.visibility =
                     if (recentPlaylist.isNotEmpty()) View.VISIBLE else View.GONE
             }
 
-            playlistToolbar.setOptionsButtonClickListener {
+            mPlaylistToolbar.setOptionsButtonClickListener {
                 MenuUtils.showAllPlaylistsMenu(
                     it.context,
                     parentFragmentManager,
@@ -137,16 +129,16 @@ class AllPlaylistFragment : Fragment(R.layout.fragment_all_playlist), PlaylistOp
                 )
             }
 
-            rvPlaylist.layoutManager = LinearLayoutManager(requireContext())
-            rvPlaylist.adapter = PlaylistAdapter(allPlaylistList, this)
+            mRvPlaylist.layoutManager = LinearLayoutManager(requireContext())
+            mRvPlaylist.adapter = PlaylistAdapter(allPlaylistList, this)
         }
     }
 
     override fun onOptionClicked(playlistOptionsModel: PlaylistOptionsModel) {
-        playlistViewModel.setAllPlaylistOption(playlistOptionsModel)
+        mPlaylistViewModel.setAllPlaylistOption(playlistOptionsModel)
     }
 
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
-        playlistViewModel.setPlaylistToOpen(playlistModel.id)
+        mPlaylistViewModel.setPlaylistToOpen(playlistModel.id)
     }
 }

@@ -14,8 +14,8 @@ import com.google.gson.annotations.SerializedName
 
 data class PlaylistModel(
     @SerializedName("id") val id: String,
-    @SerializedName("name") val name: String,
-    @SerializedName("items") val items: List<PlaylistItemModel>
+    @SerializedName("name") var name: String,
+    @SerializedName("items") var items: List<PlaylistItemModel>
 ) :
     Parcelable {
     companion object {

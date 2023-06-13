@@ -63,12 +63,6 @@ object PlaylistViewUtils {
             val shouldShowOnboarding: Boolean =
                 PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding
             if (shouldShowOnboarding) {
-//                val playlistActivityIntent =
-//                    Intent(activity, PlaylistMenuOnboardingActivity::class.java)
-//                playlistActivityIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-//                activity.startActivity(playlistActivityIntent)
-//                PlaylistPreferenceUtils.defaultPrefs(activity).shouldShowOnboarding =
-//                    false
                 PlaylistOnboardingPanel(
                     (activity as FragmentActivity),
                     it, playlistOnboardingActionClickListener
@@ -120,25 +114,5 @@ object PlaylistViewUtils {
         val snack = Snackbar.make(view, message, Snackbar.LENGTH_LONG)
         snack.setAction(action.actionText, action.onActionClickListener)
         snack.show()
-    }
-
-    fun getOnboardingItemList(context: Context): List<PlaylistOnboardingModel> {
-        return listOf(
-            PlaylistOnboardingModel(
-                context.getString(R.string.playlist_onboarding_title_1),
-                context.getString(R.string.playlist_onboarding_text_1),
-                R.drawable.ic_playlist_graphic_1
-            ),
-            PlaylistOnboardingModel(
-                context.getString(R.string.playlist_onboarding_title_2),
-                context.getString(R.string.playlist_onboarding_text_2),
-                R.drawable.ic_playlist_graphic_2
-            ),
-            PlaylistOnboardingModel(
-                context.getString(R.string.playlist_onboarding_title_3),
-                context.getString(R.string.playlist_onboarding_text_3),
-                R.drawable.ic_playlist_graphic_3
-            )
-        )
     }
 }

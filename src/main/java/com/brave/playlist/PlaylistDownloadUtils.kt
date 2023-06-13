@@ -32,65 +32,63 @@ import java.io.File
 import java.util.concurrent.Executors
 
 object PlaylistDownloadUtils {
-    private var dataSourceFactory: DataSource.Factory? = null
-    private var httpDataSourceFactory: DataSource.Factory? = null
-    private var databaseProvider: DatabaseProvider? = null
-    private var downloadDirectory: File? = null
-    private var downloadCache: Cache? = null
-    private var downloadManager: DownloadManager? = null
-    private const val DOWNLOAD_CONTENT_DIRECTORY = "downloads"
+    private var mDataSourceFactory: DataSource.Factory? = null
+    private var mHttpDataSourceFactory: DataSource.Factory? = null
+    private var mDatabaseProvider: DatabaseProvider? = null
+    private var mDownloadDirectory: File? = null
+    private var mDownloadCache: Cache? = null
+    private var mDownloadManager: DownloadManager? = null
 
     @Synchronized
     fun getHttpDataSourceFactory(): DataSource.Factory? {
-        if (httpDataSourceFactory == null) {
-            httpDataSourceFactory = DefaultHttpDataSource.Factory()
+        if (mHttpDataSourceFactory == null) {
+            mHttpDataSourceFactory = DefaultHttpDataSource.Factory()
         }
-        return httpDataSourceFactory
+        return mHttpDataSourceFactory
     }
 
-    /** Returns a [DataSource.Factory].  */
     @Synchronized
     fun getDataSourceFactory(context: Context): DataSource.Factory {
-        if (dataSourceFactory == null) {
+        if (mDataSourceFactory == null) {
             val upstreamFactory = DefaultDataSource.Factory(
                 context,
                 getHttpDataSourceFactory()!!
             )
-            dataSourceFactory =
+            mDataSourceFactory =
                 getDownloadCache(context)?.let { buildReadOnlyCacheDataSource(upstreamFactory, it) }
         }
-        return dataSourceFactory!!
+        return mDataSourceFactory!!
     }
 
     @Synchronized
     fun getDownloadNotificationHelper(
         context: Context
     ): DownloadNotificationHelper {
-        return DownloadNotificationHelper(context, PlaylistVideoService.PLAYLIST_CHANNEL_ID)
+        return DownloadNotificationHelper(context, ConstantUtils.PLAYLIST_CHANNEL_ID)
     }
 
     @Synchronized
     fun getDownloadManager(context: Context): DownloadManager? {
         ensureDownloadManagerInitialized(context)
-        return downloadManager
+        return mDownloadManager
     }
 
     @Synchronized
     private fun getDownloadCache(context: Context): Cache? {
-        if (downloadCache == null) {
+        if (mDownloadCache == null) {
             val downloadContentDirectory =
-                File(getDownloadDirectory(context), DOWNLOAD_CONTENT_DIRECTORY)
-            downloadCache = SimpleCache(
+                File(getDownloadDirectory(context), ConstantUtils.DOWNLOAD_CONTENT_DIRECTORY)
+            mDownloadCache = SimpleCache(
                 downloadContentDirectory, NoOpCacheEvictor(), getDatabaseProvider(context)!!
             )
         }
-        return downloadCache
+        return mDownloadCache
     }
 
     @Synchronized
     private fun ensureDownloadManagerInitialized(context: Context) {
-        if (downloadManager == null) {
-            downloadManager = getDownloadCache(context)?.let {
+        if (mDownloadManager == null) {
+            mDownloadManager = getDownloadCache(context)?.let {
                 DownloadManager(
                     context,
                     getDatabaseProvider(context)!!,
@@ -104,21 +102,21 @@ object PlaylistDownloadUtils {
 
     @Synchronized
     private fun getDatabaseProvider(context: Context): DatabaseProvider? {
-        if (databaseProvider == null) {
-            databaseProvider = StandaloneDatabaseProvider(context)
+        if (mDatabaseProvider == null) {
+            mDatabaseProvider = StandaloneDatabaseProvider(context)
         }
-        return databaseProvider
+        return mDatabaseProvider
     }
 
     @Synchronized
     private fun getDownloadDirectory(context: Context): File? {
-        if (downloadDirectory == null) {
-            downloadDirectory = context.getExternalFilesDir( /* type = */null)
-            if (downloadDirectory == null) {
-                downloadDirectory = context.filesDir
+        if (mDownloadDirectory == null) {
+            mDownloadDirectory = context.getExternalFilesDir( /* type = */null)
+            if (mDownloadDirectory == null) {
+                mDownloadDirectory = context.filesDir
             }
         }
-        return downloadDirectory
+        return mDownloadDirectory
     }
 
     private fun buildReadOnlyCacheDataSource(

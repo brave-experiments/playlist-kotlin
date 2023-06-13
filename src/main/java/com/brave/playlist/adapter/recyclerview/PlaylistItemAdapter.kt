@@ -42,7 +42,7 @@ class PlaylistItemAdapter(
 
     private var allViewHolderViews = HashMap<String, View>()
     fun updatePlaylistItemDownloadProgress(downloadProgressModel: DownloadProgressModel) {
-        val view = allViewHolderViews[downloadProgressModel.id]
+        val view = allViewHolderViews[downloadProgressModel.playlistItemId]
         val ivMediaStatus: AppCompatImageView? = view?.findViewById(R.id.ivMediaStatus)
         val tvMediaDownloadProgress: AppCompatTextView? =
             view?.findViewById(R.id.tvMediaDownloadProgress)

@@ -12,5 +12,5 @@ import com.brave.playlist.enums.PlaylistOptionsEnum
 data class MoveOrCopyModel(
     val playlistOptionsEnum: PlaylistOptionsEnum,
     val toPlaylistId: String,
-    val items: List<PlaylistItemModel>
+    val playlistItems: List<PlaylistItemModel>
 )

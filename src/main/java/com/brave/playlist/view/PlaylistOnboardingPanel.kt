@@ -22,7 +22,7 @@ import com.brave.playlist.extension.addScrimBackground
 import com.brave.playlist.extension.afterMeasured
 import com.brave.playlist.extension.showOnboardingGradientBg
 import com.brave.playlist.listener.PlaylistOnboardingActionClickListener
-import com.brave.playlist.util.PlaylistViewUtils
+import com.brave.playlist.util.PlaylistUtils
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -48,7 +48,7 @@ class PlaylistOnboardingPanel(
             view.findViewById(R.id.playlistOnboardingViewPager)
 
         val adapter = PlaylistOnboardingFragmentStateAdapter(
-            fragmentActivity, PlaylistViewUtils.getOnboardingItemList(context = view.context)
+            fragmentActivity, PlaylistUtils.getOnboardingItemList(context = view.context)
         )
         playlistOnboardingViewPager.adapter = adapter
 

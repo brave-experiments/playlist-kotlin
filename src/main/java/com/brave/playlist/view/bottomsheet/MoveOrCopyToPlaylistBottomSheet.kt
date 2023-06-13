@@ -33,8 +33,8 @@ import com.google.android.material.card.MaterialCardView
 class MoveOrCopyToPlaylistBottomSheet :
     BottomSheetDialogFragment(), PlaylistClickListener {
 
-    private lateinit var playlistViewModel: PlaylistViewModel
-    private val moveOrCopyModel: MoveOrCopyModel = PlaylistUtils.moveOrCopyModel
+    private lateinit var mPlaylistViewModel: PlaylistViewModel
+    private val mMoveOrCopyModel: MoveOrCopyModel = PlaylistUtils.moveOrCopyModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,24 +44,19 @@ class MoveOrCopyToPlaylistBottomSheet :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        playlistViewModel = activity?.let {
-            ViewModelProvider(
-                it, ViewModelProvider.NewInstanceFactory()
-            )
-        }!![PlaylistViewModel::class.java]
+        mPlaylistViewModel = ViewModelProvider(requireActivity())[PlaylistViewModel::class.java]
 
         val layoutBottomSheet: MaterialCardView = view.findViewById(R.id.layoutBottomSheet)
         layoutBottomSheet.setTopCornersRounded(16)
 
         var fromPlaylistId = ""
-        if (moveOrCopyModel.items.isNotEmpty()) {
-            fromPlaylistId = moveOrCopyModel.items[0].playlistId
+        if (mMoveOrCopyModel.playlistItems.isNotEmpty()) {
+            fromPlaylistId = mMoveOrCopyModel.playlistItems[0].playlistId
         }
 
-        playlistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
+        mPlaylistViewModel.fetchPlaylistData(ConstantUtils.ALL_PLAYLIST)
 
-        playlistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
+        mPlaylistViewModel.allPlaylistData.observe(viewLifecycleOwner) { allPlaylistData ->
             val allPlaylistList = mutableListOf<PlaylistModel>()
             for (allPlaylistModel in allPlaylistData) {
                 if (allPlaylistModel.id != fromPlaylistId) {
@@ -97,7 +92,7 @@ class MoveOrCopyToPlaylistBottomSheet :
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
         if (playlistModel.id == ConstantUtils.NEW_PLAYLIST) {
             PlaylistUtils.moveOrCopyModel =
-                MoveOrCopyModel(moveOrCopyModel.playlistOptionsEnum, "", moveOrCopyModel.items)
+                MoveOrCopyModel(mMoveOrCopyModel.playlistOptionsEnum, "", mMoveOrCopyModel.playlistItems)
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
                 PlaylistOptionsEnum.NEW_PLAYLIST,
                 shouldMoveOrCopy = true
@@ -109,11 +104,11 @@ class MoveOrCopyToPlaylistBottomSheet :
                 .commit()
         } else {
             PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
-                moveOrCopyModel.playlistOptionsEnum,
+                mMoveOrCopyModel.playlistOptionsEnum,
                 playlistModel.id,
-                moveOrCopyModel.items
+                mMoveOrCopyModel.playlistItems
             )
-            playlistViewModel.performMoveOrCopy(PlaylistUtils.moveOrCopyModel)
+            mPlaylistViewModel.performMoveOrCopy(PlaylistUtils.moveOrCopyModel)
         }
         dismiss()
     }

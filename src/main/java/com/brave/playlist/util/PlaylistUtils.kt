@@ -8,22 +8,22 @@
 package com.brave.playlist.util
 
 import android.app.Activity
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import com.brave.playlist.PlaylistVideoService
+import com.brave.playlist.R
 import com.brave.playlist.activity.PlaylistMenuOnboardingActivity
 import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
-import java.util.Date
+import com.brave.playlist.model.PlaylistOnboardingModel
+import com.brave.playlist.util.ConstantUtils.PLAYLIST_CHANNEL_ID
+import java.util.*
 
 
 object PlaylistUtils {
@@ -32,8 +32,8 @@ object PlaylistUtils {
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val serviceChannel = NotificationChannel(
-                PlaylistVideoService.PLAYLIST_CHANNEL_ID,
-                PlaylistVideoService.PLAYLIST_CHANNEL_ID,
+                PLAYLIST_CHANNEL_ID,
+                context.resources.getString(R.string.playlist_feature_text),
                 NotificationManager.IMPORTANCE_HIGH
             )
             serviceChannel.lightColor = Color.BLUE
@@ -59,23 +59,12 @@ object PlaylistUtils {
         intent.action = Intent.ACTION_SEND
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, text)
-        context.startActivity(Intent.createChooser(intent, "Share with:"))
-    }
-
-    fun isPlaylistServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
-        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
+        context.startActivity(Intent.createChooser(intent, context.resources.getString(R.string.share_with)))
     }
 
     fun playlistNotificationIntent(context: Context, playlistItemModel: PlaylistItemModel): Intent? {
         return try {
             val intent = Intent(context,Class.forName("org.chromium.chrome.browser.playlist.PlaylistHostActivity"))
-//            val intent = Intent(context,PlaylistMenuOnboardingActivity::class.java)
             intent.action = ConstantUtils.PLAYLIST_ACTION
             intent.putExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID, playlistItemModel.id)
             intent.putExtra(ConstantUtils.CURRENT_PLAYLIST_ID, playlistItemModel.playlistId)
@@ -88,6 +77,26 @@ object PlaylistUtils {
         }
     }
 
+    fun getOnboardingItemList(context: Context): List<PlaylistOnboardingModel> {
+        return listOf(
+            PlaylistOnboardingModel(
+                context.getString(R.string.playlist_onboarding_title_1),
+                context.getString(R.string.playlist_onboarding_text_1),
+                R.drawable.ic_playlist_graphic_1
+            ),
+            PlaylistOnboardingModel(
+                context.getString(R.string.playlist_onboarding_title_2),
+                context.getString(R.string.playlist_onboarding_text_2),
+                R.drawable.ic_playlist_graphic_2
+            ),
+            PlaylistOnboardingModel(
+                context.getString(R.string.playlist_onboarding_title_3),
+                context.getString(R.string.playlist_onboarding_text_3),
+                R.drawable.ic_playlist_graphic_3
+            )
+        )
+    }
+
     @JvmStatic
     fun openPlaylistMenuOnboardingActivity(context: Context) {
         val playlistActivityIntent = Intent(context, PlaylistMenuOnboardingActivity::class.java)
@@ -95,6 +104,7 @@ object PlaylistUtils {
         context.startActivity(playlistActivityIntent)
     }
 
+    @JvmStatic
     fun openBraveActivityWithUrl(activity: Activity, url: String) {
         try{
             val intent = Intent(activity,Class.forName("org.chromium.chrome.browser.ChromeTabbedActivity"))

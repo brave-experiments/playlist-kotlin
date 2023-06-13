@@ -12,4 +12,6 @@ enum class PlaylistEventEnum {
     LIST_CREATED,  // A list is created
     LIST_REMOVED,  // A list is removed
     ALL_DELETED,   // All playlist are deleted
+
+    ITEM_MOVED,    // Item was moved from playlist
 }

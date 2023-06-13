@@ -21,6 +21,7 @@ import android.view.*
 import android.view.View.OnClickListener
 import android.view.accessibility.AccessibilityEvent
 import android.view.animation.Interpolator
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.MotionEventCompat
 import androidx.core.view.ViewCompat
 import com.brave.playlist.R
@@ -32,146 +33,35 @@ class BottomPanelLayout @JvmOverloads constructor(
     defStyle: Int = 0
 ) :
     ViewGroup(context, attrs, defStyle) {
-    /**
-     * @return The current minimin fling velocity
-     */
-    /**
-     * Sets the minimum fling velocity for the panel
-     *
-     * @param val the new value
-     */
-    /**
-     * Minimum velocity that will be detected as a fling
-     */
     var minFlingVelocity = DEFAULT_MIN_FLING_VELOCITY
-
-    /**
-     * The fade color used for the panel covered by the slider. 0 = no fading.
-     */
     private var mCoveredFadeColor = DEFAULT_FADE_COLOR
-
-    /**
-     * The paint used to dim the main layout when sliding
-     */
     private val mCoveredFadePaint = Paint()
-
-    /**
-     * Drawable used to draw the shadow between panes.
-     */
     private var mShadowDrawable: Drawable? = null
-
-    /**
-     * The size of the overhang in pixels.
-     */
     private var mPanelHeight = -1
-
-    /**
-     * The size of the shadow in pixels.
-     */
     private var mShadowHeight = -1
-
-    /**
-     * Parallax offset
-     */
     private var mParallaxOffset = -1
-
-    /**
-     * True if the collapsed panel should be dragged up.
-     */
     private var mIsSlidingUp = false
-    /**
-     * Check if the panel is set as an overlay.
-     */
-    /**
-     * Sets whether or not the panel overlays the content
-     *
-     * @param overlayed
-     */
-    /**
-     * Panel overlays the windows instead of putting it underneath it.
-     */
     var isOverlayed = DEFAULT_OVERLAY_FLAG
-    /**
-     * Check whether or not the main content is clipped to the top of the panel
-     */
-    /**
-     * Sets whether or not the main content is clipped to the top of the panel
-     *
-     * @param clip
-     */
-    /**
-     * The main view is clipped to the main top border
-     */
     var isClipPanel = DEFAULT_CLIP_PANEL_FLAG
-
-    /**
-     * If provided, the panel can be dragged by only this view. Otherwise, the entire panel can be
-     * used for dragging.
-     */
     private var mDragView: View? = null
-
-    /**
-     * If provided, the panel can be dragged by only this view. Otherwise, the entire panel can be
-     * used for dragging.
-     */
     private var mDragViewResId = -1
-
-    /**
-     * If provided, the panel will transfer the scroll from this view to itself when needed.
-     */
     private var mScrollableView: View? = null
     private var mScrollableViewResId = 0
     private var mScrollableViewHelper = ScrollableViewHelper()
-
-    /**
-     * The child view that can slide, if any.
-     */
     private var mSlideableView: View? = null
-
-    /**
-     * The main view
-     */
     private var mMainView: View? = null
 
-    /**
-     * Current state of the slideable view.
-     */
     enum class PanelState {
         EXPANDED, COLLAPSED, ANCHORED, HIDDEN, DRAGGING
     }
 
     var mSlideState: PanelState? = DEFAULT_SLIDE_STATE
-
-    /**
-     * If the current slide state is DRAGGING, this will store the last non dragging state
-     */
     private var mLastNotDraggingSlideState: PanelState? = DEFAULT_SLIDE_STATE
-
-    /**
-     * How far the panel is offset from its expanded position.
-     * range [0, 1] where 0 = collapsed, 1 = expanded.
-     */
     private var mSlideOffset = 0f
-
-    /**
-     * How far in pixels the slideable panel may move.
-     */
     private var mSlideRange = 0
-
-    /**
-     * An anchor point where the panel can stop during sliding
-     */
     private var mAnchorPoint = 1f
-
-    /**
-     * A panel view is locked into internal scrolling or another condition that
-     * is preventing a drag.
-     */
     private var mIsUnableToDrag = false
 
-    /**
-     * Flag indicating that sliding feature is enabled\disabled
-     */
     private var mIsTouchEnabled: Boolean
     private var mPrevMotionX = 0f
     private var mPrevMotionY = 0f
@@ -182,85 +72,31 @@ class BottomPanelLayout @JvmOverloads constructor(
     private var mFadeOnClickListener: OnClickListener? = null
     private var mDragHelper: ViewDragHelper?
 
-    /**
-     * Stores whether or not the pane was expanded the last time it was slideable.
-     * If expand/collapse operations are invoked this state is modified. Used by
-     * instance state save/restore.
-     */
     private var mFirstLayout = true
     private val mTmpRect = Rect()
 
-    /**
-     * Listener for monitoring events about sliding panes.
-     */
     interface PanelSlideListener {
-        /**
-         * Called when a sliding pane's position changes.
-         *
-         * @param panel       The child view that was moved
-         * @param slideOffset The new offset of this sliding pane within its range, from 0-1
-         */
-        fun onPanelSlide(panel: View?, slideOffset: Float)
-
-        /**
-         * Called when a sliding panel state changes
-         *
-         * @param panel The child view that was slid to an collapsed position
-         */
-        fun onPanelStateChanged(panel: View?, previousState: PanelState?, newState: PanelState?)
+        fun onPanelSlide(panel: View?, slideOffset: Float) {}
+        fun onPanelStateChanged(panel: View?, previousState: PanelState?, newState: PanelState?) {}
     }
 
     init {
-        var scrollerInterpolator: Interpolator? = null
+        val scrollerInterpolator: Interpolator? = null
         if (attrs != null) {
             val defAttrs = context.obtainStyledAttributes(attrs, DEFAULT_ATTRS)
             val gravity = defAttrs.getInt(0, Gravity.NO_GRAVITY)
             setGravity(gravity)
             defAttrs.recycle()
             val ta = context.obtainStyledAttributes(attrs, R.styleable.BottomPanelLayout)
-            if (ta != null) {
-                mPanelHeight =
-                    ta.getDimensionPixelSize(R.styleable.BottomPanelLayout_panelHeight, -1)
-//                mShadowHeight =
-//                    ta.getDimensionPixelSize(R.styleable.SlidingUpPanelLayout_umanoShadowHeight, -1)
-//                mParallaxOffset = ta.getDimensionPixelSize(
-//                    R.styleable.SlidingUpPanelLayout_umanoParallaxOffset,
-//                    -1
-//                )
-//                minFlingVelocity = ta.getInt(
-//                    R.styleable.SlidingUpPanelLayout_umanoFlingVelocity,
-//                    DEFAULT_MIN_FLING_VELOCITY
-//                )
-//                mCoveredFadeColor =
-//                    ta.getColor(R.styleable.SlidingUpPanelLayout_umanoFadeColor, DEFAULT_FADE_COLOR)
-//                mDragViewResId =
-//                    ta.getResourceId(R.styleable.SlidingUpPanelLayout_umanoDragView, -1)
-                mScrollableViewResId =
-                    ta.getResourceId(R.styleable.BottomPanelLayout_scrollableView, -1)
-//                isOverlayed = ta.getBoolean(
-//                    R.styleable.SlidingUpPanelLayout_umanoOverlay,
-//                    DEFAULT_OVERLAY_FLAG
-//                )
-//                isClipPanel = ta.getBoolean(
-//                    R.styleable.SlidingUpPanelLayout_umanoClipPanel,
-//                    DEFAULT_CLIP_PANEL_FLAG
-//                )
-//                mAnchorPoint = ta.getFloat(
-//                    R.styleable.SlidingUpPanelLayout_umanoAnchorPoint,
-//                    DEFAULT_ANCHOR_POINT
-//                )
-                mSlideState = PanelState.values()[ta.getInt(
-                    R.styleable.BottomPanelLayout_initialState,
-                    DEFAULT_SLIDE_STATE.ordinal
-                )]
-//                val interpolatorResId =
-//                    ta.getResourceId(R.styleable.SlidingUpPanelLayout_umanoScrollInterpolator, -1)
-//                if (interpolatorResId != -1) {
-//                    scrollerInterpolator =
-//                        AnimationUtils.loadInterpolator(context, interpolatorResId)
-//                }
-                ta.recycle()
-            }
+            mPanelHeight =
+                ta.getDimensionPixelSize(R.styleable.BottomPanelLayout_panelHeight, -1)
+            mScrollableViewResId =
+                ta.getResourceId(R.styleable.BottomPanelLayout_scrollableView, -1)
+            mSlideState = PanelState.values()[ta.getInt(
+                R.styleable.BottomPanelLayout_initialState,
+                DEFAULT_SLIDE_STATE.ordinal
+            )]
+            ta.recycle()
         }
         val density = context.resources.displayMetrics.density
         if (mPanelHeight == -1) {
@@ -274,11 +110,7 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
         // If the shadow height is zero, don't show the shadow
         mShadowDrawable = if (mShadowHeight > 0) {
-            if (mIsSlidingUp) {
-                resources.getDrawable(R.drawable.above_shadow)
-            } else {
-                resources.getDrawable(R.drawable.below_shadow)
-            }
+            ResourcesCompat.getDrawable(resources, if(mIsSlidingUp) R.drawable.above_shadow else R.drawable.below_shadow, null)
         } else {
             null
         }
@@ -288,9 +120,6 @@ class BottomPanelLayout @JvmOverloads constructor(
         mIsTouchEnabled = true
     }
 
-    /**
-     * Set the Drag View after the view is inflated
-     */
     override fun onFinishInflate() {
         super.onFinishInflate()
         if (mDragViewResId != -1) {
@@ -308,27 +137,7 @@ class BottomPanelLayout @JvmOverloads constructor(
             requestLayout()
         }
     }
-    /**
-     * @return The ARGB-packed color value used to fade the fixed pane
-     */
-    /**
-     * Set the color used to fade the pane covered by the sliding pane out when the pane
-     * will become fully covered in the expanded state.
-     *
-     * @param color An ARGB-packed color value
-     */
-    var coveredFadeColor: Int
-        get() = mCoveredFadeColor
-        set(color) {
-            mCoveredFadeColor = color
-            requestLayout()
-        }
 
-    /**
-     * Set sliding enabled flag
-     *
-     * @param enabled flag value
-     */
     var isTouchEnabled: Boolean
         get() = mIsTouchEnabled && mSlideableView != null && mSlideState != PanelState.HIDDEN
         set(enabled) {
@@ -338,30 +147,7 @@ class BottomPanelLayout @JvmOverloads constructor(
     fun smoothToBottom() {
         smoothSlideTo(0f, 0)
     }
-    /**
-     * @return The current shadow height
-     */
-    /**
-     * Set the shadow height
-     *
-     * @param val A height in pixels
-     */
-    var shadowHeight: Int
-        get() = mShadowHeight
-        set(value) {
-            mShadowHeight = value
-            if (!mFirstLayout) {
-                invalidate()
-            }
-        }
-    /**
-     * @return The current collapsed panel height
-     */
-    /**
-     * Set the collapsed panel height in pixels
-     *
-     * @param val A height in pixels
-     */
+
     var panelHeight: Int
         get() = mPanelHeight
         set(value) {
@@ -379,9 +165,6 @@ class BottomPanelLayout @JvmOverloads constructor(
             }
         }// Clamp slide offset at zero for parallax computation;
 
-    /**
-     * @return The current parallax offset
-     */
     val currentParallaxOffset: Int
         get() {
             // Clamp slide offset at zero for parallax computation;
@@ -389,52 +172,14 @@ class BottomPanelLayout @JvmOverloads constructor(
             return if (mIsSlidingUp) -offset else offset
         }
 
-    /**
-     * Set parallax offset for the panel
-     *
-     * @param val A height in pixels
-     */
-    fun setParallaxOffset(`val`: Int) {
-        mParallaxOffset = `val`
-        if (!mFirstLayout) {
-            requestLayout()
-        }
-    }
-
-    /**
-     * Adds a panel slide listener
-     *
-     * @param listener
-     */
     fun addPanelSlideListener(listener: PanelSlideListener) {
         synchronized(mPanelSlideListeners) { mPanelSlideListeners.add(listener) }
     }
 
-    /**
-     * Removes a panel slide listener
-     *
-     * @param listener
-     */
     fun removePanelSlideListener(listener: PanelSlideListener) {
         synchronized(mPanelSlideListeners) { mPanelSlideListeners.remove(listener) }
     }
 
-    /**
-     * Provides an on click for the portion of the main view that is dimmed. The listener is not
-     * triggered if the panel is in a collapsed or a hidden position. If the on click listener is
-     * not provided, the clicks on the dimmed area are passed through to the main layout.
-     *
-     * @param listener
-     */
-    fun setFadeOnClickListener(listener: OnClickListener?) {
-        mFadeOnClickListener = listener
-    }
-
-    /**
-     * Set the draggable view portion. Use to null, to allow the whole panel to be draggable
-     *
-     * @param dragView A view that will be used to drag the panel.
-     */
     fun setDragView(dragView: View?) {
         if (mDragView != null) {
             mDragView!!.setOnClickListener(null)
@@ -460,54 +205,9 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Set the draggable view portion. Use to null, to allow the whole panel to be draggable
-     *
-     * @param dragViewResId The resource ID of the new drag view
-     */
-    fun setDragView(dragViewResId: Int) {
-        mDragViewResId = dragViewResId
-        setDragView(findViewById(dragViewResId))
-    }
-
-    /**
-     * Set the scrollable child of the sliding layout. If set, scrolling will be transfered between
-     * the panel and the view when necessary
-     *
-     * @param scrollableView The scrollable view
-     */
     fun setScrollableView(scrollableView: View?) {
         mScrollableView = scrollableView
     }
-
-    /**
-     * Sets the current scrollable view helper. See ScrollableViewHelper description for details.
-     *
-     * @param helper
-     */
-    fun setScrollableViewHelper(helper: ScrollableViewHelper) {
-        mScrollableViewHelper = helper
-    }
-    /**
-     * Gets the currently set anchor point
-     *
-     * @return the currently set anchor point
-     */
-    /**
-     * Set an anchor point where the panel can stop during sliding
-     *
-     * @param anchorPoint A value between 0 and 1, determining the position of the anchor point
-     * starting from the top of the layout.
-     */
-    var anchorPoint: Float
-        get() = mAnchorPoint
-        set(anchorPoint) {
-            if (anchorPoint > 0 && anchorPoint <= 1) {
-                mAnchorPoint = anchorPoint
-                mFirstLayout = true
-                requestLayout()
-            }
-        }
 
     fun dispatchOnPanelSlide(panel: View?) {
         synchronized(mPanelSlideListeners) {

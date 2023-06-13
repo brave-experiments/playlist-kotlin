@@ -15,7 +15,6 @@ enum class PlaylistItemEventEnum {
     ITEM_CACHED,            // The item is cached in local storage
     ITEM_DELETED,           // An item deleted
     ITEM_UPDATED,           // An item's properties have been changed
-    ITEM_MOVED,             // An item moved
     ITEM_ABORTED,           // Aborted during the creation process
     ITEM_LOCAL_DATA_REMOVED,  // Local data removed
 
