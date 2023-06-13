@@ -5,21 +5,46 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            try {
+                storeFile file(KEYSTORE_FILEPATH)
+                storePassword KEYSTORE_PASSWORD
+                keyAlias KEYSTORE_ALIAS
+                keyPassword KEY_PASSWORD
+            } catch (ignored) {
+                throw new InvalidUserDataException("You should define KEYSTORE_ALIAS, KEYSTORE_FILEPATH, KEYSTORE_PASSWORD and KEY_PASSWORD in gradle.properties.")
+            }
+        }
+    }
+    namespace 'com.brave.playlist'
     compileSdk 33
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         minSdk 24
         targetSdk 33
-
+        versionCode 1
+        versionName '0.0.1'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
         vectorDrawables.useSupportLibrary = true
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "playlist_${variant.name}_${defaultConfig.versionName}.aar"
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
@@ -32,7 +57,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'com.brave.playlist'
 }
 
 ext {
