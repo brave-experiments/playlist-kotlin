@@ -59,7 +59,7 @@ object PlaylistUtils {
         intent.action = Intent.ACTION_SEND
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, text)
-        context.startActivity(Intent.createChooser(intent, context.resources.getString(R.string.share_with)))
+        context.startActivity(Intent.createChooser(intent, context.resources.getString(R.string.playlist_share_with)))
     }
 
     fun playlistNotificationIntent(context: Context, playlistItemModel: PlaylistItemModel): Intent? {

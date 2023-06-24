@@ -58,6 +58,7 @@
     <string name="playlist_offline_message">Playlist item is not cached.\nPlease cache the item for offline mode.</string>
     <string name="playlist_item_expired_message">Content expired. Try again in a few seconds.</string>
     <string name="playlist_empty_playlist_name">Please enter valid playlist name</string>
-    <string name="share_with">"Share with : "</string>
+    <string name="playlist_share_with">"Share with : "</string>
+    <string name="playlist_hide_playlist_button">Hide Playlist button</string>
     <!--    Last Updated String-->
 </resources>
