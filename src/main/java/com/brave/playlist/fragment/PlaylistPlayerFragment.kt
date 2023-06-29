@@ -147,6 +147,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         view?.afterMeasured {
             view?.fitsSystemWindows = true
         }
+
         val layoutParams: FrameLayout.LayoutParams =
             mAspectRatioFrameLayout.layoutParams as FrameLayout.LayoutParams
         mStyledPlayerView.afterMeasured {
@@ -155,7 +156,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                 if (context?.resources?.getBoolean(R.bool.isTablet) == true) 650f else 300f,
                 resources.displayMetrics
             ).toInt()
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
             mAspectRatioFrameLayout.layoutParams = layoutParams
+            mAspectRatioFrameLayout.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
 
         val hoverLayoutParams: FrameLayout.LayoutParams =
@@ -184,9 +187,12 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         }
         val layoutParams: FrameLayout.LayoutParams =
             mAspectRatioFrameLayout.layoutParams as FrameLayout.LayoutParams
-        layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
-        layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
-        mAspectRatioFrameLayout.layoutParams = layoutParams
+        mStyledPlayerView.afterMeasured {
+            layoutParams.width = FrameLayout.LayoutParams.MATCH_PARENT
+            layoutParams.height = FrameLayout.LayoutParams.MATCH_PARENT
+            mAspectRatioFrameLayout.layoutParams = layoutParams
+            mAspectRatioFrameLayout.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+        }
 
         val hoverLayoutParams: FrameLayout.LayoutParams =
             mHoverControlsLayout.layoutParams as FrameLayout.LayoutParams
