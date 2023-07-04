@@ -111,10 +111,7 @@ object PlaylistDownloadUtils {
     @Synchronized
     private fun getDownloadDirectory(context: Context): File? {
         if (mDownloadDirectory == null) {
-            mDownloadDirectory = context.getExternalFilesDir( /* type = */null)
-            if (mDownloadDirectory == null) {
-                mDownloadDirectory = context.filesDir
-            }
+            mDownloadDirectory = context.filesDir
         }
         return mDownloadDirectory
     }

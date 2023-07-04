@@ -7,7 +7,6 @@
 
 package com.brave.playlist.slidingpanel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -17,15 +16,21 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.view.*
+import android.view.Gravity
+import android.view.MotionEvent
+import android.view.SoundEffectConstants
+import android.view.View
 import android.view.View.OnClickListener
+import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.animation.Interpolator
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.MotionEventCompat
 import androidx.core.view.ViewCompat
 import com.brave.playlist.R
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 class BottomPanelLayout @JvmOverloads constructor(
     context: Context,
@@ -33,7 +38,7 @@ class BottomPanelLayout @JvmOverloads constructor(
     defStyle: Int = 0
 ) :
     ViewGroup(context, attrs, defStyle) {
-    var minFlingVelocity = DEFAULT_MIN_FLING_VELOCITY
+    private var minFlingVelocity = DEFAULT_MIN_FLING_VELOCITY
     private var mCoveredFadeColor = DEFAULT_FADE_COLOR
     private val mCoveredFadePaint = Paint()
     private var mShadowDrawable: Drawable? = null
@@ -41,8 +46,8 @@ class BottomPanelLayout @JvmOverloads constructor(
     private var mShadowHeight = -1
     private var mParallaxOffset = -1
     private var mIsSlidingUp = false
-    var isOverlayed = DEFAULT_OVERLAY_FLAG
-    var isClipPanel = DEFAULT_CLIP_PANEL_FLAG
+    private var isOverlayed = DEFAULT_OVERLAY_FLAG
+    private var isClipPanel = DEFAULT_CLIP_PANEL_FLAG
     private var mDragView: View? = null
     private var mDragViewResId = -1
     private var mScrollableView: View? = null
@@ -130,7 +135,7 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
     }
 
-    fun setGravity(gravity: Int) {
+    private fun setGravity(gravity: Int) {
         require(!(gravity != Gravity.TOP && gravity != Gravity.BOTTOM)) { "gravity must be set to either top or bottom" }
         mIsSlidingUp = gravity == Gravity.BOTTOM
         if (!mFirstLayout) {
@@ -138,14 +143,25 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
     }
 
-    var isTouchEnabled: Boolean
+    private var isTouchEnabled: Boolean
         get() = mIsTouchEnabled && mSlideableView != null && mSlideState != PanelState.HIDDEN
         set(enabled) {
             mIsTouchEnabled = enabled
         }
 
     fun smoothToBottom() {
-        smoothSlideTo(0f, 0)
+        if (!isEnabled || mSlideableView == null) {
+            // Nothing to do.
+            return
+        }
+        val panelTop = computePanelTopPosition(0f)
+        if (mSlideableView?.left?.let {
+                mDragHelper?.smoothSlideViewTo(mSlideableView,
+                    it, panelTop)
+            } == true) {
+            setAllChildrenVisible()
+            ViewCompat.postInvalidateOnAnimation(this)
+        }
     }
 
     var panelHeight: Int
@@ -165,10 +181,10 @@ class BottomPanelLayout @JvmOverloads constructor(
             }
         }// Clamp slide offset at zero for parallax computation;
 
-    val currentParallaxOffset: Int
+    private val currentParallaxOffset: Int
         get() {
             // Clamp slide offset at zero for parallax computation;
-            val offset = (mParallaxOffset * Math.max(mSlideOffset, 0f)).toInt()
+            val offset = (mParallaxOffset * max(mSlideOffset, 0f)).toInt()
             return if (mIsSlidingUp) -offset else offset
         }
 
@@ -180,16 +196,14 @@ class BottomPanelLayout @JvmOverloads constructor(
         synchronized(mPanelSlideListeners) { mPanelSlideListeners.remove(listener) }
     }
 
-    fun setDragView(dragView: View?) {
-        if (mDragView != null) {
-            mDragView!!.setOnClickListener(null)
-        }
+    private fun setDragView(dragView: View?) {
+        mDragView?.setOnClickListener(null)
         mDragView = dragView
-        if (mDragView != null) {
-            mDragView!!.isClickable = true
-            mDragView!!.isFocusable = false
-            mDragView!!.isFocusableInTouchMode = false
-            mDragView!!.setOnClickListener(OnClickListener {
+        mDragView?.let {
+            it.isClickable = true
+            it.isFocusable = false
+            it.isFocusableInTouchMode = false
+            it.setOnClickListener(OnClickListener {
                 if (!isEnabled || !isTouchEnabled) return@OnClickListener
                 panelState =
                     if (mSlideState != PanelState.EXPANDED && mSlideState != PanelState.ANCHORED) {
@@ -205,11 +219,11 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
     }
 
-    fun setScrollableView(scrollableView: View?) {
+    private fun setScrollableView(scrollableView: View?) {
         mScrollableView = scrollableView
     }
 
-    fun dispatchOnPanelSlide(panel: View?) {
+    private fun dispatchOnPanelSlide(panel: View?) {
         synchronized(mPanelSlideListeners) {
             for (l in mPanelSlideListeners) {
                 l.onPanelSlide(panel, mSlideOffset)
@@ -217,7 +231,7 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
     }
 
-    fun dispatchOnPanelStateChanged(
+    private fun dispatchOnPanelStateChanged(
         panel: View?,
         previousState: PanelState?,
         newState: PanelState?
@@ -238,37 +252,29 @@ class BottomPanelLayout @JvmOverloads constructor(
         val rightBound = width - paddingRight
         val topBound = paddingTop
         val bottomBound = height - paddingBottom
-        val left: Int
-        val right: Int
-        val top: Int
-        val bottom: Int
-        if (mSlideableView != null && hasOpaqueBackground(
-                mSlideableView!!
-            )
-        ) {
-            left = mSlideableView!!.left
-            right = mSlideableView!!.right
-            top = mSlideableView!!.top
-            bottom = mSlideableView!!.bottom
-        } else {
-            bottom = 0
-            top = bottom
-            right = top
-            left = right
-        }
-        val child = getChildAt(0)
-        val clampedChildLeft = Math.max(leftBound, child.left)
-        val clampedChildTop = Math.max(topBound, child.top)
-        val clampedChildRight = Math.min(rightBound, child.right)
-        val clampedChildBottom = Math.min(bottomBound, child.bottom)
-        val vis: Int
-        vis =
-            if (clampedChildLeft >= left && clampedChildTop >= top && clampedChildRight <= right && clampedChildBottom <= bottom) {
+        mSlideableView?.let {
+            var left = 0
+            var right = 0
+            var top = 0
+            var bottom = 0
+            if (hasOpaqueBackground(it)) {
+                left = it.left
+                right = it.right
+                top = it.top
+                bottom = it.bottom
+            }
+            val child = getChildAt(0)
+            val clampedChildLeft = max(leftBound, child.left)
+            val clampedChildTop = max(topBound, child.top)
+            val clampedChildRight = min(rightBound, child.right)
+            val clampedChildBottom = min(bottomBound, child.bottom)
+            val vis: Int = if (clampedChildLeft >= left && clampedChildTop >= top && clampedChildRight <= right && clampedChildBottom <= bottom) {
                 INVISIBLE
             } else {
                 VISIBLE
             }
-        child.visibility = vis
+            child.visibility = vis
+        }
     }
 
     fun setAllChildrenVisible() {
@@ -336,13 +342,16 @@ class BottomPanelLayout @JvmOverloads constructor(
                 // See https://github.com/umano/AndroidSlidingUpPanel/issues/412.
                 height -= lp.topMargin
             }
-            var childWidthSpec: Int
-            childWidthSpec = if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
-                MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST)
-            } else if (lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-                MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
-            } else {
-                MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY)
+            val childWidthSpec: Int = when (lp.width) {
+                ViewGroup.LayoutParams.WRAP_CONTENT -> {
+                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST)
+                }
+                ViewGroup.LayoutParams.MATCH_PARENT -> {
+                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+                }
+                else -> {
+                    MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY)
+                }
             }
             var childHeightSpec: Int
             if (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
@@ -358,7 +367,9 @@ class BottomPanelLayout @JvmOverloads constructor(
             }
             child.measure(childWidthSpec, childHeightSpec)
             if (child === mSlideableView) {
-                mSlideRange = mSlideableView!!.measuredHeight - mPanelHeight
+                mSlideableView?.let {
+                    mSlideRange = it.measuredHeight - mPanelHeight
+                }
             }
         }
         setMeasuredDimension(widthSize, heightSize)
@@ -397,7 +408,7 @@ class BottomPanelLayout @JvmOverloads constructor(
             if (!mIsSlidingUp) {
                 if (child === mMainView && !isOverlayed) {
                     childTop =
-                        computePanelTopPosition(mSlideOffset) + mSlideableView!!.measuredHeight
+                        computePanelTopPosition(mSlideOffset) + (mSlideableView?.measuredHeight?:0)
                 }
             }
             val childBottom = childTop + childHeight
@@ -423,32 +434,34 @@ class BottomPanelLayout @JvmOverloads constructor(
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         // If the scrollable view is handling touch, never intercept
         if (mIsScrollableViewHandlingTouch || !isTouchEnabled) {
-            mDragHelper!!.abort()
+            mDragHelper?.abort()
             return false
         }
-        val action = MotionEventCompat.getActionMasked(ev)
+        val action = ev.action
         val x = ev.x
         val y = ev.y
-        val adx = Math.abs(x - mInitialMotionX)
-        val ady = Math.abs(y - mInitialMotionY)
-        val dragSlop = mDragHelper!!.touchSlop
+        val adx = abs(x - mInitialMotionX)
+        val ady = abs(y - mInitialMotionY)
+        val dragSlop = mDragHelper?.touchSlop
         when (action) {
             MotionEvent.ACTION_DOWN -> {
                 mIsUnableToDrag = false
                 mInitialMotionX = x
                 mInitialMotionY = y
                 if (!isViewUnder(mDragView, x.toInt(), y.toInt())) {
-                    mDragHelper!!.cancel()
+                    mDragHelper?.cancel()
                     mIsUnableToDrag = true
                     return false
                 }
             }
 
             MotionEvent.ACTION_MOVE -> {
-                if (ady > dragSlop && adx > ady) {
-                    mDragHelper!!.cancel()
-                    mIsUnableToDrag = true
-                    return false
+                dragSlop?.let {
+                    if (ady > it && adx > ady) {
+                        mDragHelper?.cancel()
+                        mIsUnableToDrag = true
+                        return false
+                    }
                 }
             }
 
@@ -456,31 +469,33 @@ class BottomPanelLayout @JvmOverloads constructor(
                 // If the dragView is still dragging when we get here, we need to call processTouchEvent
                 // so that the view is settled
                 // Added to make scrollable views work (tokudu)
-                if (mDragHelper!!.isDragging) {
-                    mDragHelper!!.processTouchEvent(ev)
+                if (mDragHelper?.isDragging == true) {
+                    mDragHelper?.processTouchEvent(ev)
                     return true
                 }
                 // Check if this was a click on the faded part of the screen, and fire off the listener if there is one.
-                if (ady <= dragSlop && adx <= dragSlop && mSlideOffset > 0 && !isViewUnder(
-                        mSlideableView,
-                        mInitialMotionX.toInt(),
-                        mInitialMotionY.toInt()
-                    ) && mFadeOnClickListener != null
-                ) {
-                    playSoundEffect(SoundEffectConstants.CLICK)
-                    mFadeOnClickListener!!.onClick(this)
-                    return true
+                dragSlop?.let {
+                    if (ady <= it && adx <= it && mSlideOffset > 0 && !isViewUnder(
+                            mSlideableView,
+                            mInitialMotionX.toInt(),
+                            mInitialMotionY.toInt()
+                        ) && mFadeOnClickListener != null
+                    ) {
+                        playSoundEffect(SoundEffectConstants.CLICK)
+                        mFadeOnClickListener?.onClick(this)
+                        return true
+                    }
                 }
             }
         }
-        return mDragHelper!!.shouldInterceptTouchEvent(ev)
+        return mDragHelper?.shouldInterceptTouchEvent(ev) == true
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         return if (!isEnabled || !isTouchEnabled) {
             super.onTouchEvent(ev)
         } else try {
-            mDragHelper!!.processTouchEvent(ev)
+            mDragHelper?.processTouchEvent(ev)
             true
         } catch (ex: Exception) {
             // Ignore the pointer out of range exception
@@ -489,9 +504,9 @@ class BottomPanelLayout @JvmOverloads constructor(
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        val action = MotionEventCompat.getActionMasked(ev)
+        val action = ev.action
         if (!isEnabled || !isTouchEnabled || mIsUnableToDrag && action != MotionEvent.ACTION_DOWN) {
-            mDragHelper!!.abort()
+            mDragHelper?.abort()
             return super.dispatchTouchEvent(ev)
         }
         val x = ev.x
@@ -505,7 +520,7 @@ class BottomPanelLayout @JvmOverloads constructor(
             val dy = y - mPrevMotionY
             mPrevMotionX = x
             mPrevMotionY = y
-            if (Math.abs(dx) > Math.abs(dy)) {
+            if (abs(dx) > abs(dy)) {
                 // Scrolling horizontally, so ignore
                 return super.dispatchTouchEvent(ev)
             }
@@ -556,8 +571,8 @@ class BottomPanelLayout @JvmOverloads constructor(
                 // Was the panel handling the touch previously?
                 // Then we need to rejigger things so that the
                 // child gets a proper down event.
-                if (!mIsScrollableViewHandlingTouch && mDragHelper!!.isDragging) {
-                    mDragHelper!!.cancel()
+                if (!mIsScrollableViewHandlingTouch && mDragHelper?.isDragging == true) {
+                    mDragHelper?.cancel()
                     ev.action = MotionEvent.ACTION_DOWN
                 }
                 mIsScrollableViewHandlingTouch = true
@@ -567,7 +582,7 @@ class BottomPanelLayout @JvmOverloads constructor(
             // If the scrollable view was handling the touch and we receive an up
             // we want to clear any previous dragging state so we don't intercept a touch stream accidentally
             if (mIsScrollableViewHandlingTouch) {
-                mDragHelper!!.setDragState(ViewDragHelper.STATE_IDLE)
+                mDragHelper?.setDragState(ViewDragHelper.STATE_IDLE)
             }
         }
 
@@ -590,7 +605,7 @@ class BottomPanelLayout @JvmOverloads constructor(
      * Computes the top position of the panel based on the slide offset.
      */
     private fun computePanelTopPosition(slideOffset: Float): Int {
-        val slidingViewHeight = if (mSlideableView != null) mSlideableView!!.measuredHeight else 0
+        val slidingViewHeight = mSlideableView?.measuredHeight ?: 0
         val slidePixelOffset = (slideOffset * mSlideRange).toInt()
         // Compute the top of the panel if its collapsed
         return if (mIsSlidingUp) measuredHeight - paddingBottom - mPanelHeight - slidePixelOffset else paddingTop - slidingViewHeight + mPanelHeight + slidePixelOffset
@@ -607,18 +622,10 @@ class BottomPanelLayout @JvmOverloads constructor(
         // top position
         return if (mIsSlidingUp) (topBoundCollapsed - topPosition).toFloat() / mSlideRange else (topPosition - topBoundCollapsed).toFloat() / mSlideRange
     }
-    /**
-     * Returns the current state of the panel as an enum.
-     *
-     * @return the current panel state
-     */// Abort any running animation, to allow state change
-    /**
-     * Change panel state to the given state with
-     *
-     * @param state - new panel state
-     */
-    private var panelState: PanelState? = null
+
+    private var panelState: PanelState?
         get() = mSlideState
+        set(value) {mSlideState=value}
 
     private fun setPanelStateInternal(state: PanelState) {
         if (mSlideState == state) return
@@ -627,14 +634,10 @@ class BottomPanelLayout @JvmOverloads constructor(
         dispatchOnPanelStateChanged(this, oldState, state)
     }
 
-    /**
-     * Update the parallax based on the current slide offset.
-     */
-    @SuppressLint("NewApi")
     private fun applyParallaxForCurrentSlideOffset() {
         if (mParallaxOffset > 0) {
             val mainViewOffset = currentParallaxOffset
-            ViewCompat.setTranslationY(mMainView, mainViewOffset.toFloat())
+            mMainView?.translationY = mainViewOffset.toFloat()
         }
     }
 
@@ -650,19 +653,19 @@ class BottomPanelLayout @JvmOverloads constructor(
         dispatchOnPanelSlide(mSlideableView)
         // If the slide offset is negative, and overlay is not on, we need to increase the
         // height of the main content
-        val lp = mMainView!!.layoutParams as LayoutParams
+        val lp = mMainView?.layoutParams as LayoutParams
         val defaultHeight = height - paddingBottom - paddingTop - mPanelHeight
         if (mSlideOffset <= 0 && !isOverlayed) {
             // expand the main view
             lp.height =
-                if (mIsSlidingUp) newTop - paddingBottom else height - paddingBottom - mSlideableView!!.measuredHeight - newTop
+                if (mIsSlidingUp) newTop - paddingBottom else height - paddingBottom - (mSlideableView?.measuredHeight?:0) - newTop
             if (lp.height == defaultHeight) {
                 lp.height = ViewGroup.LayoutParams.MATCH_PARENT
             }
-            mMainView!!.requestLayout()
+            mMainView?.requestLayout()
         } else if (lp.height != ViewGroup.LayoutParams.MATCH_PARENT && !isOverlayed) {
             lp.height = ViewGroup.LayoutParams.MATCH_PARENT
-            mMainView!!.requestLayout()
+            mMainView?.requestLayout()
         }
     }
 
@@ -674,10 +677,12 @@ class BottomPanelLayout @JvmOverloads constructor(
             // Unless the panel is set to overlay content
             canvas.getClipBounds(mTmpRect)
             if (!isOverlayed) {
-                if (mIsSlidingUp) {
-                    mTmpRect.bottom = Math.min(mTmpRect.bottom, mSlideableView!!.top)
-                } else {
-                    mTmpRect.top = Math.max(mTmpRect.top, mSlideableView!!.bottom)
+                mSlideableView?.let {
+                    if (mIsSlidingUp) {
+                        mTmpRect.bottom = min(mTmpRect.bottom, it.top)
+                    } else {
+                        mTmpRect.top = max(mTmpRect.top, it.bottom)
+                    }
                 }
             }
             if (isClipPanel) {
@@ -698,26 +703,6 @@ class BottomPanelLayout @JvmOverloads constructor(
         return result
     }
 
-    /**
-     * Smoothly animate mDraggingPane to the target X position within its range.
-     *
-     * @param slideOffset position to animate to
-     * @param velocity    initial velocity in case of fling, or 0.
-     */
-    fun smoothSlideTo(slideOffset: Float, velocity: Int): Boolean {
-        if (!isEnabled || mSlideableView == null) {
-            // Nothing to do.
-            return false
-        }
-        val panelTop = computePanelTopPosition(slideOffset)
-        if (mDragHelper!!.smoothSlideViewTo(mSlideableView, mSlideableView!!.left, panelTop)) {
-            setAllChildrenVisible()
-            ViewCompat.postInvalidateOnAnimation(this)
-            return true
-        }
-        return false
-    }
-
     override fun computeScroll() {
         if (mDragHelper != null && mDragHelper?.continueSettling(true) == true) {
             if (!isEnabled) {
@@ -731,55 +716,24 @@ class BottomPanelLayout @JvmOverloads constructor(
     override fun draw(c: Canvas) {
         super.draw(c)
 
-        // draw the shadow
-        if (mShadowDrawable != null && mSlideableView != null) {
-            val right = mSlideableView!!.right
-            val top: Int
-            val bottom: Int
-            if (mIsSlidingUp) {
-                top = mSlideableView!!.top - mShadowHeight
-                bottom = mSlideableView!!.top
-            } else {
-                top = mSlideableView!!.bottom
-                bottom = mSlideableView!!.bottom + mShadowHeight
-            }
-            val left = mSlideableView!!.left
-            mShadowDrawable?.setBounds(left, top, right, bottom)
-            mShadowDrawable?.draw(c)
-        }
-    }
-
-    /**
-     * Tests scrollability within child views of v given a delta of dx.
-     *
-     * @param v      View to test for horizontal scrollability
-     * @param checkV Whether the view v passed should itself be checked for scrollability (true),
-     * or just its children (false).
-     * @param dx     Delta scrolled in pixels
-     * @param x      X coordinate of the active touch point
-     * @param y      Y coordinate of the active touch point
-     * @return true if child views of v can be scrolled by delta of dx.
-     */
-    protected fun canScroll(v: View, checkV: Boolean, dx: Int, x: Int, y: Int): Boolean {
-        if (v is ViewGroup) {
-            val group = v
-            val scrollX = v.getScrollX()
-            val scrollY = v.getScrollY()
-            val count = group.childCount
-            // Count backwards - let topmost views consume scroll distance first.
-            for (i in count - 1 downTo 0) {
-                val child = group.getChildAt(i)
-                if (x + scrollX >= child.left && x + scrollX < child.right && y + scrollY >= child.top && y + scrollY < child.bottom &&
-                    canScroll(
-                        child, true, dx, x + scrollX - child.left,
-                        y + scrollY - child.top
-                    )
-                ) {
-                    return true
+        mSlideableView?.let {
+            // draw the shadow
+            if (mShadowDrawable != null) {
+                val right = it.right
+                val top: Int
+                val bottom: Int
+                if (mIsSlidingUp) {
+                    top = it.top - mShadowHeight
+                    bottom = it.top
+                } else {
+                    top = it.bottom
+                    bottom = it.bottom + mShadowHeight
                 }
+                val left = it.left
+                mShadowDrawable?.setBounds(left, top, right, bottom)
+                mShadowDrawable?.draw(c)
             }
         }
-        return checkV && ViewCompat.canScrollHorizontally(v, -dx)
     }
 
     override fun generateDefaultLayoutParams(): ViewGroup.LayoutParams {
@@ -809,14 +763,14 @@ class BottomPanelLayout @JvmOverloads constructor(
     }
 
     public override fun onRestoreInstanceState(state: Parcelable) {
-        var state: Parcelable? = state
-        if (state is Bundle) {
-            val bundle = state
+        var newState: Parcelable? = state
+        if (newState is Bundle) {
+            val bundle = newState
             mSlideState = bundle.getSerializable(SLIDING_STATE) as PanelState?
             mSlideState = if (mSlideState == null) DEFAULT_SLIDE_STATE else mSlideState
-            state = bundle.getParcelable("superState")
+            newState = bundle.getParcelable("superState")
         }
-        super.onRestoreInstanceState(state)
+        super.onRestoreInstanceState(newState)
     }
 
     private inner class DragHelperCallback : ViewDragHelper.Callback() {
@@ -826,19 +780,21 @@ class BottomPanelLayout @JvmOverloads constructor(
 
         override fun onViewDragStateChanged(state: Int) {
             if (mDragHelper != null && mDragHelper?.viewDragState == ViewDragHelper.STATE_IDLE) {
-                mSlideOffset = computeSlideOffset(mSlideableView!!.top)
-                applyParallaxForCurrentSlideOffset()
-                if (mSlideOffset == 1f) {
-                    updateObscuredViewVisibility()
-                    setPanelStateInternal(PanelState.EXPANDED)
-                } else if (mSlideOffset == 0f) {
-                    setPanelStateInternal(PanelState.COLLAPSED)
-                } else if (mSlideOffset < 0) {
-                    setPanelStateInternal(PanelState.HIDDEN)
-                    mSlideableView!!.visibility = INVISIBLE
-                } else {
-                    updateObscuredViewVisibility()
-                    setPanelStateInternal(PanelState.ANCHORED)
+                mSlideableView?.let {
+                    mSlideOffset = computeSlideOffset(it.top)
+                    applyParallaxForCurrentSlideOffset()
+                    if (mSlideOffset == 1f) {
+                        updateObscuredViewVisibility()
+                        setPanelStateInternal(PanelState.EXPANDED)
+                    } else if (mSlideOffset == 0f) {
+                        setPanelStateInternal(PanelState.COLLAPSED)
+                    } else if (mSlideOffset < 0) {
+                        setPanelStateInternal(PanelState.HIDDEN)
+                        it.visibility = INVISIBLE
+                    } else {
+                        updateObscuredViewVisibility()
+                        setPanelStateInternal(PanelState.ANCHORED)
+                    }
                 }
             }
         }
@@ -859,11 +815,9 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
 
         override fun onViewReleased(releasedChild: View?, xvel: Float, yvel: Float) {
-            var target = 0
-
             // direction is always positive if we are sliding in the expanded direction
             val direction = if (mIsSlidingUp) -yvel else yvel
-            target = if (direction > 0 && mSlideOffset <= mAnchorPoint) {
+            val target = if (direction > 0 && mSlideOffset <= mAnchorPoint) {
                 // swipe up -> expand and stop at anchor point
                 computePanelTopPosition(mAnchorPoint)
             } else if (direction > 0 && mSlideOffset > mAnchorPoint) {
@@ -886,7 +840,7 @@ class BottomPanelLayout @JvmOverloads constructor(
                 computePanelTopPosition(0.0f)
             }
             if (mDragHelper != null) {
-                mDragHelper?.settleCapturedViewAt(releasedChild!!.left, target)
+                releasedChild?.left?.let { mDragHelper?.settleCapturedViewAt(it, target) }
             }
             invalidate()
         }
@@ -899,9 +853,9 @@ class BottomPanelLayout @JvmOverloads constructor(
             val collapsedTop = computePanelTopPosition(0f)
             val expandedTop = computePanelTopPosition(1.0f)
             return if (mIsSlidingUp) {
-                Math.min(Math.max(top, expandedTop), collapsedTop)
+                min(max(top, expandedTop), collapsedTop)
             } else {
-                Math.min(Math.max(top, collapsedTop), expandedTop)
+                min(max(top, collapsedTop), expandedTop)
             }
         }
     }
@@ -910,20 +864,13 @@ class BottomPanelLayout @JvmOverloads constructor(
         var weight = 0f
 
         constructor() : super(MATCH_PARENT, MATCH_PARENT)
-        constructor(width: Int, height: Int) : super(width, height)
-        constructor(width: Int, height: Int, weight: Float) : super(width, height) {
-            this.weight = weight
-        }
 
         constructor(source: ViewGroup.LayoutParams?) : super(source)
         constructor(source: MarginLayoutParams?) : super(source)
-        constructor(source: LayoutParams?) : super(source)
         constructor(c: Context, attrs: AttributeSet?) : super(c, attrs) {
             val ta = c.obtainStyledAttributes(attrs, ATTRS)
-            if (ta != null) {
-                weight = ta.getFloat(0, 0f)
-                ta.recycle()
-            }
+            weight = ta.getFloat(0, 0f)
+            ta.recycle()
         }
 
         companion object {
@@ -934,17 +881,10 @@ class BottomPanelLayout @JvmOverloads constructor(
     }
 
     companion object {
-        private val TAG = BottomPanelLayout::class.java.simpleName
-
         /**
          * Default peeking out panel height
          */
         const val DEFAULT_PANEL_HEIGHT = 68 // dp;
-
-        /**
-         * Default anchor point height
-         */
-        private const val DEFAULT_ANCHOR_POINT = 1.0f // In relative %
 
         /**
          * Default initial state for the component

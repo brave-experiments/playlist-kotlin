@@ -20,6 +20,8 @@ import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
+import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.brave.playlist.local_database.PlaylistRepository
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.util.ConstantUtils
@@ -35,7 +37,6 @@ import com.brave.playlist.util.PlaylistPreferenceUtils.continuousListening
 import com.brave.playlist.util.PlaylistPreferenceUtils.rememberFilePlaybackPosition
 import com.brave.playlist.util.PlaylistPreferenceUtils.rememberListPlaybackPosition
 import com.brave.playlist.util.PlaylistPreferenceUtils.setLatestPlaylistItem
-import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.util.PlaylistUtils.createNotificationChannel
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -84,6 +85,9 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private val mPlaylistRepository: PlaylistRepository by lazy {
         PlaylistRepository(applicationContext)
     }
+    private val mPlaylistViewModel: PlaylistViewModel by lazy {
+        ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(PlaylistViewModel::class.java)
+    }
     private val mSavePositionRunnableCode: Runnable = object : Runnable {
         override fun run() {
             if (mCurrentPlayer?.isPlaying == true) {
@@ -123,6 +127,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     override fun onCreate() {
         super.onCreate()
+
         createNotificationChannel(applicationContext)
         mCurrentItemIndex = C.INDEX_UNSET
         val loadControl = DefaultLoadControl.Builder()
@@ -190,13 +195,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             }
 
             override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                return PendingIntent.getActivity(
-                    applicationContext,
-                    0,
-                    getMediaItemFromPosition(player.currentMediaItemIndex)
-                        ?.let { PlaylistUtils.playlistNotificationIntent(applicationContext, it) },
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                )
+//                return PendingIntent.getActivity(
+//                    applicationContext,
+//                    0,
+//                    getMediaItemFromPosition(player.currentMediaItemIndex)
+//                        ?.let { PlaylistUtils.playlistNotificationIntent(applicationContext, it) },
+//                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+//                )
+                return null
             }
 
             override fun getCurrentContentText(player: Player): CharSequence {
@@ -242,7 +248,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 //                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
                 .setUri(mediaModel.mediaSrc)
                 .setMediaMetadata(movieMetadata)
-//                .setMimeType(MimeTypes.VIDEO_MP4)
+                .setMimeType(MimeTypes.VIDEO_MP4)
                 .build()
             mMediaQueue.add(mediaItem)
             mCastMediaQueue.add(castMediaItem)
@@ -296,6 +302,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                     .setMimeType(MimeTypes.APPLICATION_M3U8)
                     .build()
                 mMediaQueue[mCurrentPlayer?.currentMediaItemIndex?:0] = mediaItem
+                mCastMediaQueue[mCurrentPlayer?.currentMediaItemIndex?:0] = mediaItem
                 Log.e(TAG, "onPlayerError : setCurrentPlayer")
                 setCurrentPlayer(if (mCastPlayer?.isCastSessionAvailable == true) mCastPlayer else mLocalPlayer)
             }
@@ -373,9 +380,10 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     private fun sendCastStatusBroadcast(shouldShowControls: Boolean) {
         val intent = Intent()
-        intent.action = CAST_ACTION
-        intent.putExtra(SHOULD_SHOW_CONTROLS, shouldShowControls)
-        sendBroadcast(intent)
+        intent.action = packageName+CAST_ACTION
+        intent.putExtra(packageName+ SHOULD_SHOW_CONTROLS, shouldShowControls)
+        intent.setPackage(packageName)
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
 
     private fun sendCurrentPlayingItemBroadcast() {
@@ -389,7 +397,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
             val intent = Intent()
             intent.action = CURRENT_PLAYING_ITEM_ACTION
             intent.putExtra(CURRENT_PLAYING_ITEM_ID, currentPlayingItemId)
-            sendBroadcast(intent)
+            intent.setPackage(packageName)
+            LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
         }
         CURRENTLY_PLAYED_ITEM_ID = currentPlayingItemId
         Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())

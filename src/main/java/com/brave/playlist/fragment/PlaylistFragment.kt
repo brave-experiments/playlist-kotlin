@@ -17,7 +17,11 @@ import android.text.TextUtils
 import android.text.format.Formatter
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
@@ -25,6 +29,7 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistDownloadUtils
@@ -34,16 +39,29 @@ import com.brave.playlist.R
 import com.brave.playlist.adapter.recyclerview.PlaylistItemAdapter
 import com.brave.playlist.enums.PlaylistOptionsEnum
 import com.brave.playlist.extension.afterMeasured
-import com.brave.playlist.listener.*
-import com.brave.playlist.model.*
-import com.brave.playlist.util.*
+import com.brave.playlist.listener.ItemInteractionListener
+import com.brave.playlist.listener.PlaylistItemClickListener
+import com.brave.playlist.listener.PlaylistItemOptionsListener
+import com.brave.playlist.listener.PlaylistOptionsListener
+import com.brave.playlist.listener.StartDragListener
+import com.brave.playlist.model.MoveOrCopyModel
+import com.brave.playlist.model.PlaylistItemModel
+import com.brave.playlist.model.PlaylistItemOptionModel
+import com.brave.playlist.model.PlaylistModel
+import com.brave.playlist.model.PlaylistOptionsModel
+import com.brave.playlist.util.ConnectionUtils
 import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ACTION
 import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ID
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.ConstantUtils.TAG
+import com.brave.playlist.util.MediaUtils
+import com.brave.playlist.util.MenuUtils
+import com.brave.playlist.util.PlaylistItemGestureHelper
+import com.brave.playlist.util.PlaylistPreferenceUtils
 import com.brave.playlist.util.PlaylistPreferenceUtils.getLatestPlaylistItem
 import com.brave.playlist.util.PlaylistPreferenceUtils.recentlyPlayedPlaylist
 import com.brave.playlist.util.PlaylistPreferenceUtils.rememberListPlaybackPosition
+import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
 import com.bumptech.glide.Glide
 import com.google.gson.GsonBuilder
@@ -53,7 +71,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.util.*
+import java.util.LinkedList
 
 class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
     StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
@@ -96,7 +114,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(CURRENT_PLAYING_ITEM_ACTION)
-        activity?.registerReceiver(broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(broadcastReceiver, intentFilter)
 
         mEmptyView = view.findViewById(R.id.empty_view)
         mPlaylistView = view.findViewById(R.id.playlist_view)
@@ -178,7 +196,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 requireActivity().finish()
             }
 
-            playlistData.items.forEach {playlistItemModel ->
+            playlistData.items.forEach { playlistItemModel ->
                 PlaylistDownloadUtils.startDownloadRequest(requireContext(), playlistItemModel)
             }
 
@@ -302,10 +320,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                                 mPlaylistItemAdapter?.updatePlayingStatus(
                                     it
                                 )
-                                if (!arguments?.getString(CURRENT_PLAYING_ITEM_ID).isNullOrEmpty() && mPlaylistModel.items.isNotEmpty()) {
+                                if (!arguments?.getString(CURRENT_PLAYING_ITEM_ID)
+                                        .isNullOrEmpty() && mPlaylistModel.items.isNotEmpty()
+                                ) {
                                     mPlaylistModel.items.forEach { item ->
                                         if (item.id == arguments?.getString(CURRENT_PLAYING_ITEM_ID)) {
-                                            Log.e(TAG, item.id + " : "+item.name )
+                                            Log.e(TAG, item.id + " : " + item.name)
                                             openPlaylistPlayer(item)
                                             arguments?.putString(CURRENT_PLAYING_ITEM_ID, "")
                                             return@forEach
@@ -332,10 +352,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     }
 
     override fun onDestroyView() {
-        activity?.unregisterReceiver(broadcastReceiver)
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadcastReceiver)
         super.onDestroyView()
     }
-
     override fun onItemDelete(position: Int) {
         val selectedPlaylistItem = mPlaylistItemAdapter?.getPlaylistItems()?.get(position)
         selectedPlaylistItem?.let {
@@ -407,7 +426,10 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             return
         }
 
-        if (!selectedPlaylistItemModel.isCached && PlaylistUtils.isMediaSourceExpired(selectedPlaylistItemModel.mediaSrc)) {
+        if (!selectedPlaylistItemModel.isCached && PlaylistUtils.isMediaSourceExpired(
+                selectedPlaylistItemModel.mediaSrc
+            )
+        ) {
             Toast.makeText(
                 requireContext(),
                 getString(R.string.playlist_item_expired_message),
@@ -460,8 +482,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
             }
 
             PlaylistOptionsEnum.MOVE_PLAYLIST_ITEMS, PlaylistOptionsEnum.COPY_PLAYLIST_ITEMS -> {
-                 mPlaylistItemAdapter?.getSelectedItems()?.let {
-                     PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
+                mPlaylistItemAdapter?.getSelectedItems()?.let {
+                    PlaylistUtils.moveOrCopyModel = MoveOrCopyModel(
                         playlistOptionsModel.optionType,
                         "",
                         it

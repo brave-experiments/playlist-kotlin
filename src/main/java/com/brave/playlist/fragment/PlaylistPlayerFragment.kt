@@ -33,6 +33,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.mediarouter.app.MediaRouteButton
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
@@ -245,9 +246,9 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             mSelectedPlaylistItemId = it.getString(SELECTED_PLAYLIST_ITEM_ID).toString()
         }
         val intentFilter = IntentFilter()
-        intentFilter.addAction(CAST_ACTION)
+        intentFilter.addAction(activity?.packageName +CAST_ACTION)
         intentFilter.addAction(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)
-        activity?.registerReceiver(broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(broadcastReceiver, intentFilter)
     }
 
     override fun onDestroy() {
@@ -436,7 +437,7 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onDestroyView() {
         releasePlayer()
-        activity?.unregisterReceiver(broadcastReceiver)
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadcastReceiver)
         mMainLayout.removePanelSlideListener(this)
         super.onDestroyView()
     }
@@ -779,8 +780,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
-            if (action.equals(CAST_ACTION)) {
-                val shouldShowControls = intent.getBooleanExtra(SHOULD_SHOW_CONTROLS, true)
+            if (action.equals(activity?.packageName+ CAST_ACTION)) {
+                val shouldShowControls = intent.getBooleanExtra(activity?.packageName+ SHOULD_SHOW_CONTROLS, true)
                 mIsCastInProgress = !shouldShowControls
                 mLayoutVideoControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
             } else if (action.equals(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)) {
