@@ -86,7 +86,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         PlaylistRepository(applicationContext)
     }
     private val mPlaylistViewModel: PlaylistViewModel by lazy {
-        ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(PlaylistViewModel::class.java)
+        ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+            .create(PlaylistViewModel::class.java)
     }
     private val mSavePositionRunnableCode: Runnable = object : Runnable {
         override fun run() {
@@ -231,8 +232,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         }).setSmallIconResourceId(R.drawable.ic_playing_sound)
             .build()
 
-        Log.e(TAG, "playlistItemsModel?.size : "+mPlaylistItemsModel?.size.toString())
-        Log.e(TAG, "playlistItemsModel : "+mPlaylistItemsModel.toString())
+        Log.e(TAG, "playlistItemsModel?.size : " + mPlaylistItemsModel?.size.toString())
+        Log.e(TAG, "playlistItemsModel : " + mPlaylistItemsModel.toString())
         mMediaQueue.clear()
         mCastMediaQueue.clear()
         mPlaylistItemsModel?.forEach { mediaModel ->
@@ -243,7 +244,10 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                 .setUri(Uri.parse(if (mediaModel.isCached) mediaModel.mediaPath else mediaModel.mediaSrc))
                 .setMediaMetadata(movieMetadata)
                 .build()
-            val mediaItem : MediaItem = PlaylistDownloadUtils.getMediaItemFromDownloadRequest(applicationContext, mediaModel)?: onlineMediaItem
+            val mediaItem: MediaItem = PlaylistDownloadUtils.getMediaItemFromDownloadRequest(
+                applicationContext,
+                mediaModel
+            ) ?: onlineMediaItem
             val castMediaItem = MediaItem.Builder()
 //                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
                 .setUri(mediaModel.mediaSrc)
@@ -289,11 +293,12 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     override fun onPlayerError(error: PlaybackException) {
         super.onPlayerError(error)
-        when(error.errorCode) {
+        when (error.errorCode) {
             PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED -> {
                 val currentPlaylistItemModel = getCurrentPlayingItem()
                 val movieMetadata: MediaMetadata =
-                    MediaMetadata.Builder().setTitle(currentPlaylistItemModel?.name).setArtist(currentPlaylistItemModel?.author)
+                    MediaMetadata.Builder().setTitle(currentPlaylistItemModel?.name)
+                        .setArtist(currentPlaylistItemModel?.author)
                         .setArtworkUri(Uri.parse(currentPlaylistItemModel?.thumbnailPath)).build()
                 val mediaItem = MediaItem.Builder()
 //                .setUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
@@ -301,18 +306,19 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
                     .setMediaMetadata(movieMetadata)
                     .setMimeType(MimeTypes.APPLICATION_M3U8)
                     .build()
-                mMediaQueue[mCurrentPlayer?.currentMediaItemIndex?:0] = mediaItem
-                mCastMediaQueue[mCurrentPlayer?.currentMediaItemIndex?:0] = mediaItem
+                mMediaQueue[mCurrentPlayer?.currentMediaItemIndex ?: 0] = mediaItem
+                mCastMediaQueue[mCurrentPlayer?.currentMediaItemIndex ?: 0] = mediaItem
                 Log.e(TAG, "onPlayerError : setCurrentPlayer")
                 setCurrentPlayer(if (mCastPlayer?.isCastSessionAvailable == true) mCastPlayer else mLocalPlayer)
             }
+
             else -> {
                 if (mCurrentPlayer?.hasNextMediaItem() == true) {
                     mCurrentPlayer?.nextMediaItemIndex?.let { setCurrentItem(it) }
                 }
             }
         }
-        Log.e(TAG, "onPlayerError : "+ error.message.toString())
+        Log.e(TAG, "onPlayerError : " + error.message.toString())
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -380,8 +386,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
 
     private fun sendCastStatusBroadcast(shouldShowControls: Boolean) {
         val intent = Intent()
-        intent.action = packageName+CAST_ACTION
-        intent.putExtra(packageName+ SHOULD_SHOW_CONTROLS, shouldShowControls)
+        intent.action = packageName + CAST_ACTION
+        intent.putExtra(packageName + SHOULD_SHOW_CONTROLS, shouldShowControls)
         intent.setPackage(packageName)
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
@@ -404,7 +410,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         Log.e("CURRENTLY_PLAYED_ITEM_ID", CURRENTLY_PLAYED_ITEM_ID.toString())
     }
 
-    private fun getMediaItemFromPosition(position: Int) : PlaylistItemModel? {
+    private fun getMediaItemFromPosition(position: Int): PlaylistItemModel? {
 //        if ((playlistItemsModel?.size ?: 0) >= position) {
 //            return null
 //        }
@@ -415,7 +421,8 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
     private fun updateCurrentItemIndex() {
         val playbackState = mCurrentPlayer?.playbackState
         maybeSetCurrentItemAndNotify(
-            if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) mCurrentPlayer?.currentMediaItemIndex?:C.INDEX_UNSET else C.INDEX_UNSET
+            if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) mCurrentPlayer?.currentMediaItemIndex
+                ?: C.INDEX_UNSET else C.INDEX_UNSET
         )
     }
 
@@ -469,14 +476,14 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         }
         this.mCurrentPlayer = currentPlayer
 
-        Log.e(TAG, "before currentPlayer?.mediaItemCount : "+ currentPlayer?.mediaItemCount)
+        Log.e(TAG, "before currentPlayer?.mediaItemCount : " + currentPlayer?.mediaItemCount)
         // Media queue management.
         if (currentPlayer === mCastPlayer) {
             currentPlayer?.setMediaItems(mCastMediaQueue, currentItemIndex, playbackPositionMs)
         } else {
             currentPlayer?.setMediaItems(mMediaQueue, currentItemIndex, playbackPositionMs)
         }
-        Log.e(TAG, "after currentPlayer?.mediaItemCount : "+ currentPlayer?.mediaItemCount)
+        Log.e(TAG, "after currentPlayer?.mediaItemCount : " + currentPlayer?.mediaItemCount)
         currentPlayer?.playWhenReady = playWhenReady
         currentPlayer?.prepare()
         currentPlayer?.play()
@@ -503,7 +510,7 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         if (this.mCurrentItemIndex != currentItemIndex) {
             this.mCurrentItemIndex = currentItemIndex
             CURRENTLY_PLAYED_ITEM_ID = getCurrentPlayingItem()?.id
-            Log.e(TAG,"CURRENTLY_PLAYED_ITEM_ID: "+ CURRENTLY_PLAYED_ITEM_ID.toString())
+            Log.e(TAG, "CURRENTLY_PLAYED_ITEM_ID: " + CURRENTLY_PLAYED_ITEM_ID.toString())
         }
     }
 }

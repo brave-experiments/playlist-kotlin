@@ -36,7 +36,7 @@ fun View.showOnboardingGradientBg() {
         Color.parseColor("#9D159E"),
         Color.parseColor("#CA0C7F"),
     )
-    val colorPositions= floatArrayOf(0.0142f,0.1414f,0.3206f, 0.4944f, 0.6556f, 0.8442f, 1f)
+    val colorPositions = floatArrayOf(0.0142f, 0.1414f, 0.3206f, 0.4944f, 0.6556f, 0.8442f, 1f)
 
     // apply gradient from left to right of the rectangle along X axis , from top to bottom along Y axis
     val paintShader = LinearGradient(
@@ -50,6 +50,6 @@ fun View.showOnboardingGradientBg() {
     )
 
     val shapeDrawable = ShapeDrawable(RectShape())
-    shapeDrawable.paint.shader =paintShader
+    shapeDrawable.paint.shader = paintShader
     this.background = shapeDrawable
 }

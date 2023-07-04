@@ -71,7 +71,11 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
                     )
                     activity?.onBackPressedDispatcher?.onBackPressed()
                 } else {
-                    Toast.makeText(requireContext(), R.string.playlist_empty_playlist_name, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.playlist_empty_playlist_name,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } else {
                 if (!mEtPlaylistName.text.isNullOrEmpty()) {
@@ -83,7 +87,11 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
                     )
                     activity?.onBackPressedDispatcher?.onBackPressed()
                 } else {
-                    Toast.makeText(requireContext(), R.string.playlist_empty_playlist_name, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.playlist_empty_playlist_name,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }

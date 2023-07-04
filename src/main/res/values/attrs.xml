@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2023 The Brave Authors. All rights reserved.
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -20,22 +19,13 @@
     </declare-styleable>
     <declare-styleable name="BottomPanelLayout">
         <attr name="panelHeight" format="dimension" />
-<!--        <attr name="umanoShadowHeight" format="dimension" />-->
-<!--        <attr name="umanoParallaxOffset" format="dimension" />-->
-<!--        <attr name="umanoFadeColor" format="color" />-->
-<!--        <attr name="umanoFlingVelocity" format="integer" />-->
-<!--        <attr name="umanoDragView" format="reference" />-->
         <attr name="scrollableView" format="reference" />
-<!--        <attr name="umanoOverlay" format="boolean"/>-->
-<!--        <attr name="umanoClipPanel" format="boolean"/>-->
-<!--        <attr name="umanoAnchorPoint" format="float" />-->
         <attr name="initialState" format="enum">
             <enum name="expanded" value="0" />
             <enum name="collapsed" value="1" />
             <enum name="anchored" value="2" />
             <enum name="hidden" value="3" />
         </attr>
-<!--        <attr name="umanoScrollInterpolator" format="reference" />-->
     </declare-styleable>
     <bool name="isTablet">false</bool>
 </resources>

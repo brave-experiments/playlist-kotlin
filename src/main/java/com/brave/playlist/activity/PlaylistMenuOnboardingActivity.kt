@@ -18,7 +18,6 @@ import com.brave.playlist.extension.afterMeasured
 import com.brave.playlist.extension.showOnboardingGradientBg
 import com.brave.playlist.util.ConstantUtils
 import com.brave.playlist.util.PlaylistUtils
-import com.brave.playlist.util.PlaylistViewUtils
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
@@ -40,7 +39,7 @@ class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboa
         val nextButton: AppCompatButton = findViewById(R.id.btNextOnboarding)
         nextButton.setOnClickListener {
             if (playlistOnboardingViewPager.currentItem == 2) {
-                PlaylistUtils.openBraveActivityWithUrl(this,ConstantUtils.PLAYLIST_FEATURE_YT_URL)
+                PlaylistUtils.openBraveActivityWithUrl(this, ConstantUtils.PLAYLIST_FEATURE_YT_URL)
             } else {
                 playlistOnboardingViewPager.currentItem =
                     playlistOnboardingViewPager.currentItem + 1
@@ -51,7 +50,8 @@ class PlaylistMenuOnboardingActivity : AppCompatActivity(R.layout.playlist_onboa
             ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                nextButton.text = if (position ==2) getString(R.string.playlist_try_it) else getString(R.string.playlist_next)
+                nextButton.text =
+                    if (position == 2) getString(R.string.playlist_try_it) else getString(R.string.playlist_next)
                 adapter.notifyItemChanged(position)
             }
         })

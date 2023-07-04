@@ -114,7 +114,8 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(CURRENT_PLAYING_ITEM_ACTION)
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(broadcastReceiver, intentFilter)
 
         mEmptyView = view.findViewById(R.id.empty_view)
         mPlaylistView = view.findViewById(R.id.playlist_view)
@@ -355,6 +356,7 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadcastReceiver)
         super.onDestroyView()
     }
+
     override fun onItemDelete(position: Int) {
         val selectedPlaylistItem = mPlaylistItemAdapter?.getPlaylistItems()?.get(position)
         selectedPlaylistItem?.let {

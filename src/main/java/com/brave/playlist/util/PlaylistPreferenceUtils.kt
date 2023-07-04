@@ -53,9 +53,9 @@ object PlaylistPreferenceUtils {
             }
         }
 
-    fun SharedPreferences.getLatestPlaylistItem(key : String) : String? = getString(key, "")
+    fun SharedPreferences.getLatestPlaylistItem(key: String): String? = getString(key, "")
 
-    fun SharedPreferences.setLatestPlaylistItem(key :String, value: String) {
+    fun SharedPreferences.setLatestPlaylistItem(key: String, value: String) {
         edit {
             it.putString(key, value)
         }

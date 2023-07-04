@@ -20,16 +20,22 @@ class ScrollableViewHelper {
             if (isSlidingUp) {
                 val firstChild: View = rv.getChildAt(0)
                 // Approximate the scroll position based on the top child and the first visible item
-                rv.getChildLayoutPosition(firstChild) * lm!!.getDecoratedMeasuredHeight(firstChild) - lm.getDecoratedTop(
-                    firstChild
-                )
+                lm?.let {
+                    rv.getChildLayoutPosition(firstChild) * it.getDecoratedMeasuredHeight(firstChild) - it.getDecoratedTop(
+                        firstChild
+                    )
+                } ?: 0
             } else {
                 val lastChild: View = rv.getChildAt(rv.childCount - 1)
                 // Approximate the scroll position based on the bottom child and the last visible item
-                (rv.adapter!!
-                    .itemCount - 1) * lm!!.getDecoratedMeasuredHeight(lastChild) + lm.getDecoratedBottom(
-                    lastChild
-                ) - rv.bottom
+                lm?.let {
+                    if ((rv.adapter?.itemCount ?: 0) > 0) {
+                        ((rv.adapter?.itemCount
+                            ?: 0) - 1) * it.getDecoratedMeasuredHeight(lastChild) + it.getDecoratedBottom(
+                            lastChild
+                        ) - rv.bottom
+                    } else 0
+                } ?: 0
             }
         } else {
             0

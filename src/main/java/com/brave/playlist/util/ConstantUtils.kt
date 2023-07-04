@@ -27,7 +27,7 @@ object ConstantUtils {
     const val CURRENT_PLAYING_ITEM_ACTION = "current_playing_item_action"
     const val CURRENT_PLAYING_ITEM_ID = "current_playing_item_id"
 
-    const val OPEN_URL ="open_url"
+    const val OPEN_URL = "open_url"
     const val PLAYLIST_ACTION = "playlist"
     const val CURRENT_PLAYLIST_ID = "current_playlist_id"
     const val PLAYLIST_FEATURE_YT_URL = "https://youtu.be/dL0Aw6QGTwY"

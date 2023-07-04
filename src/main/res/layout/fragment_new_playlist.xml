@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2023 The Brave Authors. All rights reserved.
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -10,19 +9,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:background="?android:windowBackground"
     android:clipToPadding="false"
-    android:background="?android:windowBackground">
+    android:fitsSystemWindows="true">
 
     <com.brave.playlist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/playlist_toolbar_height"
         app:actionButtonText="@string/playlist_create_toolbar_text"
+        app:backButtonTint="@color/playlist_text_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:backButtonTint="@color/playlist_text_color"
         app:showActionButton="true" />
 
     <androidx.constraintlayout.widget.Guideline

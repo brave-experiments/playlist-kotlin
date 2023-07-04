@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2023 The Brave Authors. All rights reserved.
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -11,10 +10,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/ic_media_player_bg"
-    android:fitsSystemWindows="true"
     android:clipToPadding="false"
-    android:orientation="vertical"
-    android:keepScreenOn="true">
+    android:fitsSystemWindows="true"
+    android:keepScreenOn="true"
+    android:orientation="vertical">
 
     <com.brave.playlist.view.PlaylistToolbar
         android:id="@+id/playlistToolbar"
@@ -72,16 +71,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:visibility="gone"
                         android:foreground="?attr/selectableItemBackground"
+                        android:visibility="gone"
                         app:srcCompat="@drawable/ic_back_toolbar_playlist" />
 
                     <View
                         android:id="@+id/empty_view"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
-                        android:visibility="gone"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        android:visibility="gone" />
 
                     <androidx.mediarouter.app.MediaRouteButton
                         android:id="@+id/media_route_button"
@@ -96,8 +95,8 @@
                         android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:layout_marginEnd="32dp"
-                        android:visibility="gone"
                         android:foreground="?attr/selectableItemBackground"
+                        android:visibility="gone"
                         app:srcCompat="@drawable/ic_picture_in_picture" />
 
                     <androidx.appcompat.widget.AppCompatImageView
@@ -114,9 +113,9 @@
                     android:id="@+id/videoPlayerLoading"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:indeterminate="false"
                     android:layout_gravity="center"
-                    android:visibility="visible"/>
+                    android:indeterminate="false"
+                    android:visibility="visible" />
 
             </FrameLayout>
 
@@ -124,19 +123,19 @@
                 android:id="@+id/layoutVideoControls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:clipToPadding="false"
-                android:paddingHorizontal="32dp">
+                android:paddingHorizontal="32dp"
+                android:visibility="gone">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvVideoSource"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:drawableStart="@drawable/ic_play_filled"
                     android:drawablePadding="5dp"
                     android:textColor="@color/media_stats_color"
                     android:textSize="12sp"
-                    android:layout_marginTop="8dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -145,10 +144,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     android:textColor="@android:color/white"
                     android:textSize="16sp"
-                    android:maxLines="2"
-                    android:ellipsize="end"
                     app:layout_constraintEnd_toStartOf="@id/ivVideoOptions"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvVideoSource" />

@@ -23,7 +23,7 @@ import com.brave.playlist.model.MoveOrCopyModel
 import com.brave.playlist.model.PlaylistItemModel
 import com.brave.playlist.model.PlaylistOnboardingModel
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_CHANNEL_ID
-import java.util.*
+import java.util.Date
 
 
 object PlaylistUtils {
@@ -59,20 +59,31 @@ object PlaylistUtils {
         intent.action = Intent.ACTION_SEND
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_TEXT, text)
-        context.startActivity(Intent.createChooser(intent, context.resources.getString(R.string.playlist_share_with)))
+        context.startActivity(
+            Intent.createChooser(
+                intent,
+                context.resources.getString(R.string.playlist_share_with)
+            )
+        )
     }
 
-    fun playlistNotificationIntent(context: Context, playlistItemModel: PlaylistItemModel): Intent? {
+    fun playlistNotificationIntent(
+        context: Context,
+        playlistItemModel: PlaylistItemModel
+    ): Intent? {
         return try {
-            val intent = Intent(context,Class.forName("org.chromium.chrome.browser.playlist.PlaylistHostActivity"))
+            val intent = Intent(
+                context,
+                Class.forName("org.chromium.chrome.browser.playlist.PlaylistHostActivity")
+            )
             intent.action = ConstantUtils.PLAYLIST_ACTION
             intent.putExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID, playlistItemModel.id)
             intent.putExtra(ConstantUtils.CURRENT_PLAYLIST_ID, playlistItemModel.playlistId)
             intent.putExtra(ConstantUtils.PLAYLIST_NAME, playlistItemModel.name)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        } catch(ex: ClassNotFoundException) {
-            Log.e(ConstantUtils.TAG, "playlistNotificationIntent"+ex.message)
+        } catch (ex: ClassNotFoundException) {
+            Log.e(ConstantUtils.TAG, "playlistNotificationIntent" + ex.message)
             null
         }
     }
@@ -106,14 +117,15 @@ object PlaylistUtils {
 
     @JvmStatic
     fun openBraveActivityWithUrl(activity: Activity, url: String) {
-        try{
-            val intent = Intent(activity,Class.forName("org.chromium.chrome.browser.ChromeTabbedActivity"))
+        try {
+            val intent =
+                Intent(activity, Class.forName("org.chromium.chrome.browser.ChromeTabbedActivity"))
             intent.putExtra(ConstantUtils.OPEN_URL, url)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             activity.finish()
             activity.startActivity(intent)
-        } catch(ex: ClassNotFoundException) {
-            Log.e(ConstantUtils.TAG, "openBraveActivityWithUrl : "+ex.message)
+        } catch (ex: ClassNotFoundException) {
+            Log.e(ConstantUtils.TAG, "openBraveActivityWithUrl : " + ex.message)
         }
     }
 }

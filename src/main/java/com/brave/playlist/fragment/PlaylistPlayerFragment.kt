@@ -168,14 +168,18 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         mHoverControlsLayout.layoutParams = hoverLayoutParams
 
         mMainLayout.mSlideState = BottomPanelLayout.PanelState.COLLAPSED
-        mMainLayout.panelHeight = if (context?.resources?.getBoolean(R.bool.isTablet) == true) 150.dpToPx.toInt() else 70.dpToPx.toInt()
+        mMainLayout.panelHeight =
+            if (context?.resources?.getBoolean(R.bool.isTablet) == true) 150.dpToPx.toInt() else 70.dpToPx.toInt()
         if (!mIsCastInProgress) {
             mStyledPlayerView.useController = false
             mLayoutVideoControls.visibility = View.VISIBLE
         }
         mPlaylistToolbar.visibility = View.VISIBLE
         val windowInsetsController =
-            WindowCompat.getInsetsController(requireActivity().window, requireActivity().window.decorView)
+            WindowCompat.getInsetsController(
+                requireActivity().window,
+                requireActivity().window.decorView
+            )
         windowInsetsController.show(WindowInsetsCompat.Type.systemBars())
         mBackImg.visibility = View.GONE
         mEmptyView.visibility = View.GONE
@@ -207,7 +211,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         mLayoutVideoControls.visibility = View.GONE
         mPlaylistToolbar.visibility = View.GONE
         val windowInsetsController =
-            WindowCompat.getInsetsController(requireActivity().window, requireActivity().window.decorView)
+            WindowCompat.getInsetsController(
+                requireActivity().window,
+                requireActivity().window.decorView
+            )
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
@@ -246,9 +253,10 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             mSelectedPlaylistItemId = it.getString(SELECTED_PLAYLIST_ITEM_ID).toString()
         }
         val intentFilter = IntentFilter()
-        intentFilter.addAction(activity?.packageName +CAST_ACTION)
+        intentFilter.addAction(activity?.packageName + CAST_ACTION)
         intentFilter.addAction(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(broadcastReceiver, intentFilter)
     }
 
     override fun onDestroy() {
@@ -780,12 +788,15 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
     private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             val action = intent.action
-            if (action.equals(activity?.packageName+ CAST_ACTION)) {
-                val shouldShowControls = intent.getBooleanExtra(activity?.packageName+ SHOULD_SHOW_CONTROLS, true)
+            if (action.equals(activity?.packageName + CAST_ACTION)) {
+                val shouldShowControls =
+                    intent.getBooleanExtra(activity?.packageName + SHOULD_SHOW_CONTROLS, true)
                 mIsCastInProgress = !shouldShowControls
-                mLayoutVideoControls.visibility = if (shouldShowControls) View.VISIBLE else View.GONE
+                mLayoutVideoControls.visibility =
+                    if (shouldShowControls) View.VISIBLE else View.GONE
             } else if (action.equals(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)) {
-                val currentPlayingItemId = intent.getStringExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID)
+                val currentPlayingItemId =
+                    intent.getStringExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID)
                 if (!currentPlayingItemId.isNullOrEmpty()) {
                     mPlaylistItemAdapter?.updatePlayingStatus(currentPlayingItemId)
                 }
@@ -822,6 +833,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         newState: BottomPanelLayout.PanelState?
     ) {
         val shouldEnableControls = newState != BottomPanelLayout.PanelState.EXPANDED
-        enableControls(shouldEnableControls , mLayoutPlayer)
+        enableControls(shouldEnableControls, mLayoutPlayer)
     }
 }

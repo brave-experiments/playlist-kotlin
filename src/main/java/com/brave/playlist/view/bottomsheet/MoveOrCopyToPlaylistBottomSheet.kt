@@ -92,7 +92,11 @@ class MoveOrCopyToPlaylistBottomSheet :
     override fun onPlaylistClick(playlistModel: PlaylistModel) {
         if (playlistModel.id == ConstantUtils.NEW_PLAYLIST) {
             PlaylistUtils.moveOrCopyModel =
-                MoveOrCopyModel(mMoveOrCopyModel.playlistOptionsEnum, "", mMoveOrCopyModel.playlistItems)
+                MoveOrCopyModel(
+                    mMoveOrCopyModel.playlistOptionsEnum,
+                    "",
+                    mMoveOrCopyModel.playlistItems
+                )
             val newPlaylistFragment = NewPlaylistFragment.newInstance(
                 PlaylistOptionsEnum.NEW_PLAYLIST,
                 shouldMoveOrCopy = true

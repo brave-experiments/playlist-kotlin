@@ -15,11 +15,11 @@ class PlaylistRepository(context: Context) {
     var playlistItemModelDao: PlaylistItemModelDao? =
         PlaylistDatabase.getInstance(context)?.playlistItemModelDao()
 
-    fun getAllPlaylistItemModel() : List<PlaylistItemModel>? {
+    fun getAllPlaylistItemModel(): List<PlaylistItemModel>? {
         return playlistItemModelDao?.getAll()
     }
 
-    fun getPlaylistItemById(playlistItemId:String) : PlaylistItemModel? {
+    fun getPlaylistItemById(playlistItemId: String): PlaylistItemModel? {
         return playlistItemModelDao?.getPlaylistItemById(playlistItemId)
     }
 

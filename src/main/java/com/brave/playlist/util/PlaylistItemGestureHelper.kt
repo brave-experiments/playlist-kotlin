@@ -170,7 +170,8 @@ class PlaylistItemGestureHelper<VH : AbstractRecyclerViewAdapter.AbstractViewHol
             itemView.bottom
         )
 
-        removeOfflineIconBg.bounds = buttonPositions[viewHolder.bindingAdapterPosition]!![0].viewRect!!
+        removeOfflineIconBg.bounds =
+            buttonPositions[viewHolder.bindingAdapterPosition]!![0].viewRect!!
 
         removeOfflineIconBg.draw(c)
         removeOfflineIcon.draw(c)

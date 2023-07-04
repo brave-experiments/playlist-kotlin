@@ -7,8 +7,7 @@
   ~ You can obtain one at https://mozilla.org/MPL/2.0/.
   -->
 
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/onboardingLayout"
     android:layout_width="match_parent"
@@ -29,7 +28,7 @@
             android:id="@+id/playlistOnboardingViewPager"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="24dp"/>
+            android:padding="24dp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btNextOnboarding"

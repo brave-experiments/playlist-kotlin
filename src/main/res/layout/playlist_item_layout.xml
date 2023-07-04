@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2023 The Brave Authors. All rights reserved.
   ~ This Source Code Form is subject to the terms of the Mozilla Public
   ~ License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -22,10 +21,10 @@
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
         app:cardBackgroundColor="@android:color/transparent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:cardCornerRadius="8dp"
-        app:cardElevation="0dp">
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivMediaThumbnail"
@@ -94,9 +93,9 @@
             android:id="@+id/tvMediaDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginEnd="16dp"
-            android:textColor="@color/media_stats_color" />
+            android:textColor="@color/media_stats_color"
+            android:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvMediaFileSize"
@@ -128,7 +127,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp"
             app:srcCompat="@drawable/ic_drag"
-            app:tint="@color/icon_tint"/>
+            app:tint="@color/icon_tint" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivMediaOptions"

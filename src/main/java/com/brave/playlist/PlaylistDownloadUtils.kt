@@ -127,38 +127,59 @@ object PlaylistDownloadUtils {
     }
 
     @JvmStatic
-    fun startDownloadRequest(context : Context, playlistIteModel: PlaylistItemModel) {
+    fun startDownloadRequest(context: Context, playlistIteModel: PlaylistItemModel) {
         val extension: String = playlistIteModel.mediaPath
             .substring(playlistIteModel.mediaPath.lastIndexOf("."))
         Log.e(ConstantUtils.TAG, "extension : $extension")
         if (playlistIteModel.isCached && extension == ".m3u8") {
-            val downloadRequest = DownloadRequest.Builder(playlistIteModel.id, Uri.parse(playlistIteModel.mediaSrc)).setMimeType(
-                MimeTypes.APPLICATION_M3U8).build()
+            val downloadRequest =
+                DownloadRequest.Builder(playlistIteModel.id, Uri.parse(playlistIteModel.mediaSrc))
+                    .setMimeType(
+                        MimeTypes.APPLICATION_M3U8
+                    ).build()
             if (getDownloadManager(context)?.downloadIndex?.getDownload(playlistIteModel.id)?.state != Download.STATE_COMPLETED) {
-                DownloadService.sendAddDownload(context, PlaylistDownloadService::class.java, downloadRequest, true)
+                DownloadService.sendAddDownload(
+                    context,
+                    PlaylistDownloadService::class.java,
+                    downloadRequest,
+                    true
+                )
             }
             Log.e(ConstantUtils.TAG, playlistIteModel.name + playlistIteModel.mediaSrc)
         }
     }
 
     @JvmStatic
-    fun removeDownloadRequest(context : Context, playlistIteModel: PlaylistItemModel) {
+    fun removeDownloadRequest(context: Context, playlistIteModel: PlaylistItemModel) {
         val extension: String = playlistIteModel.mediaPath
             .substring(playlistIteModel.mediaPath.lastIndexOf("."))
         Log.e(ConstantUtils.TAG, "extension : $extension")
         if (playlistIteModel.isCached && extension == ".m3u8") {
-            DownloadService.sendRemoveDownload(context, PlaylistDownloadService::class.java, playlistIteModel.id, true)
+            DownloadService.sendRemoveDownload(
+                context,
+                PlaylistDownloadService::class.java,
+                playlistIteModel.id,
+                true
+            )
             Log.e(ConstantUtils.TAG, playlistIteModel.name + playlistIteModel.mediaSrc)
         }
     }
 
-    fun getMediaItemFromDownloadRequest(context : Context, playlistIteModel: PlaylistItemModel) : MediaItem? {
+    fun getMediaItemFromDownloadRequest(
+        context: Context,
+        playlistIteModel: PlaylistItemModel
+    ): MediaItem? {
         val extension: String = playlistIteModel.mediaPath
             .substring(playlistIteModel.mediaPath.lastIndexOf("."))
         return if (playlistIteModel.isCached && extension == ".m3u8") {
             Log.e(ConstantUtils.TAG, "extension : $extension")
-            Log.e(ConstantUtils.TAG, getDownloadManager(context)?.downloadIndex?.getDownload(playlistIteModel.id)?.state.toString())
-            val downloadRequest = DownloadRequest.Builder(playlistIteModel.id, Uri.parse(playlistIteModel.mediaSrc)).setMimeType(MimeTypes.APPLICATION_M3U8).build()
+            Log.e(
+                ConstantUtils.TAG,
+                getDownloadManager(context)?.downloadIndex?.getDownload(playlistIteModel.id)?.state.toString()
+            )
+            val downloadRequest =
+                DownloadRequest.Builder(playlistIteModel.id, Uri.parse(playlistIteModel.mediaSrc))
+                    .setMimeType(MimeTypes.APPLICATION_M3U8).build()
             Log.e(ConstantUtils.TAG, playlistIteModel.name + playlistIteModel.mediaSrc)
             downloadRequest.toMediaItem()
         } else {

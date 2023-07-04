@@ -8,7 +8,6 @@
 package com.brave.playlist.util
 
 import android.app.Activity
-import android.content.Context
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -23,7 +22,6 @@ import com.brave.playlist.extension.allowMoving
 import com.brave.playlist.interpolator.BraveBounceInterpolator
 import com.brave.playlist.listener.PlaylistOnboardingActionClickListener
 import com.brave.playlist.listener.PlaylistOptionsListener
-import com.brave.playlist.model.PlaylistOnboardingModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.model.SnackBarActionModel
 import com.brave.playlist.util.PlaylistPreferenceUtils.shouldShowOnboarding

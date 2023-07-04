@@ -115,7 +115,11 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
         // If the shadow height is zero, don't show the shadow
         mShadowDrawable = if (mShadowHeight > 0) {
-            ResourcesCompat.getDrawable(resources, if(mIsSlidingUp) R.drawable.above_shadow else R.drawable.below_shadow, null)
+            ResourcesCompat.getDrawable(
+                resources,
+                if (mIsSlidingUp) R.drawable.above_shadow else R.drawable.below_shadow,
+                null
+            )
         } else {
             null
         }
@@ -156,8 +160,10 @@ class BottomPanelLayout @JvmOverloads constructor(
         }
         val panelTop = computePanelTopPosition(0f)
         if (mSlideableView?.left?.let {
-                mDragHelper?.smoothSlideViewTo(mSlideableView,
-                    it, panelTop)
+                mDragHelper?.smoothSlideViewTo(
+                    mSlideableView,
+                    it, panelTop
+                )
             } == true) {
             setAllChildrenVisible()
             ViewCompat.postInvalidateOnAnimation(this)
@@ -268,11 +274,12 @@ class BottomPanelLayout @JvmOverloads constructor(
             val clampedChildTop = max(topBound, child.top)
             val clampedChildRight = min(rightBound, child.right)
             val clampedChildBottom = min(bottomBound, child.bottom)
-            val vis: Int = if (clampedChildLeft >= left && clampedChildTop >= top && clampedChildRight <= right && clampedChildBottom <= bottom) {
-                INVISIBLE
-            } else {
-                VISIBLE
-            }
+            val vis: Int =
+                if (clampedChildLeft >= left && clampedChildTop >= top && clampedChildRight <= right && clampedChildBottom <= bottom) {
+                    INVISIBLE
+                } else {
+                    VISIBLE
+                }
             child.visibility = vis
         }
     }
@@ -346,9 +353,11 @@ class BottomPanelLayout @JvmOverloads constructor(
                 ViewGroup.LayoutParams.WRAP_CONTENT -> {
                     MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST)
                 }
+
                 ViewGroup.LayoutParams.MATCH_PARENT -> {
                     MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
                 }
+
                 else -> {
                     MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY)
                 }
@@ -408,7 +417,8 @@ class BottomPanelLayout @JvmOverloads constructor(
             if (!mIsSlidingUp) {
                 if (child === mMainView && !isOverlayed) {
                     childTop =
-                        computePanelTopPosition(mSlideOffset) + (mSlideableView?.measuredHeight?:0)
+                        computePanelTopPosition(mSlideOffset) + (mSlideableView?.measuredHeight
+                            ?: 0)
                 }
             }
             val childBottom = childTop + childHeight
@@ -625,7 +635,9 @@ class BottomPanelLayout @JvmOverloads constructor(
 
     private var panelState: PanelState?
         get() = mSlideState
-        set(value) {mSlideState=value}
+        set(value) {
+            mSlideState = value
+        }
 
     private fun setPanelStateInternal(state: PanelState) {
         if (mSlideState == state) return
@@ -658,7 +670,8 @@ class BottomPanelLayout @JvmOverloads constructor(
         if (mSlideOffset <= 0 && !isOverlayed) {
             // expand the main view
             lp.height =
-                if (mIsSlidingUp) newTop - paddingBottom else height - paddingBottom - (mSlideableView?.measuredHeight?:0) - newTop
+                if (mIsSlidingUp) newTop - paddingBottom else height - paddingBottom - (mSlideableView?.measuredHeight
+                    ?: 0) - newTop
             if (lp.height == defaultHeight) {
                 lp.height = ViewGroup.LayoutParams.MATCH_PARENT
             }

@@ -27,7 +27,8 @@ class PlaylistDownloadService : DownloadService(
     R.string.playlist_feature_text
 ) {
     override fun getDownloadManager(): DownloadManager {
-        val downloadManager: DownloadManager? = PlaylistDownloadUtils.getDownloadManager( /* context= */applicationContext)
+        val downloadManager: DownloadManager? =
+            PlaylistDownloadUtils.getDownloadManager( /* context= */applicationContext)
         val downloadNotificationHelper: DownloadNotificationHelper =
             PlaylistDownloadUtils.getDownloadNotificationHelper( /* context= */this)
         downloadManager?.maxParallelDownloads = 5
@@ -54,7 +55,8 @@ class PlaylistDownloadService : DownloadService(
                 /* contentIntent = */ null,
                 /* message = */ null,
                 downloads,
-                notMetRequirements)
+                notMetRequirements
+            )
     }
 
     private class TerminalStateNotificationHelper(
@@ -85,6 +87,7 @@ class PlaylistDownloadService : DownloadService(
                         Util.fromUtf8Bytes(download.request.data)
                     )
                 }
+
                 Download.STATE_FAILED -> {
                     notificationHelper.buildDownloadFailedNotification(
                         context,
@@ -93,6 +96,7 @@ class PlaylistDownloadService : DownloadService(
                         Util.fromUtf8Bytes(download.request.data)
                     )
                 }
+
                 else -> {
                     return
                 }

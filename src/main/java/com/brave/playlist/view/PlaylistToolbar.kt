@@ -98,7 +98,6 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
             if (context is AppCompatActivity)
                 context.onBackPressedDispatcher.onBackPressed()
         }
-        ivOptionsToolbarPlayList.setOnClickListener { showEditPlaylistPopupWindow() }
         tvTitleToolbarPlaylist.text = typedArray.getString(R.styleable.PlaylistToolbar_title)
         tvActionToolbarPlaylist.text =
             typedArray.getString(R.styleable.PlaylistToolbar_actionButtonText)
@@ -124,10 +123,6 @@ class PlaylistToolbar(context: Context, attrs: AttributeSet?, defStyleAttr: Int,
     }
 
     private fun getColor(color: Int): Int = context.getColor(color)
-
-    private fun showEditPlaylistPopupWindow() {
-
-    }
 
     fun updateSelectedItems(count: Int) {
         tvItemSelected.text = context.getString(R.string.playlist_number_selected, count)
