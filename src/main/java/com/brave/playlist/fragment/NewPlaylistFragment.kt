@@ -47,7 +47,7 @@ class NewPlaylistFragment : Fragment(R.layout.fragment_new_playlist) {
 
         mEtPlaylistName = view.findViewById(R.id.etPlaylistName)
         if (mPlaylistModel != null) {
-            mEtPlaylistName.setText(mPlaylistModel!!.name)
+            mEtPlaylistName.setText(mPlaylistModel?.name)
         }
         mPlaylistToolbar = view.findViewById(R.id.playlistToolbar)
         mPlaylistToolbar.setToolbarTitle(

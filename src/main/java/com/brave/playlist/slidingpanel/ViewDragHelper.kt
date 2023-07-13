@@ -8,12 +8,16 @@
 package com.brave.playlist.slidingpanel
 
 import android.content.Context
-import android.view.*
+import android.view.MotionEvent
+import android.view.VelocityTracker
+import android.view.View
+import android.view.ViewConfiguration
+import android.view.ViewGroup
 import android.view.animation.Interpolator
 import android.widget.OverScroller
 import androidx.core.view.MotionEventCompat
 import androidx.core.view.VelocityTrackerCompat
-import java.util.*
+import java.util.Arrays
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -263,7 +267,7 @@ class ViewDragHelper private constructor(
         activePointerId = INVALID_POINTER
         clearMotionHistory()
         if (mVelocityTracker != null) {
-            mVelocityTracker!!.recycle()
+            mVelocityTracker?.recycle()
             mVelocityTracker = null
         }
     }
@@ -347,10 +351,10 @@ class ViewDragHelper private constructor(
         xvel: Int,
         yvel: Int
     ): Boolean {
-        val startLeft = capturedView!!.left
-        val startTop = capturedView!!.top
-        val dx = finalLeft - startLeft
-        val dy = finalTop - startTop
+        val startLeft = capturedView?.left
+        val startTop = capturedView?.top
+        val dx = finalLeft - (startLeft ?: 0)
+        val dy = finalTop - (startTop ?: 0)
         if (dx == 0 && dy == 0) {
             // Nothing to do. Send callbacks, be done.
             mScroller.abortAnimation()
@@ -358,7 +362,7 @@ class ViewDragHelper private constructor(
             return false
         }
         val duration = computeSettleDuration(capturedView, dx, dy, xvel, yvel)
-        mScroller.startScroll(startLeft, startTop, dx, dy, duration)
+        mScroller.startScroll((startLeft ?: 0), (startTop ?: 0), dx, dy, duration)
         setDragState(STATE_SETTLING)
         return true
     }
@@ -459,36 +463,38 @@ class ViewDragHelper private constructor(
             return false
         }
         if (viewDragState == STATE_SETTLING) {
-            var keepGoing = mScroller.computeScrollOffset()
-            val x = mScroller.currX
-            val y = mScroller.currY
-            val dx = x - capturedView!!.left
-            val dy = y - capturedView!!.top
-            if (!keepGoing && dy != 0) { //fix #525
-                //Invalid drag state
-                capturedView!!.top = 0
-                return true
-            }
-            if (dx != 0) {
-                capturedView!!.offsetLeftAndRight(dx)
-            }
-            if (dy != 0) {
-                capturedView!!.offsetTopAndBottom(dy)
-            }
-            if (dx != 0 || dy != 0) {
-                mCallback.onViewPositionChanged(capturedView, x, y, dx, dy)
-            }
-            if (keepGoing && (x == mScroller.finalX) && (y == mScroller.finalY)) {
-                // Close enough. The interpolator/scroller might think we're still moving
-                // but the user sure doesn't.
-                mScroller.abortAnimation()
-                keepGoing = mScroller.isFinished
-            }
-            if (!keepGoing) {
-                if (deferCallbacks) {
-                    mParentView.post(mSetIdleRunnable)
-                } else {
-                    setDragState(STATE_IDLE)
+            capturedView?.let {
+                var keepGoing = mScroller.computeScrollOffset()
+                val x = mScroller.currX
+                val y = mScroller.currY
+                val dx = x - it.left
+                val dy = y - it.top
+                if (!keepGoing && dy != 0) { //fix #525
+                    //Invalid drag state
+                    it.top = 0
+                    return true
+                }
+                if (dx != 0) {
+                    it.offsetLeftAndRight(dx)
+                }
+                if (dy != 0) {
+                    it.offsetTopAndBottom(dy)
+                }
+                if (dx != 0 || dy != 0) {
+                    mCallback.onViewPositionChanged(it, x, y, dx, dy)
+                }
+                if (keepGoing && (x == mScroller.finalX) && (y == mScroller.finalY)) {
+                    // Close enough. The interpolator/scroller might think we're still moving
+                    // but the user sure doesn't.
+                    mScroller.abortAnimation()
+                    keepGoing = mScroller.isFinished
+                }
+                if (!keepGoing) {
+                    if (deferCallbacks) {
+                        mParentView.post(mSetIdleRunnable)
+                    } else {
+                        setDragState(STATE_IDLE)
+                    }
                 }
             }
         }
@@ -526,13 +532,13 @@ class ViewDragHelper private constructor(
     }
 
     private fun clearMotionHistory(pointerId: Int) {
-        if (mInitialMotionX == null || mInitialMotionX!!.size <= pointerId) {
+        if (mInitialMotionX == null || (mInitialMotionX?.size ?: 0) <= pointerId) {
             return
         }
-        mInitialMotionX!![pointerId] = 0f
-        mInitialMotionY!![pointerId] = 0f
-        mLastMotionX!![pointerId] = 0f
-        mLastMotionY!![pointerId] = 0f
+        mInitialMotionX?.let { it[pointerId] = 0f }
+        mInitialMotionY?.let { it[pointerId] = 0f }
+        mLastMotionX?.let { it[pointerId] = 0f }
+        mLastMotionY?.let { it[pointerId] = 0f }
         mInitialEdgesTouched[pointerId] = 0
         mEdgeDragsInProgress[pointerId] = 0
         mEdgeDragsLocked[pointerId] = 0
@@ -540,7 +546,7 @@ class ViewDragHelper private constructor(
     }
 
     private fun ensureMotionHistorySizeForId(pointerId: Int) {
-        if (mInitialMotionX == null || mInitialMotionX!!.size <= pointerId) {
+        if (mInitialMotionX == null || (mInitialMotionX?.size ?: 0) <= pointerId) {
             val imx = FloatArray(pointerId + 1)
             val imy = FloatArray(pointerId + 1)
             val lmx = FloatArray(pointerId + 1)
@@ -549,10 +555,10 @@ class ViewDragHelper private constructor(
             val edip = IntArray(pointerId + 1)
             val edl = IntArray(pointerId + 1)
             if (mInitialMotionX != null) {
-                System.arraycopy(mInitialMotionX, 0, imx, 0, mInitialMotionX!!.size)
-                System.arraycopy(mInitialMotionY, 0, imy, 0, mInitialMotionY!!.size)
-                System.arraycopy(mLastMotionX, 0, lmx, 0, mLastMotionX!!.size)
-                System.arraycopy(mLastMotionY, 0, lmy, 0, mLastMotionY!!.size)
+                mInitialMotionX?.let { System.arraycopy(it, 0, imx, 0, it.size) }
+                mInitialMotionY?.let { System.arraycopy(it, 0, imy, 0, it.size) }
+                mLastMotionX?.let { System.arraycopy(it, 0, lmx, 0, it.size) }
+                mLastMotionY?.let { System.arraycopy(it, 0, lmy, 0, it.size) }
                 System.arraycopy(mInitialEdgesTouched, 0, iit, 0, mInitialEdgesTouched.size)
                 System.arraycopy(mEdgeDragsInProgress, 0, edip, 0, mEdgeDragsInProgress.size)
                 System.arraycopy(mEdgeDragsLocked, 0, edl, 0, mEdgeDragsLocked.size)
@@ -643,7 +649,7 @@ class ViewDragHelper private constructor(
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain()
         }
-        mVelocityTracker!!.addMovement(ev)
+        mVelocityTracker?.addMovement(ev)
         when (action) {
             MotionEvent.ACTION_DOWN -> {
                 val x = ev.x
@@ -737,7 +743,7 @@ class ViewDragHelper private constructor(
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain()
         }
-        mVelocityTracker!!.addMovement(ev)
+        mVelocityTracker?.addMovement(ev)
         when (action) {
             MotionEvent.ACTION_DOWN -> {
                 val x = ev.x
@@ -782,7 +788,9 @@ class ViewDragHelper private constructor(
                     val y = ev.getY(index)
                     val idx = (x - mLastMotionX!![activePointerId]).toInt()
                     val idy = (y - mLastMotionY!![activePointerId]).toInt()
-                    dragTo(capturedView!!.left + idx, capturedView!!.top + idy, idx, idy)
+                    capturedView?.let {
+                        dragTo(it.left + idx, it.top + idy, idx, idy)
+                    }
                     saveLastMotion(ev)
                 } else {
                     // Check to see if any pointer is now over a draggable view.
@@ -918,7 +926,7 @@ class ViewDragHelper private constructor(
         get() = viewDragState == STATE_DRAGGING
 
     private fun releaseViewForPointerUp() {
-        mVelocityTracker!!.computeCurrentVelocity(1000, mMaxVelocity)
+        mVelocityTracker?.computeCurrentVelocity(1000, mMaxVelocity)
         val xvel = clampMag(
             VelocityTrackerCompat.getXVelocity(mVelocityTracker, activePointerId),
             minVelocity, mMaxVelocity
@@ -931,24 +939,26 @@ class ViewDragHelper private constructor(
     }
 
     private fun dragTo(left: Int, top: Int, dx: Int, dy: Int) {
-        var clampedY = top
-        val oldLeft = capturedView!!.left
-        val oldTop = capturedView!!.top
-        if (dx != 0) {
-            val clampedX = 0
-            capturedView!!.offsetLeftAndRight(clampedX - oldLeft)
-        }
-        if (dy != 0) {
-            clampedY = mCallback.clampViewPositionVertical(capturedView, top, dy)
-            capturedView!!.offsetTopAndBottom(clampedY - oldTop)
-        }
-        if (dx != 0 || dy != 0) {
-            val clampedDx = left - oldLeft
-            val clampedDy = clampedY - oldTop
-            mCallback.onViewPositionChanged(
-                capturedView, left, clampedY,
-                clampedDx, clampedDy
-            )
+        capturedView?.let {
+            var clampedY = top
+            val oldLeft = it.left
+            val oldTop = it.top
+            if (dx != 0) {
+                val clampedX = 0
+                it.offsetLeftAndRight(clampedX - oldLeft)
+            }
+            if (dy != 0) {
+                clampedY = mCallback.clampViewPositionVertical(it, top, dy)
+                it.offsetTopAndBottom(clampedY - oldTop)
+            }
+            if (dx != 0 || dy != 0) {
+                val clampedDx = left - oldLeft
+                val clampedDy = clampedY - oldTop
+                mCallback.onViewPositionChanged(
+                    it, left, clampedY,
+                    clampedDx, clampedDy
+                )
+            }
         }
     }
 

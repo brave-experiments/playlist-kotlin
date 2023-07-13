@@ -7,10 +7,7 @@
 
 package com.brave.playlist.fragment
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
@@ -29,7 +26,6 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistDownloadUtils
@@ -50,7 +46,6 @@ import com.brave.playlist.model.PlaylistItemOptionModel
 import com.brave.playlist.model.PlaylistModel
 import com.brave.playlist.model.PlaylistOptionsModel
 import com.brave.playlist.util.ConnectionUtils
-import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ACTION
 import com.brave.playlist.util.ConstantUtils.CURRENT_PLAYING_ITEM_ID
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.ConstantUtils.TAG
@@ -96,26 +91,9 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
     private lateinit var mEmptyView: View
     private lateinit var mPlaylistView: View
 
-    private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            val action = intent.action
-            if (action.equals(CURRENT_PLAYING_ITEM_ACTION)) {
-                val currentPlayingItemId = intent.getStringExtra(CURRENT_PLAYING_ITEM_ID)
-                if (!currentPlayingItemId.isNullOrEmpty()) {
-                    mPlaylistItemAdapter?.updatePlayingStatus(currentPlayingItemId)
-                }
-            }
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mPlaylistViewModel = ViewModelProvider(requireActivity())[PlaylistViewModel::class.java]
-
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(CURRENT_PLAYING_ITEM_ACTION)
-        LocalBroadcastManager.getInstance(requireContext())
-            .registerReceiver(broadcastReceiver, intentFilter)
 
         mEmptyView = view.findViewById(R.id.empty_view)
         mPlaylistView = view.findViewById(R.id.playlist_view)
@@ -187,6 +165,12 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
         mProgressBar = view.findViewById(R.id.progressBar)
         mProgressBar.visibility = View.VISIBLE
         mRvPlaylist.visibility = View.GONE
+
+        PlaylistVideoService.currentPlayingItem.observe(viewLifecycleOwner) { currentPlayingItemId ->
+            if (!currentPlayingItemId.isNullOrEmpty()) {
+                mPlaylistItemAdapter?.updatePlayingStatus(currentPlayingItemId)
+            }
+        }
 
         mPlaylistViewModel.playlistData.observe(viewLifecycleOwner) { playlistData ->
             Log.e(TAG, playlistData.toString())
@@ -350,11 +334,6 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
                 mPlaylistModel, this, mPlaylistModel.id == DEFAULT_PLAYLIST
             )
         }
-    }
-
-    override fun onDestroyView() {
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadcastReceiver)
-        super.onDestroyView()
     }
 
     override fun onItemDelete(position: Int) {

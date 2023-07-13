@@ -21,10 +21,6 @@ object ConstantUtils {
     const val SHOULD_MOVE_OR_COPY = "should_move_or_copy"
     const val ONBOARDING_MODEL = "onboarding_model"
 
-    const val CAST_ACTION = "cast_action"
-    const val SHOULD_SHOW_CONTROLS = "should_show_controls"
-
-    const val CURRENT_PLAYING_ITEM_ACTION = "current_playing_item_action"
     const val CURRENT_PLAYING_ITEM_ID = "current_playing_item_id"
 
     const val OPEN_URL = "open_url"

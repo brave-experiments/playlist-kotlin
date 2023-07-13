@@ -33,7 +33,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.mediarouter.app.MediaRouteButton
 import androidx.recyclerview.widget.RecyclerView
 import com.brave.playlist.PlaylistVideoService
@@ -49,14 +48,11 @@ import com.brave.playlist.local_database.PlaylistRepository
 import com.brave.playlist.model.*
 import com.brave.playlist.slidingpanel.BottomPanelLayout
 import com.brave.playlist.util.ConnectionUtils
-import com.brave.playlist.util.ConstantUtils
-import com.brave.playlist.util.ConstantUtils.CAST_ACTION
 import com.brave.playlist.util.ConstantUtils.DEFAULT_PLAYLIST
 import com.brave.playlist.util.ConstantUtils.PLAYER_ITEMS
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_MODEL
 import com.brave.playlist.util.ConstantUtils.PLAYLIST_NAME
 import com.brave.playlist.util.ConstantUtils.SELECTED_PLAYLIST_ITEM_ID
-import com.brave.playlist.util.ConstantUtils.SHOULD_SHOW_CONTROLS
 import com.brave.playlist.util.ConstantUtils.TAG
 import com.brave.playlist.util.MediaUtils
 import com.brave.playlist.util.MenuUtils
@@ -252,11 +248,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             mPlaylistModel = it.getParcelable(PLAYLIST_MODEL)
             mSelectedPlaylistItemId = it.getString(SELECTED_PLAYLIST_ITEM_ID).toString()
         }
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(activity?.packageName + CAST_ACTION)
-        intentFilter.addAction(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)
-        LocalBroadcastManager.getInstance(requireContext())
-            .registerReceiver(broadcastReceiver, intentFilter)
     }
 
     override fun onDestroy() {
@@ -329,7 +320,8 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
         mIvVideoOptions.setOnClickListener {
             mPlaylistModel?.let { model ->
                 val currentPlaylistItem =
-                    mPlaylistItems[mPlaylistVideoService?.getCurrentPlayer()?.currentPeriodIndex!!]
+                    mPlaylistItems[mPlaylistVideoService?.getCurrentPlayer()?.currentPeriodIndex
+                        ?: 0]
                 MenuUtils.showPlaylistItemMenu(
                     view.context, parentFragmentManager,
                     currentPlaylistItem, playlistId = model.id, playlistItemOptionsListener = this,
@@ -382,6 +374,18 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
             // Playlist Video service
             activity?.startService(intent)
             activity?.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+
+            PlaylistVideoService.castStatus.observe(viewLifecycleOwner) { shouldShowControls ->
+                mIsCastInProgress = !shouldShowControls
+                mLayoutVideoControls.visibility =
+                    if (shouldShowControls) View.VISIBLE else View.GONE
+            }
+
+            PlaylistVideoService.currentPlayingItem.observe(viewLifecycleOwner) { currentPlayingItemId ->
+                if (!currentPlayingItemId.isNullOrEmpty()) {
+                    mPlaylistItemAdapter?.updatePlayingStatus(currentPlayingItemId)
+                }
+            }
 
             mScope.launch {
                 mPlaylistItems.forEach {
@@ -445,7 +449,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
 
     override fun onDestroyView() {
         releasePlayer()
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadcastReceiver)
         mMainLayout.removePanelSlideListener(this)
         super.onDestroyView()
     }
@@ -782,25 +785,6 @@ class PlaylistPlayerFragment : Fragment(R.layout.fragment_playlist_player), Play
                     MoveOrCopyModel(playlistItemOptionModel.optionType, "", moveOrCopyItems)
             }
             mPlaylistViewModel.setPlaylistItemOption(playlistItemOptionModel)
-        }
-    }
-
-    private var broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            val action = intent.action
-            if (action.equals(activity?.packageName + CAST_ACTION)) {
-                val shouldShowControls =
-                    intent.getBooleanExtra(activity?.packageName + SHOULD_SHOW_CONTROLS, true)
-                mIsCastInProgress = !shouldShowControls
-                mLayoutVideoControls.visibility =
-                    if (shouldShowControls) View.VISIBLE else View.GONE
-            } else if (action.equals(ConstantUtils.CURRENT_PLAYING_ITEM_ACTION)) {
-                val currentPlayingItemId =
-                    intent.getStringExtra(ConstantUtils.CURRENT_PLAYING_ITEM_ID)
-                if (!currentPlayingItemId.isNullOrEmpty()) {
-                    mPlaylistItemAdapter?.updatePlayingStatus(currentPlayingItemId)
-                }
-            }
         }
     }
 
