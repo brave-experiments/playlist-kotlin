@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Binder
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.session.MediaSessionCompat
@@ -183,11 +184,23 @@ class PlaylistVideoService : Service(), Player.Listener, SessionAvailabilityList
         super.onDestroy()
     }
 
+    @Suppress("DEPRECATION")
+    private fun getPlaylistItemModels(intent: Intent): ArrayList<PlaylistItemModel>? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableArrayListExtra(
+                PLAYER_ITEMS,
+                PlaylistItemModel::class.java
+            )
+        } else {
+            intent.getParcelableArrayListExtra(PLAYER_ITEMS)
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.e(TAG, "onStartCommand")
         intent?.let {
             mPlaylistName = it.getStringExtra(PLAYLIST_NAME)
-            mPlaylistItemsModel = it.getParcelableArrayListExtra(PLAYER_ITEMS)
+            mPlaylistItemsModel = getPlaylistItemModels(it)
         }
 
         mPlayerNotificationManager = PlayerNotificationManager.Builder(

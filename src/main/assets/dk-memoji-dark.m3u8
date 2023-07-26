@@ -1,0 +1,13 @@
+#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=355000,CODECS="avc1.640028",RESOLUTION=640x480
+/dannykeane/video/upload/c_limit,w_1920,h_1080,vc_h264:high:4.0,br_8500k/q_80:qmax_90,ac_none/v1587362535/dk-memoji-dark.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=347000,CODECS="avc1.4D401F",RESOLUTION=640x480
+/dannykeane/video/upload/c_limit,w_960,h_540,vc_h264:main:3.1,br_3500k/q_80:qmax_90,ac_none/v1587362535/dk-memoji-dark.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=347000,CODECS="avc1.4D401F",RESOLUTION=640x480
+/dannykeane/video/upload/c_limit,w_1280,h_720,vc_h264:main:3.1,br_5500k/q_80:qmax_90,ac_none/v1587362535/dk-memoji-dark.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=291000,CODECS="avc1.42C01E",RESOLUTION=480x360
+/dannykeane/video/upload/c_limit,w_640,h_360,vc_h264:baseline:3.0,br_2m/q_80:qmax_90,ac_none/v1587362535/dk-memoji-dark.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=221000,CODECS="avc1.42C01E",RESOLUTION=360x270
+/dannykeane/video/upload/c_limit,w_480,h_270,vc_h264:baseline:3.0,br_800k/q_80:qmax_90,ac_none/v1587362535/dk-memoji-dark.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=193000,CODECS="avc1.42C01E",RESOLUTION=320x240
+/dannykeane/video/upload/c_limit,w_320,h_240,vc_h264:baseline:3.0,br_192k/q_80:qmax_90,ac_none/v1587362535/dk-memoji-dark.m3u8

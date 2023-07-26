@@ -21,7 +21,6 @@ import com.google.android.exoplayer2.offline.DownloadRequest
 import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.exoplayer2.ui.DownloadNotificationHelper
 import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.cache.Cache
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
@@ -33,27 +32,16 @@ import java.util.concurrent.Executors
 
 object PlaylistDownloadUtils {
     private var mDataSourceFactory: DataSource.Factory? = null
-    private var mHttpDataSourceFactory: DataSource.Factory? = null
+//    private var mHttpDataSourceFactory: DataSource.Factory? = null
     private var mDatabaseProvider: DatabaseProvider? = null
     private var mDownloadDirectory: File? = null
     private var mDownloadCache: Cache? = null
     private var mDownloadManager: DownloadManager? = null
 
     @Synchronized
-    fun getHttpDataSourceFactory(): DataSource.Factory? {
-        if (mHttpDataSourceFactory == null) {
-            mHttpDataSourceFactory = DefaultHttpDataSource.Factory()
-        }
-        return mHttpDataSourceFactory
-    }
-
-    @Synchronized
     fun getDataSourceFactory(context: Context): DataSource.Factory {
         if (mDataSourceFactory == null) {
-            val upstreamFactory = DefaultDataSource.Factory(
-                context,
-                getHttpDataSourceFactory()!!
-            )
+            val upstreamFactory = DefaultHttpDataSource.Factory()
             mDataSourceFactory =
                 getDownloadCache(context)?.let { buildReadOnlyCacheDataSource(upstreamFactory, it) }
         }
@@ -93,7 +81,7 @@ object PlaylistDownloadUtils {
                     context,
                     getDatabaseProvider(context)!!,
                     it,
-                    getHttpDataSourceFactory()!!,
+                    getDataSourceFactory(context),
                     Executors.newFixedThreadPool( /* nThreads = */6)
                 )
             }
@@ -128,8 +116,8 @@ object PlaylistDownloadUtils {
 
     @JvmStatic
     fun startDownloadRequest(context: Context, playlistIteModel: PlaylistItemModel) {
-        val extension: String = playlistIteModel.mediaPath
-            .substring(playlistIteModel.mediaPath.lastIndexOf("."))
+        val extension: String = playlistIteModel.mediaSrc
+            .substring(playlistIteModel.mediaSrc.lastIndexOf("."))
         Log.e(ConstantUtils.TAG, "extension : $extension")
         if (playlistIteModel.isCached && extension == ".m3u8") {
             val downloadRequest =

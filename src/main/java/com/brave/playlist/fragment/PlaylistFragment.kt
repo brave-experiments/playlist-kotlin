@@ -10,6 +10,7 @@ package com.brave.playlist.fragment
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.text.TextUtils
 import android.text.format.Formatter
 import android.util.Log
@@ -59,14 +60,22 @@ import com.brave.playlist.util.PlaylistPreferenceUtils.rememberListPlaybackPosit
 import com.brave.playlist.util.PlaylistUtils
 import com.brave.playlist.view.PlaylistToolbar
 import com.bumptech.glide.Glide
+import com.google.android.exoplayer2.source.hls.playlist.HlsMediaPlaylist
+import com.google.android.exoplayer2.source.hls.playlist.HlsMultivariantPlaylist
+import com.google.android.exoplayer2.source.hls.playlist.HlsPlaylist
+import com.google.android.exoplayer2.source.hls.playlist.HlsPlaylistParser
+import com.google.android.exoplayer2.util.UriUtil
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.util.LinkedList
+
 
 class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionListener,
     StartDragListener, PlaylistOptionsListener, PlaylistItemOptionsListener,
@@ -93,6 +102,25 @@ class PlaylistFragment : Fragment(R.layout.fragment_playlist), ItemInteractionLi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val hlsParser = HlsPlaylistParser().parse(Uri.parse("https://res.cloudinary.com/dannykeane/video/upload/sp_full_hd/q_80:qmax_90,ac_none/v1/dk-memoji-dark.m3u8"), FileInputStream(File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath+"/"+"dk-memoji-dark.m3u8")))
+
+        var hlsParser2: HlsPlaylist? = null
+        if (hlsParser is HlsMultivariantPlaylist && hlsParser.variants.size > 0) {
+            Log.e(TAG, hlsParser.mediaPlaylistUrls.toString())
+            hlsParser2 = HlsPlaylistParser().parse(Uri.parse(hlsParser.variants[0].url.toString()), FileInputStream(
+                File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath+"/"+"dk-memoji-dark_1.m3u8")
+            )
+            )
+            if (hlsParser2 is HlsMediaPlaylist) {
+                Log.e(TAG, hlsParser2.segments[0].url)
+            }
+        }
+
+        Uri.parse(UriUtil.resolve("https://prodamdnewsencoding.akamaized.net/out/v1/6847e0355d7b47fdab9571f575a1eac5/43b6f121beb24ffaa1509325e7e23fb2/15bb94d4cae942ed8a198cc8f63db8ed/4e78157149424d08a27f6290f287f72f/f8fdd6ff3a2a47d6ad0e7c243092b4e7/index_1.m3u8", "../../../4e78157149424d08a27f6290f287f72f/f8fdd6ff3a2a47d6ad0e7c243092b4e7/index_1_0.ts"))
+
+
         mPlaylistViewModel = ViewModelProvider(requireActivity())[PlaylistViewModel::class.java]
 
         mEmptyView = view.findViewById(R.id.empty_view)
